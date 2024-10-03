@@ -1,45 +1,32 @@
-package tdc.edu.vn.project_mobile_be.entities.idcards;
+package tdc.edu.vn.project_mobile_be.DTO;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
-import tdc.edu.vn.project_mobile_be.entities.user.User;
+import tdc.edu.vn.project_mobile_be.entities.idcards.IdCard;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "idcards")
-public class IdCard implements Serializable {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "ididcard_id", length = 36)
+public class IdCardDTO {
     private String idCardId;
-
-    @Column(name = "idcard_number", length = 12, nullable = false)
     private String idCardNumber;
-
-    @Column(name = "idcard_image_front_path")
     private String imageFrontPath;
-
-    @Column(name = "idcard_image_back_path")
     private String imageBackPath;
-
-    @Column(name = "idcard_date", length = 10)
     private String idCardDate;
-
-    @Column(name = "created_at")
     private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    @JsonBackReference
-    private User user;
+    public IdCardDTO() {
+    }
 
-    // Getters and Setters
+    public IdCardDTO(String idCardId, String idCardNumber, String imageFrontPath, String imageBackPath, String idCardDate, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.idCardId = idCardId;
+        this.idCardNumber = idCardNumber;
+        this.imageFrontPath = imageFrontPath;
+        this.imageBackPath = imageBackPath;
+        this.idCardDate = idCardDate;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    // Getters và Setters
     public String getIdCardId() {
         return idCardId;
     }
@@ -96,22 +83,16 @@ public class IdCard implements Serializable {
         this.updatedAt = updatedAt;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    // Lifecycle callbacks để tự động cập nhật thời gian tạo và sửa
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+    // Phương thức chuyển đổi từ entity IdCard sang DTO
+    public static IdCardDTO fromEntity(IdCard idCard) {
+        return new IdCardDTO(
+                idCard.getIdCardId(),
+                idCard.getIdCardNumber(),
+                idCard.getImageFrontPath(),
+                idCard.getImageBackPath(),
+                idCard.getIdCardDate(),
+                idCard.getCreatedAt(),  // Thêm createdAt
+                idCard.getUpdatedAt()   // Thêm updatedAt
+        );
     }
 }

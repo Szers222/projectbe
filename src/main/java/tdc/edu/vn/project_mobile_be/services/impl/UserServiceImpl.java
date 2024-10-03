@@ -39,10 +39,11 @@ public class UserServiceImpl implements UserService {
     public User updateUser(String id, User user) {
         if (userRepository.existsById(id)) {
             user.setUserId(id);
-            return userRepository.save(user);
+            return userRepository.save(user); // Lưu người dùng đã cập nhật
         }
-        return null;
+        return null; // Trả về null nếu người dùng không tồn tại
     }
+
 
     @Override
     public void deleteUser(String id) {
