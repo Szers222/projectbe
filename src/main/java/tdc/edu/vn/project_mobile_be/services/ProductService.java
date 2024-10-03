@@ -1,4 +1,4 @@
-package tdc.edu.vn.project_mobile_be.services.impl;
+package tdc.edu.vn.project_mobile_be.services;
 
 public class ProductService {
 }

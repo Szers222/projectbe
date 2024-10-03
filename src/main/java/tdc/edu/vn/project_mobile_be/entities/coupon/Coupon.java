@@ -1,9 +1,10 @@
-package tdc.edu.vn.project_mobile_be.entities;
+package tdc.edu.vn.project_mobile_be.entities.coupon;
 
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import tdc.edu.vn.project_mobile_be.entities.product.Product;
 
 import java.sql.Timestamp;
 import java.util.UUID;

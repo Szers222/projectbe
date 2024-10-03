@@ -1,9 +1,10 @@
-package tdc.edu.vn.project_mobile_be.entities;
+package tdc.edu.vn.project_mobile_be.entities.product;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -32,7 +33,7 @@ public class Product {
     @Column(name = "product_views")
     private int views;
 
-    @Column(name = "coupon_id")
+    @Column(name = "coupon_id", insertable = false, updatable = false)
     private UUID coupon_id;
 
     @Column(name = "post_id")

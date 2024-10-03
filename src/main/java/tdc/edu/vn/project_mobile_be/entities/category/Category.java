@@ -1,4 +1,4 @@
-package tdc.edu.vn.project_mobile_be.entities;
+package tdc.edu.vn.project_mobile_be.entities.category;
 
 import jakarta.persistence.*;
 import lombok.Data;
