@@ -15,31 +15,38 @@ public class SlideshowImageServiceImpl implements SlideshowImageService {
     @Autowired
     private SlideshowImageRepository repository;
 
+    //lay tat cả
     @Override
     public List<SlideshowImage> getAll() {
         return repository.findAll();
     }
-
+    //chi tiết
     @Override
     public SlideshowImage getById(String id) {
         Optional<SlideshowImage> image = repository.findById(id);
         return image.orElse(null);
     }
-
+    //thêm
     @Override
     public SlideshowImage create(SlideshowImage image) {
         return repository.save(image);
     }
-
+    //update
     @Override
     public SlideshowImage update(String id, SlideshowImage updatedImage) {
-        if (repository.existsById(id)) {
-            updatedImage.setId(id);
+        Optional<SlideshowImage> existingImageOpt = repository.findById(id);
+        if (existingImageOpt.isPresent()) {
+            SlideshowImage existingImage = existingImageOpt.get();
+            // Bảo toàn created_at
+            updatedImage.setCreatedAt(existingImage.getCreatedAt());
+            updatedImage.setId(id);  // Bảo toàn id
+            // Save lại đối tượng đã cập nhật
             return repository.save(updatedImage);
         }
         return null;
     }
 
+    //xóa
     @Override
     public void delete(String id) {
         repository.deleteById(id);

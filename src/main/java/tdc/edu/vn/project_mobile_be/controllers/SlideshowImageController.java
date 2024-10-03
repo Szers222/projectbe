@@ -3,7 +3,10 @@ package tdc.edu.vn.project_mobile_be.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tdc.edu.vn.project_mobile_be.DTO.SlideshowImageDTO;
+
+import tdc.edu.vn.project_mobile_be.DTO.slideshowDTO.CreateSlideshowImageDTO;
+import tdc.edu.vn.project_mobile_be.DTO.slideshowDTO.GetSlideshowImageDTO;
+import tdc.edu.vn.project_mobile_be.DTO.slideshowDTO.UpdateSlideshowImageDTO;
 import tdc.edu.vn.project_mobile_be.entities.slideshows.SlideshowImage;
 import tdc.edu.vn.project_mobile_be.services.SlideshowImageService;
 
@@ -18,42 +21,33 @@ public class SlideshowImageController {
 
     // Lấy tất cả hình ảnh
     @GetMapping
-    public List<SlideshowImageDTO> getAllImages() {
+    public List<GetSlideshowImageDTO> getAllImages() {
         return service.getAll().stream()
-                .map(SlideshowImageDTO::fromEntity)
+                .map(GetSlideshowImageDTO::fromEntity)
                 .toList();
     }
 
     // Lấy hình ảnh theo ID
     @GetMapping("/{id}")
-    public ResponseEntity<SlideshowImageDTO> getImageById(@PathVariable String id) {
+    public ResponseEntity<GetSlideshowImageDTO> getImageById(@PathVariable String id) {
         SlideshowImage image = service.getById(id);
-        return image != null ? ResponseEntity.ok(SlideshowImageDTO.fromEntity(image)) : ResponseEntity.notFound().build();
+        return image != null ? ResponseEntity.ok(GetSlideshowImageDTO.fromEntity(image)) : ResponseEntity.notFound().build();
     }
 
     // Thêm mới hình ảnh
     @PostMapping("/add")
-    public ResponseEntity<SlideshowImageDTO> createImage(@RequestBody SlideshowImageDTO imageDTO) {
-        SlideshowImage newImage = new SlideshowImage();
-        newImage.setUrl(imageDTO.getUrl());
-        newImage.setIndex(imageDTO.getIndex());
-        newImage.setAlt(imageDTO.getAlt());
-
+    public ResponseEntity<GetSlideshowImageDTO> createImage(@RequestBody CreateSlideshowImageDTO imageDTO) {
+        SlideshowImage newImage = imageDTO.toEntity();
         SlideshowImage createdImage = service.create(newImage);
-        return ResponseEntity.ok(SlideshowImageDTO.fromEntity(createdImage));
+        return ResponseEntity.ok(GetSlideshowImageDTO.fromEntity(createdImage));
     }
 
     // Cập nhật hình ảnh
     @PutMapping("/{id}")
-    public ResponseEntity<SlideshowImageDTO> updateImage(@PathVariable String id, @RequestBody SlideshowImageDTO imageDTO) {
-        SlideshowImage updatedImage = new SlideshowImage();
-        updatedImage.setId(id);
-        updatedImage.setUrl(imageDTO.getUrl());
-        updatedImage.setIndex(imageDTO.getIndex());
-        updatedImage.setAlt(imageDTO.getAlt());
-
+    public ResponseEntity<GetSlideshowImageDTO> updateImage(@PathVariable String id, @RequestBody UpdateSlideshowImageDTO imageDTO) {
+        SlideshowImage updatedImage = imageDTO.toEntity();
         SlideshowImage savedImage = service.update(id, updatedImage);
-        return savedImage != null ? ResponseEntity.ok(SlideshowImageDTO.fromEntity(savedImage)) : ResponseEntity.notFound().build();
+        return savedImage != null ? ResponseEntity.ok(GetSlideshowImageDTO.fromEntity(savedImage)) : ResponseEntity.notFound().build();
     }
 
     // Xóa hình ảnh
