@@ -10,7 +10,9 @@ import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.status.CategoryStatus;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -42,7 +44,7 @@ public class Category {
     /**
      * ManyToOne
      */
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "category_status_id", nullable = false)
     private CategoryStatus status;
 
@@ -56,6 +58,6 @@ public class Category {
     // ManyToMany - Product - Category
     @ManyToMany(mappedBy = "categories")
     @ToString.Exclude
-    private List<Product> products;
+    private Set<Product> products = new HashSet<>();
 
 }

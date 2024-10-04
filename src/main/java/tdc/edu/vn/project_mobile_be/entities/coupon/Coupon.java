@@ -2,16 +2,21 @@ package tdc.edu.vn.project_mobile_be.entities.coupon;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import tdc.edu.vn.project_mobile_be.entities.type.CouponType;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "coupons", schema = "relationship")
+@Table(name = "coupons")
 @DynamicInsert
 @DynamicUpdate
 public class Coupon {
@@ -41,9 +46,6 @@ public class Coupon {
     @Column(name = "coupon_price")
     private String price;
 
-    @Column(name = "coupon_type", nullable = false)
-    private int type;
-
     @Column(name = "created_at", nullable = false)
     private Timestamp created_at;
 
@@ -53,4 +55,12 @@ public class Coupon {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "product_id")
     private Product product;
+
+    @ManyToOne
+    @JoinColumn(name = "coupon_type_id")
+    private CouponType type;
+
+    @ManyToMany(mappedBy = "coupons")
+    @ToString.Exclude
+    private Set<Order> products = new HashSet<>();
 }
