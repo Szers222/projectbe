@@ -1,9 +1,10 @@
-package tdc.edu.vn.project_mobile_be.entities;
+package tdc.edu.vn.project_mobile_be.entities.coupon;
 
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import tdc.edu.vn.project_mobile_be.entities.product.Product;
 
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -15,8 +16,8 @@ import java.util.UUID;
 @DynamicUpdate
 public class Coupon {
     @Id
-    @Column(name = "coupon_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "coupon_id",nullable = false,columnDefinition = "BINARY(16)")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     @Column(name = "coupon_name", nullable = false)

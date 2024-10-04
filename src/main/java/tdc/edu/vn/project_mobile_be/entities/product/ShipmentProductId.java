@@ -1,8 +1,6 @@
 package tdc.edu.vn.project_mobile_be.entities.product;
 
 
-
-
 import jakarta.persistence.Embeddable;
 import lombok.Data;
 
@@ -11,8 +9,7 @@ import java.util.UUID;
 
 @Embeddable
 @Data
-public class CategoryProductId implements Serializable {
-
+public class ShipmentProductId implements Serializable {
     private UUID product_id;
     private UUID shipment_id;
 }
