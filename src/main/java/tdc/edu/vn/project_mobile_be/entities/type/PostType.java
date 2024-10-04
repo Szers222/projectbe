@@ -14,10 +14,10 @@ import java.util.UUID;
 @Table(name = "post_status")
 @DynamicInsert
 @DynamicUpdate
-public class PosType {
+public class PostType {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "post_type_id",nullable = false,columnDefinition = "VARCHAR(36)")
+    @Column(name = "post_type_id",nullable = false,columnDefinition = "BINARY(16)")
     private UUID id;
     @Column(name = "post_type_type",nullable = false)
     private int type;
