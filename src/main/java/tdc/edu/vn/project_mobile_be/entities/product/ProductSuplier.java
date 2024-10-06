@@ -6,7 +6,9 @@ import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -30,5 +32,5 @@ public class ProductSuplier {
     private String updated_at;
 
     @OneToMany(mappedBy = "suplier",cascade = CascadeType.ALL,orphanRemoval = false)
-    private List<Product> products;
+    private Set<Product> products = new HashSet<>();
 }

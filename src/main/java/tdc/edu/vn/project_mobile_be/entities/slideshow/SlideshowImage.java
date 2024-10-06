@@ -20,22 +20,22 @@ public class SlideshowImage {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "slideshow_image_id", nullable = false, columnDefinition = "BINARY(16)")
-    private UUID slideshowImageId;
+    private UUID id;
 
     @Column(name = "slideshow_image_url", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String slideshowImageUrl;
+    private String image_url;
 
     @Column(name = "slideshow_image_index", nullable = false, columnDefinition = "INTEGER")
-    private Integer slideshowImageIndex;
+    private Integer image_index;
 
     @Column(name = "slideshow_image_alt", length = 255, columnDefinition = "VARCHAR(255)")
-    private String slideshowImageAlt;
+    private String image_alt;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false, nullable = false, columnDefinition = "TIMESTAMP")
-    private Timestamp createdAt;
+    @Column(name = "created_at", updatable = false, nullable = false, columnDefinition = "TIMESTAMP(6)")
+    private Timestamp created_at;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
-    private Timestamp updatedAt;
+    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP(6)")
+    private Timestamp updated_at;
 }

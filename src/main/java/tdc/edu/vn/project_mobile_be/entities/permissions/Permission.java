@@ -6,8 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 
 import java.security.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -19,17 +22,20 @@ public class Permission {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "permissions_id", nullable = false, columnDefinition = "BINARY(16)")
-    private UUID permissionsId;
+    @Column(name = "permission_id", nullable = false, columnDefinition = "BINARY(16)")
+    private UUID id;
 
-    @Column(name = "permissions_name", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String permissionsName;
+    @Column(name = "permission_name", nullable = false, columnDefinition = "VARCHAR(255)")
+    private String name;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false, nullable = false, columnDefinition = "TIMESTAMP")
-    private Timestamp createdAt;
+    @Column(name = "created_at", updatable = false, nullable = false, columnDefinition = "TIMESTAMP(6)")
+    private Timestamp created_at;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private Timestamp updatedAt;
+    @Column(name = "updated_at", nullable = false, columnDefinition = ("TIMESTAMP(6)"))
+    private Timestamp updated_at;
+
+    @ManyToMany(mappedBy = "permissions", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<Role> roles = new HashSet<>();
 }

@@ -1,13 +1,15 @@
-package tdc.edu.vn.project_mobile_be.entities.product;
+package tdc.edu.vn.project_mobile_be.entities.relationship;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
 
 
 @Entity
 @Table(name = "shipments_products")
 @Data
+
 public class ShipmentProduct {
     @EmbeddedId
     private ShipmentProductId id;

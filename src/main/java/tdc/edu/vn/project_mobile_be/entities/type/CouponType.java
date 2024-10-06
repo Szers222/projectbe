@@ -1,32 +1,32 @@
 package tdc.edu.vn.project_mobile_be.entities.type;
 
+
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "post_type")
+@Table(name = "coupon_type")
 @DynamicInsert
 @DynamicUpdate
-public class PostType {
+public class CouponType {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "post_type_id",nullable = false,columnDefinition = "BINARY(16)")
+    @Column(name = "coupon_type_id",nullable = false,columnDefinition = "BINARY(16)")
     private UUID id;
-    @Column(name = "post_type",nullable = false)
+    @Column(name = "coupon_type",nullable = false)
     private int type;
-    @Column(name = "post_type_name",nullable = false)
+    @Column(name = "coupon_type_name",nullable = false)
     private String name;
 
     @OneToMany(mappedBy = "type")
-    private Set<Post> posts = new HashSet<>();
-
+    private Set<Coupon> coupons = new HashSet<>();
 }

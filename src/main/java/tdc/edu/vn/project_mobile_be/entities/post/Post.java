@@ -45,7 +45,7 @@ public class Post {
     @Column(name = "post_image_path", columnDefinition = "VARCHAR(255)")
     private String image_path;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "post_status_id", nullable = false)
     private PostStatus status;
 

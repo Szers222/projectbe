@@ -7,7 +7,9 @@ import org.hibernate.annotations.DynamicUpdate;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -26,6 +28,6 @@ public class CategoryStatus {
     @Column(name = "category_status_name", nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "status", cascade = CascadeType.ALL, orphanRemoval = false)
-    private List<Category> categoryList;
+    @OneToMany(mappedBy = "status")
+    private Set<Category> categories = new HashSet<>();
 }

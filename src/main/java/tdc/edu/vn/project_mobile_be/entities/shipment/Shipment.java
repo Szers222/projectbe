@@ -3,14 +3,13 @@ package tdc.edu.vn.project_mobile_be.entities.shipment;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import tdc.edu.vn.project_mobile_be.entities.product.Product;
-import tdc.edu.vn.project_mobile_be.entities.product.ShipmentProduct;
+import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
 
 import java.sql.Timestamp;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -34,5 +33,5 @@ public class Shipment {
 
 
     @OneToMany(mappedBy = "shipment",cascade = CascadeType.ALL,orphanRemoval = false)
-    private List<ShipmentProduct> shipmentProducts;
+    private Set<ShipmentProduct> shipmentProducts = new HashSet<>();
 }
