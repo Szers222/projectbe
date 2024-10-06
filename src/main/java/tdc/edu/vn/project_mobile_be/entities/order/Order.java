@@ -7,6 +7,7 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.status.OrderStatus;
+import tdc.edu.vn.project_mobile_be.entities.user.User;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
@@ -47,4 +48,9 @@ public class Order {
             inverseJoinColumns = @JoinColumn(name = "coupon_id")
     )
     private Set<Coupon> coupons = new HashSet<>();
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id",nullable = false)
+    private User user;
+
 }
