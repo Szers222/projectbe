@@ -1,8 +1,12 @@
 package tdc.edu.vn.project_mobile_be.entities.idcard;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 
@@ -12,6 +16,10 @@ import java.util.UUID;
 @Entity
 @Data
 @Table(name = "icard")
+@AllArgsConstructor
+@NoArgsConstructor
+@DynamicInsert
+@DynamicUpdate
 public class ICard {
 
     @Id

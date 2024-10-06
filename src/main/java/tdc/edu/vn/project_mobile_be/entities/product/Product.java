@@ -20,6 +20,8 @@ import java.util.UUID;
 @Data
 @Table(name = "products")
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @DynamicInsert
 @DynamicUpdate
 public class Product {
