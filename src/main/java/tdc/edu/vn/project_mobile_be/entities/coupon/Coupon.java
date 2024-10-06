@@ -1,7 +1,9 @@
 package tdc.edu.vn.project_mobile_be.entities.coupon;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -17,6 +19,8 @@ import java.util.UUID;
 @Data
 @Entity
 @Table(name = "coupons")
+@AllArgsConstructor
+@NoArgsConstructor
 @DynamicInsert
 @DynamicUpdate
 public class Coupon {

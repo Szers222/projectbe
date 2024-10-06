@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 
 import java.sql.Timestamp;
@@ -12,9 +14,11 @@ import java.util.UUID;
 
 @Entity
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "one_time_password")
+@AllArgsConstructor
+@NoArgsConstructor
+@DynamicInsert
+@DynamicUpdate
 public class OneTimePassword {
 
     @Id

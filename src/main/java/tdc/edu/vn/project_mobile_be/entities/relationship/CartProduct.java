@@ -9,6 +9,7 @@ import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
 @Entity
 @Table(name = "carts_products")
 @Data
+
 public class CartProduct {
     @EmbeddedId
     private CartProductId id;

@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
 import tdc.edu.vn.project_mobile_be.entities.permissions.Permission;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
@@ -17,9 +19,11 @@ import java.util.UUID;
 
 @Entity
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "roles")
+@AllArgsConstructor
+@NoArgsConstructor
+@DynamicInsert
+@DynamicUpdate
 public class Role {
 
     @Id
