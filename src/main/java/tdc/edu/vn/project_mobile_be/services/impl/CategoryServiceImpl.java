@@ -94,6 +94,11 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
         }).collect(Collectors.toList());
     }
 
+    /**
+     * Filter category tree
+     * @param category
+     * @return void
+     */
     public void filterCategoryTree(Category category) {
         category.setChildrens(category.getChildrens().stream().filter(child -> child.getStatus() != null && child.getStatus().getType() == 1 && child.getRelease() != null && child.getRelease().isBefore(ZonedDateTime.now())).collect(Collectors.toList()));
         category.getChildrens().forEach(this::filterCategoryTree);
