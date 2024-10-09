@@ -5,8 +5,10 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.UpdateTimestamp;
 import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.status.OrderStatus;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
@@ -30,17 +32,19 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(name = "created_at",nullable = false,columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private Timestamp created_at;
-    @Column(name = "updated_at",nullable = false,columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private Timestamp updated_at;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp createdAt;
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp updatedAt;
     @Column(name = "order_payment",nullable = false,columnDefinition = "int default 0")
     private int payment;
 
     @Column(name = "order_fee_ship",nullable = false,columnDefinition = "double default 0")
-    private double fee_ship;
+    private double feeShip;
     @Column(name = "order_product_price",nullable = false,columnDefinition = "double default 0")
-    private double product_price;
+    private double productPrice;
 
     @ManyToOne
     @JoinColumn(name = "order_status_id",nullable = false)

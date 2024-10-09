@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.entities.status;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,5 +34,6 @@ public class CategoryStatus {
     private String name;
 
     @OneToMany(mappedBy = "status")
+    @JsonIgnore
     private Set<Category> categories = new HashSet<>();
 }

@@ -12,7 +12,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import tdc.edu.vn.project_mobile_be.entities.permissions.Permission;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 
-import java.security.Timestamp;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -35,12 +36,11 @@ public class Role {
     private String name;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false, nullable = false, columnDefinition = "TIMESTAMP(6)")
-    private Timestamp created_at;
-
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp createdAt;
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP(6)")
-    private Timestamp updated_at;
+    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp updatedAt;
 
     @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @ToString.Exclude

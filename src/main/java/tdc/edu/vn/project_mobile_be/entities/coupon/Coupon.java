@@ -5,8 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.UpdateTimestamp;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.type.CouponType;
@@ -45,16 +47,17 @@ public class Coupon {
     private int quantity;
 
     @Column(name = "coupon_per_hundred")
-    private float per_hundred;
+    private float perHundred;
 
     @Column(name = "coupon_price")
     private String price;
 
-    @Column(name = "created_at", nullable = false)
-    private Timestamp created_at;
-
-    @Column(name = "updated_at", nullable = false)
-    private Timestamp updated_at;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp createdAt;
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp updatedAt;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "product_id")

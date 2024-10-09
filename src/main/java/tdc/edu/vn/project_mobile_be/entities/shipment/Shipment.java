@@ -5,8 +5,10 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.UpdateTimestamp;
 import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
 
 import java.sql.Timestamp;
@@ -26,14 +28,20 @@ public class Shipment {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "shipment_id", nullable = false,columnDefinition = "BINARY(16)")
     private UUID id;
-    @Column(name = "shipment_date", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "shipment_date", nullable = false, columnDefinition = "TIMESTAMP(6)")
     private Timestamp date;
     @Column(name = "shipment_discount", columnDefinition = "FLOAT DEFAULT 0")
     private float discount;
     @Column(name = "shipment_ship_cost", columnDefinition = "FLOAT DEFAULT 0")
-    private float ship_cost;
+    private float shipCost;
     @Column(name = "shipment_supplier", nullable = false, columnDefinition = "VARCHAR(255)")
     private String supplier;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp createdAt;
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp updatedAt;
 
 
     @OneToMany(mappedBy = "shipment",cascade = CascadeType.ALL,orphanRemoval = false)

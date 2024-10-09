@@ -27,19 +27,18 @@ public class SlideshowImage {
     private UUID id;
 
     @Column(name = "slideshow_image_url", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String image_url;
+    private String imageURL;
 
     @Column(name = "slideshow_image_index", nullable = false, columnDefinition = "INTEGER")
-    private Integer image_index;
+    private Integer imageIndex;
 
     @Column(name = "slideshow_image_alt", length = 255, columnDefinition = "VARCHAR(255)")
-    private String image_alt;
+    private String imageAlt;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false, nullable = false, columnDefinition = "TIMESTAMP(6)")
-    private Timestamp created_at;
-
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp createdAt;
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP(6)")
-    private Timestamp updated_at;
+    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp updatedAt;
 }

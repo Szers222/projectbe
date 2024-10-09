@@ -20,7 +20,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-public class ICard {
+public class IdCard {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -28,7 +28,7 @@ public class ICard {
     private UUID id;
 
     @Column(name = "icard_number", length = 15, nullable = false)
-    private String information_card_number;
+    private String idCardNumber;
 
     @Column(name = "icard_image_front_path", length = 255)
     private String imageFrontPath;
@@ -40,13 +40,12 @@ public class ICard {
     private String idCardDate;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false, nullable = false)
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
-
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
 
-    @OneToOne(mappedBy = "icard")
+    @OneToOne(mappedBy = "iCard")
     private User user;
 }

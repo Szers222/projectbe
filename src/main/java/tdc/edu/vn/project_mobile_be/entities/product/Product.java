@@ -2,8 +2,10 @@ package tdc.edu.vn.project_mobile_be.entities.product;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.UpdateTimestamp;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
@@ -46,13 +48,14 @@ public class Product {
     private double rating;
 
     @Column(name = "product_year_of_manufacture", columnDefinition = "int default 2000")
-    private int year_of_manufacture;
+    private int yearOfManufacture;
 
-    @Column(name = "created_at", nullable = false)
-    private Timestamp created_at;
-
-    @Column(name = "updated_at", nullable = false)
-    private Timestamp updated_at;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp createdAt;
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp updatedAt;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "coupon_id")

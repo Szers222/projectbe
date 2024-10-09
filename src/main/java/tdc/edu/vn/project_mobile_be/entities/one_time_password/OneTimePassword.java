@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.UpdateTimestamp;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 
 import java.sql.Timestamp;
@@ -30,13 +31,13 @@ public class OneTimePassword {
     private String oneTimePasswordCode;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false, nullable = false, columnDefinition = "TIMESTAMP")
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
 
     @Column(name = "one_time_password_wrong")
     private Integer oneTimePasswordWrong;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false, columnDefinition = "TIMESTAMP")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }

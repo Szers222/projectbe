@@ -8,13 +8,15 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
-import tdc.edu.vn.project_mobile_be.entities.idcard.ICard;
+import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import tdc.edu.vn.project_mobile_be.entities.one_time_password.OneTimePassword;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
+import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 import tdc.edu.vn.project_mobile_be.entities.status.UserStatus;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -50,24 +52,23 @@ public class User {
     private String address;
 
     @Column(name = "user_image_path", columnDefinition = "VARCHAR(255)")
-    private String image_path;
+    private String imagePath;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP(6)")
-    private Timestamp created_at;
-
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp createdAt;
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP(6)")
-    private Timestamp updated_at;
+    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp updatedAt;
 
     @Column(name = "user_password_level_2", nullable = true, columnDefinition = "VARCHAR(255)")
-    private String password_level_2;
+    private String passwordLevel2;
 
     @Column(name = "user_last_name", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String last_name;
+    private String lastName;
 
     @Column(name = "user_first_name", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String first_name;
+    private String firstName;
 
     @Column(name = "user_money", nullable = false, columnDefinition = "DOUBLE default 0")
     private Double money;
@@ -76,11 +77,14 @@ public class User {
     private int point;
 
     @Column(name = "user_wrong_password", columnDefinition = "int default 0")
-    private Integer wrong_password;
+    private Integer wrongPassword;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "icard_id", nullable = false)
-    private ICard icard;
+    private IdCard iCard;
+
+    @OneToOne(mappedBy = "user")
+    private Post post;
 
     @ManyToOne
     @JoinColumn(name = "user_status_id", nullable = false)
