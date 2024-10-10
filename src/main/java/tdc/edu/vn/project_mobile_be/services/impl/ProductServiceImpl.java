@@ -7,8 +7,5 @@ import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
 @Service
 public class ProductServiceImpl implements ProductService {
-    @Autowired
-    private ProductRepository productReponsitory;
-
 
 }

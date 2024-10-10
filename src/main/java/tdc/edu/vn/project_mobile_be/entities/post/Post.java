@@ -1,14 +1,18 @@
 package tdc.edu.vn.project_mobile_be.entities.post;
 
+import jakarta.jws.soap.SOAPBinding;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.UpdateTimestamp;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
 import tdc.edu.vn.project_mobile_be.entities.type.PostType;
+import tdc.edu.vn.project_mobile_be.entities.user.User;
 
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -35,11 +39,12 @@ public class Post {
     @Column(name = "post_release", columnDefinition = "TIMESTAMP", nullable = false)
     private Timestamp release;
 
-    @Column(name = "created_at", columnDefinition = "TIMESTAMP", nullable = false)
-    private Timestamp created_at;
-
-    @Column(name = "updated_at", columnDefinition = "TIMESTAMP", nullable = false)
-    private Timestamp updated_at;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp createdAt;
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp updatedAt;
 
 
     @Lob
@@ -61,4 +66,7 @@ public class Post {
     @JoinColumn(name = "post_id")
     private Product product;
 
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }

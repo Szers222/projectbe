@@ -2,8 +2,10 @@ package tdc.edu.vn.project_mobile_be.entities.product;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -21,12 +23,16 @@ public class ProductImage {
     private UUID id;
 
     @Column(name = "product_image_path", nullable = false)
-    private String image_path;
+    private String imagePath;
     @Column(name = "product_image_alt", nullable = false)
-    private String image_alt;
+    private String imageAlt;
 
-    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private Timestamp created_at;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp createdAt;
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
