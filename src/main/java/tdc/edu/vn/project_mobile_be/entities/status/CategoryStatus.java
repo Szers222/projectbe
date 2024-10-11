@@ -34,6 +34,5 @@ public class CategoryStatus {
     private String name;
 
     @OneToMany(mappedBy = "status")
-    @JsonIgnore
     private Set<Category> categories = new HashSet<>();
 }

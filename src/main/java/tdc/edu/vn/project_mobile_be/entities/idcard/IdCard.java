@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @Entity
 @Data
-@Table(name = "icard")
+@Table(name = "idCard")
 @AllArgsConstructor
 @NoArgsConstructor
 @DynamicInsert
@@ -24,19 +24,19 @@ public class IdCard {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "icard_id", length = 36, nullable = false)
+    @Column(name = "card_id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Column(name = "icard_number", length = 15, nullable = false)
+    @Column(name = "card_number", length = 15, nullable = false)
     private String idCardNumber;
 
-    @Column(name = "icard_image_front_path", length = 255)
+    @Column(name = "card_image_front_path", length = 255)
     private String imageFrontPath;
 
-    @Column(name = "icard_back_path", length = 255)
+    @Column(name = "card_back_path", length = 255)
     private String imageBackPath;
 
-    @Column(name = "icard_date", length = 10)
+    @Column(name = "card_date", length = 10)
     private String idCardDate;
 
     @CreationTimestamp

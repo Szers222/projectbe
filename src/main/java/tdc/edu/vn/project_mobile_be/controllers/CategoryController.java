@@ -12,7 +12,6 @@ import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.CategoryRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CategoryService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/api/v1")

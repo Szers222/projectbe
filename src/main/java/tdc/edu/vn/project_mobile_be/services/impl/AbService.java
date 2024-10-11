@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tdc.edu.vn.project_mobile_be.commond.HttpException;
-import tdc.edu.vn.project_mobile_be.commond.customexception.NullEntityException;
+import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 import tdc.edu.vn.project_mobile_be.interfaces.IService;
 
@@ -33,7 +33,7 @@ public abstract class AbService<E, ID> implements IService<E, ID> {
     public List<E> findAll(){
         List<E> result = repository.findAll();
         if (result.size() < 1) {
-            throw new NullEntityException("Danh sách thực thể trống");
+            throw new EntityNotFoundException("Danh sách thực thể trống");
         }
         return result;
     }
