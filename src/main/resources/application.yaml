@@ -16,5 +16,27 @@ spring:
       hibernate:
         use_sql_comments: true
         format_sql: true
-  server:
-    port: 8080
+        type:
+          descriptor:
+            sql:
+              BasicBinder: org.hibernate.type.descriptor.sql.UUIDTypeDescriptor
+              jdbc:
+                fetch_size: 100
+                batch_size: 30
+
+    servlet:
+      multipart:
+        max-file-size: 20MB
+        max-request-size: 50MB
+    server:
+      port: 8080
+      file:
+        upload-dir: C:\Users\Vinh\Desktop\project_mobile\project_mobile_be\src\main\java\tdc\edu\vn\project_mobile_be\services\impl
+        springdoc:
+          swagger-ui:
+            enabled: true
+          api-docs:
+            enabled: true
+
+
+

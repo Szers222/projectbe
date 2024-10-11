@@ -21,15 +21,11 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CategoryResponseDTO implements IDto<Category> {
-
-
     @JsonProperty("category-name")
     private String name;
 
-
     @JsonProperty("category-slug")
     private String slug;
-
 
     @JsonProperty("category-release")
     private ZonedDateTime release;

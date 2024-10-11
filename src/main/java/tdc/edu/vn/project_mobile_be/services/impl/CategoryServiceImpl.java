@@ -2,7 +2,8 @@ package tdc.edu.vn.project_mobile_be.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tdc.edu.vn.project_mobile_be.commond.customexception.NullEntityException;
+import tdc.edu.vn.project_mobile_be.commond.customexception.ExistsSlugException;
+import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.CreateCategoryRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.CategoryResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
@@ -44,7 +45,7 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
     public Category createCategory(CreateCategoryRequestDTO categoryRequestDTO) {
 
         if (categoryRepository.existsBySlug(categoryRequestDTO.getSlug())) {
-            throw new NullEntityException("Slug đã tồn tại !");
+            throw new ExistsSlugException("Slug đã tồn tại !");
         }
 
 
@@ -61,9 +62,9 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
         category.setRelease(releaseZonedDateTime);
 
         if (category.getRelease().isAfter(ZonedDateTime.now())) {
-            category.setStatus(categoryStatusRepository.findByType(0).orElseThrow(() -> new NullEntityException("Status không tồn tại !")));
+            category.setStatus(categoryStatusRepository.findByType(0).orElseThrow(() -> new EntityNotFoundException("Status không tồn tại !")));
         } else {
-            category.setStatus(categoryStatusRepository.findByType(1).orElseThrow(() -> new NullEntityException("Status không tồn tại !")));
+            category.setStatus(categoryStatusRepository.findByType(1).orElseThrow(() -> new EntityNotFoundException("Status không tồn tại !")));
         }
 
         return categoryRepository.save(category);
@@ -74,7 +75,7 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
         List<Category> categoryList = categoryRepository.findAllRootCategoriesWithChildren();
 
         if (categoryList.isEmpty()) {
-            throw new NullEntityException("Không có dữ liệu !");
+            throw new EntityNotFoundException("Không có dữ liệu !");
         }
 
         if (role == this.USER_ROLE_USER) {
@@ -121,7 +122,7 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
      * @return Category
      */
     private Category getParentCategoryById(UUID parentId) {
-        return parentId != null ? categoryRepository.findById(parentId).orElseThrow(() -> new NullEntityException("Parent không tồn tại!")) : null;
+        return parentId != null ? categoryRepository.findById(parentId).orElseThrow(() -> new EntityNotFoundException("Parent không tồn tại!")) : null;
     }
 
 }

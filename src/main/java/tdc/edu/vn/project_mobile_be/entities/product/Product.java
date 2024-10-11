@@ -14,7 +14,6 @@ import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -26,6 +25,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @DynamicInsert
 @DynamicUpdate
+//@EqualsAndHashCode(exclude = {"sizes", "images"})
+
 public class Product {
     @Id
     @Column(name = "product_id", nullable = false,columnDefinition = "BINARY(16)")
@@ -40,7 +41,8 @@ public class Product {
 
     @Column(name = "product_quantity", nullable = false, columnDefinition = "int default 0")
     private int quantity;
-
+    @Column(name = "product_sale", nullable = true, columnDefinition = "double default 0")
+    private double sale;
     @Column(name = "product_views", columnDefinition = "int default 0")
     private int views;
 
@@ -65,11 +67,14 @@ public class Product {
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductImage> images;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ProductImage> images = new HashSet<>();
+
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "product_suplier_id", nullable = false)
-    private ProductSuplier suplier;
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JoinColumn(name = "product_suplier_id")
+    private ProductSupplier suplier;
 
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -77,12 +82,16 @@ public class Product {
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
-    private List<Category> categories;
+    private Set<Category> categories = new HashSet<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ShipmentProduct> shipmentProducts = new HashSet<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CartProduct> cartProducts = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "products_sizes", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "product_size_id"))
+    private Set<ProductSize> sizes = new HashSet<>();
 
 }

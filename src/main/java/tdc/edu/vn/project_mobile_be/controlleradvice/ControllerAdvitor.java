@@ -6,9 +6,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import tdc.edu.vn.project_mobile_be.commond.customexception.ExistsSlugException;
-import tdc.edu.vn.project_mobile_be.commond.customexception.NullEntityException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.UnsupportedOperationException;
+import tdc.edu.vn.project_mobile_be.commond.customexception.*;
 import tdc.edu.vn.project_mobile_be.dtos.ErrorResponseDTO;
 
 import java.util.ArrayList;
@@ -27,9 +26,10 @@ public class ControllerAdvitor extends ResponseEntityExceptionHandler {
         errorResponseDTO.setMessage(List.of(ex.getMessage()));
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
     }
-    @ExceptionHandler(NullEntityException.class)
+
+    @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Object> handleNullEntityException(
-            NullEntityException ex, WebRequest request) {
+            EntityNotFoundException ex, WebRequest request) {
         ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO();
         errorResponseDTO.setError(ex.getMessage());
         List<String> details = new ArrayList<>();
@@ -48,6 +48,41 @@ public class ControllerAdvitor extends ResponseEntityExceptionHandler {
         errorResponseDTO.setMessage(details);
         errorResponseDTO.setMessage(List.of(ex.getMessage()));
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(FileEmptyException.class)
+    public ResponseEntity<Object> handleFileEmptyException(
+            FileEmptyException ex, WebRequest request) {
+        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO();
+        errorResponseDTO.setError(ex.getMessage());
+        List<String> details = new ArrayList<>();
+        details.add("Không có file nào được chọn!");
+        errorResponseDTO.setMessage(details);
+        errorResponseDTO.setMessage(List.of(ex.getMessage()));
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(NumberErrorException.class)
+    public ResponseEntity<Object> handleFileEmptyException(
+            NumberErrorException ex, WebRequest request) {
+        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO();
+        errorResponseDTO.setError(ex.getMessage());
+        List<String> details = new ArrayList<>();
+        details.add("Số không hợp lệ!");
+        errorResponseDTO.setMessage(details);
+        errorResponseDTO.setMessage(List.of(ex.getMessage()));
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(ListNotFoundException.class)
+    public ResponseEntity<Object> handleListNotFoundException(
+            ListNotFoundException ex, WebRequest request) {
+        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO();
+        errorResponseDTO.setError(ex.getMessage());
+        List<String> details = new ArrayList<>();
+        details.add("Danh sách không tồn tại!");
+        errorResponseDTO.setMessage(details);
+        errorResponseDTO.setMessage(List.of(ex.getMessage()));
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
     }
 
 }

@@ -22,7 +22,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-public class ProductSuplier {
+public class ProductSupplier {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "product_suplier_id",nullable = false,columnDefinition = "BINARY(16)")
@@ -30,7 +30,7 @@ public class ProductSuplier {
     @Column(name = "product_suplier_name",nullable = false)
     private String name;
     private String description;
-    @Column(name = "product_suplier_logo",nullable = false)
+    @Column(name = "product_suplier_logo")
     private String logo;
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
