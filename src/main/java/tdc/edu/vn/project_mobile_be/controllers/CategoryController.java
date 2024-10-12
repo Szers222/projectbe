@@ -14,6 +14,7 @@ import tdc.edu.vn.project_mobile_be.interfaces.service.CategoryService;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping(value = "/api/v1")
 public class CategoryController {
 
@@ -40,9 +41,5 @@ public class CategoryController {
         ResponseData<List<CategoryResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Success",
                 data);
         return ResponseEntity.ok(responseData);
-    }
-    @GetMapping("/tree1")
-    public List<Category> getCategoryTree1() {
-        return categoryRepository.findAllRootCategoriesWithChildren();
     }
 }

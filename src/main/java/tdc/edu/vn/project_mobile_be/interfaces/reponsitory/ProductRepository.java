@@ -39,4 +39,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
 
     @Query("select p from Product p left join fetch  p.suplier where p.suplier.id = :suplierId")
     Page<Product> findByIdSuplier(@Param("suplierId") UUID suplierId, Pageable pageable);
+
+
 }
