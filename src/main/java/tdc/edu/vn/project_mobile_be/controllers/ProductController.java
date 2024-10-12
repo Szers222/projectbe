@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
+import tdc.edu.vn.project_mobile_be.dtos.requests.ProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.ProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
@@ -28,6 +29,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/api/v1")
+@CrossOrigin(origins = "*")
 @Tag(name = "Product Controller", description = "Endpoints for managing products")
 public class ProductController {
 
@@ -47,7 +49,7 @@ public class ProductController {
     @GetMapping(value = {"/products", "/products/"})
     public ResponseEntity<ResponseData<PagedModel<EntityModel<ProductResponseDTO>>>> getAllProducts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "3") int size,
             @RequestParam(defaultValue = "id") String sort,
             @RequestParam(defaultValue = "asc") String direction,
             PagedResourcesAssembler<ProductResponseDTO> assembler) {
@@ -160,4 +162,24 @@ public class ProductController {
         return productRepository.save(product);
     }
 
+    @GetMapping(value = {"/products/filters", "/products/filters/"})
+    public ResponseEntity<ResponseData<PagedModel<EntityModel<ProductResponseDTO>>>> getProductsByFilters(
+            @ModelAttribute ProductRequestParamsDTO params,
+            PagedResourcesAssembler<ProductResponseDTO> assembler) {
+
+        Sort.Direction sortDirection = params.getDirection().equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sortBy = Sort.by(sortDirection, params.getSort());
+        Pageable pageable = PageRequest.of(params.getPage(), params.getSize(), sortBy);
+
+        // Sử dụng Specifications để kết hợp nhiều kiểu filter
+        Page<ProductResponseDTO> productDtoPage = productService.findProductsByFilters(params, pageable);
+
+        // Chuyển đổi sang PagedModel
+        PagedModel<EntityModel<ProductResponseDTO>> pagedModel = assembler.toModel(productDtoPage);
+
+        // Đóng gói response
+        ResponseData<PagedModel<EntityModel<ProductResponseDTO>>> responseData = new ResponseData<>(HttpStatus.OK, "Success", pagedModel);
+
+        return ResponseEntity.ok(responseData);
+    }
 }

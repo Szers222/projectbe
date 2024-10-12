@@ -12,4 +12,10 @@ public interface ProductSizeRepository extends JpaRepository<ProductSize, UUID> 
 
     @Query("SELECT s FROM ProductSize s WHERE s.id IN :ids")
     List<ProductSize> findAllById(@Param("ids") List<UUID> ids);
+
+    @Query("SELECT s FROM ProductSize s WHERE s.type = :type")
+    List<ProductSize> findAllByType(@Param("type") int type);
+
+    @Query("SELECT s FROM ProductSize s left join fetch s.products p WHERE p.id in :productIds")
+    List<ProductSize> findAllByProductId(@Param("productIds") List<UUID> productIds);
 }

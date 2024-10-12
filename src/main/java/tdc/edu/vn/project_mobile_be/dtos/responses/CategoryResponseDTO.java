@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CategoryResponseDTO implements IDto<Category> {
+    @JsonProperty("category-id")
+    private UUID id;
     @JsonProperty("category-name")
     private String name;
 
@@ -55,13 +57,14 @@ public class CategoryResponseDTO implements IDto<Category> {
 
     @Override
     public void toDto(Category entity) {
-        BeanUtils.copyProperties(entity, this, "id", "createdAt", "updatedAt", "status", "parent", "childrens");
+        BeanUtils.copyProperties(entity, this, "createdAt", "updatedAt");
 
         if (entity.getStatus() != null) {
             this.status = new CategoryStatusResponseDTO();
             this.status.toDto(entity.getStatus());
         }
         this.parentId = entity.getParent() != null ? entity.getParent().getId() : null;
+        this.level = entity.getLevel();
         this.childrens = entity.getChildrens().stream()
                 .map(child -> {
                     CategoryResponseDTO childDto = new CategoryResponseDTO();

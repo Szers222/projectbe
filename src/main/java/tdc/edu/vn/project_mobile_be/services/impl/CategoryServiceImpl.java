@@ -2,8 +2,8 @@ package tdc.edu.vn.project_mobile_be.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tdc.edu.vn.project_mobile_be.commond.customexception.ExistsSlugException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
+import tdc.edu.vn.project_mobile_be.commond.customexception.ExistsSlugException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.CreateCategoryRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.CategoryResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
@@ -72,31 +72,42 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
 
     @Override
     public List<CategoryResponseDTO> getCategoryTree(int role) {
+        // Lấy danh sách tất cả các danh mục gốc cùng với danh mục con
         List<Category> categoryList = categoryRepository.findAllRootCategoriesWithChildren();
 
+        // Kiểm tra nếu danh sách rỗng, ném ngoại lệ
         if (categoryList.isEmpty()) {
             throw new EntityNotFoundException("Không có dữ liệu !");
         }
 
+        // Xử lý tùy thuộc vào vai trò người dùng
         if (role == this.USER_ROLE_USER) {
-            categoryList.forEach(category -> {
-                filterCategoryTree(category);
-            });
+            // Lọc cây danh mục cho người dùng thông thường
+            categoryList.forEach(this::filterCategoryTree);
 
         } else if (role == this.USER_ROLE_ADMIN) {
-            // Xử lý cho ADMIN nếu cần
-            // Ví dụ: không lọc danh mục con nào, hoặc thực hiện một số xử lý khác
+            // Có thể thêm logic xử lý riêng cho admin, nếu cần
+            // Ví dụ: Admin có thể thấy tất cả mà không lọc danh mục con
         }
 
-        return categoryList.stream().map(category -> {
-            CategoryResponseDTO dto = new CategoryResponseDTO();
-            dto.toDto(category);  // Giới hạn độ sâu nếu cần
-            return dto;
-        }).collect(Collectors.toList());
+        // Chuyển đổi danh sách Category sang CategoryResponseDTO
+        return categoryList.stream()
+                .map(category -> {
+                    CategoryResponseDTO dto = new CategoryResponseDTO();
+                    dto.toDto(category); // Giới hạn độ sâu trong phương thức toDto nếu cần
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     public void filterCategoryTree(Category category) {
-        category.setChildrens(category.getChildrens().stream().filter(child -> child.getStatus() != null && child.getStatus().getType() == 1 && child.getRelease() != null && child.getRelease().isBefore(ZonedDateTime.now())).collect(Collectors.toList()));
+        category.setChildrens(category.getChildrens()
+                .stream()
+                .filter(child -> child.getStatus() != null && child.getStatus().getType() == 1
+                        && child.getRelease() != null
+                        && child.getRelease()
+                        .isBefore(ZonedDateTime.now()))
+                .collect(Collectors.toList()));
         category.getChildrens().forEach(this::filterCategoryTree);
     }
 

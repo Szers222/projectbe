@@ -70,7 +70,7 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
     }
 
     private String saveImage(MultipartFile file) throws IOException {
-        String filePath = "src/main/resources/images";
+        String filePath = "./img/";
         Path path = Paths.get(filePath, file.getOriginalFilename());
         Files.copy(file.getInputStream(), path);
         return path.toString();
