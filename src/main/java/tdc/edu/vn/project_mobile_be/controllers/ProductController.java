@@ -76,7 +76,7 @@ public class ProductController {
             @ApiResponse(responseCode = "200", description = "Successful retrieval", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "Invalid request parameters", content = @Content)
     })
-
+    // xuất danh mục
     @GetMapping(value = {"/products/category", "/products/category/"})
     public ResponseEntity<ResponseData<PagedModel<EntityModel<ProductResponseDTO>>>> getAllProductsByCategory(
             @RequestParam(defaultValue = "0") int page,
