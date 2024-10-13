@@ -1,10 +1,9 @@
 package tdc.edu.vn.project_mobile_be.entities.product;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -17,7 +16,7 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "product_supliers")
+@Table(name = "product_suppliers")
 @AllArgsConstructor
 @NoArgsConstructor
 @DynamicInsert
@@ -25,13 +24,12 @@ import java.util.UUID;
 public class ProductSupplier {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "product_suplier_id",nullable = false,columnDefinition = "BINARY(16)")
-    private UUID id;
-    @Column(name = "product_suplier_name",nullable = false)
-    private String name;
-    private String description;
-    @Column(name = "product_suplier_logo")
-    private String logo;
+    @Column(name = "supplier_id",nullable = false,columnDefinition = "BINARY(16)")
+    private UUID productSupplierId;
+    @Column(name = "supplier_name",nullable = false)
+    private String productSupplierName;
+    @Column(name = "supplier_logo")
+    private String productSupplierLogo;
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
@@ -39,6 +37,7 @@ public class ProductSupplier {
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
 
-    @OneToMany(mappedBy = "suplier",cascade = CascadeType.ALL,orphanRemoval = false)
+    @OneToMany(mappedBy = "supplier",cascade = CascadeType.ALL,orphanRemoval = false )
+    @JsonBackReference
     private Set<Product> products = new HashSet<>();
 }

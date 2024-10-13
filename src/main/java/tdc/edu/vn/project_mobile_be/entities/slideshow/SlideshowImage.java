@@ -24,16 +24,16 @@ public class SlideshowImage {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "slideshow_image_id", nullable = false, columnDefinition = "BINARY(16)")
-    private UUID id;
+    private UUID slideShowImageId;
 
     @Column(name = "slideshow_image_url", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String imageURL;
+    private String slideShowImageImageURL;
 
     @Column(name = "slideshow_image_index", nullable = false, columnDefinition = "INTEGER")
-    private Integer imageIndex;
+    private Integer slideShowImageImageIndex;
 
     @Column(name = "slideshow_image_alt", length = 255, columnDefinition = "VARCHAR(255)")
-    private String imageAlt;
+    private String slideShowImageImageAlt;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")

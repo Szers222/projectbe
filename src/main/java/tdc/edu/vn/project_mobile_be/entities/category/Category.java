@@ -2,10 +2,7 @@ package tdc.edu.vn.project_mobile_be.entities.category;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -32,10 +29,10 @@ public class Category {
     @Id
     @Column(name = "category_id", nullable = false,columnDefinition = "BINARY(16)")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private UUID categoryId;
 
     @Transient
-    private int level;
+    private int categoryLevel;
 
     public int getLevel() {
         if (this.parent == null) {
@@ -46,13 +43,13 @@ public class Category {
 
     }
     @Column(name = "category_name", nullable = false)
-    private String name;
+    private String categoryName;
 
     @Column(name = "category_slug", nullable = false)
-    private String slug;
+    private String categorySlug;
 
     @Column(name = "category_release", nullable = false, columnDefinition = "TIMESTAMP")
-    private ZonedDateTime release;
+    private ZonedDateTime categoryRelease;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
@@ -66,7 +63,8 @@ public class Category {
      */
     @ManyToOne
     @JoinColumn(name = "category_status_id", nullable = false)
-    private CategoryStatus status;
+    @JsonBackReference
+    private CategoryStatus categoryStatus;
 
     // Parent - Children
     @ManyToOne
@@ -76,11 +74,13 @@ public class Category {
 
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
     @ToString.Exclude
-    private List<Category> childrens;
+    private List<Category> children;
 
     // ManyToMany - Product - Category
     @ManyToMany(mappedBy = "categories")
     @ToString.Exclude
+    @JsonBackReference
+    @EqualsAndHashCode.Exclude
     private Set<Product> products = new HashSet<>();
 
 }

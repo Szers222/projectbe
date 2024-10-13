@@ -27,15 +27,15 @@ public class Shipment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "shipment_id", nullable = false,columnDefinition = "BINARY(16)")
-    private UUID id;
+    private UUID shipmentId;
     @Column(name = "shipment_date", nullable = false, columnDefinition = "TIMESTAMP(6)")
-    private Timestamp date;
+    private Timestamp shipmentDate;
     @Column(name = "shipment_discount", columnDefinition = "FLOAT DEFAULT 0")
-    private float discount;
+    private float shipmentDiscount;
     @Column(name = "shipment_ship_cost", columnDefinition = "FLOAT DEFAULT 0")
-    private float shipCost;
+    private float shipmentShipCost;
     @Column(name = "shipment_supplier", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String supplier;
+    private String shipmentSupplier;
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;

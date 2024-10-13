@@ -25,7 +25,7 @@ public class IdCard {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "card_id", nullable = false, columnDefinition = "BINARY(16)")
-    private UUID id;
+    private UUID cardId;
 
     @Column(name = "card_number", length = 15, nullable = false)
     private String idCardNumber;

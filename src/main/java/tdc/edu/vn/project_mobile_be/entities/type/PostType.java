@@ -24,13 +24,13 @@ public class PostType {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "post_type_id",nullable = false,columnDefinition = "BINARY(16)")
-    private UUID id;
+    private UUID postTypeId;
     @Column(name = "post_type",nullable = false)
-    private int type;
+    private int postType;
     @Column(name = "post_type_name",nullable = false)
-    private String name;
+    private String postTypeName;
 
-    @OneToMany(mappedBy = "type")
+    @OneToMany(mappedBy = "postType")
     private Set<Post> posts = new HashSet<>();
 
 }

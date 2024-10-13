@@ -11,35 +11,45 @@ import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
+import java.math.RoundingMode;
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.text.NumberFormat;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductResponseDTO implements IDto<Product> {
-    @JsonProperty("product-id")
-    private UUID id;
-    @JsonProperty("product-name")
-    private String name;
-    @JsonProperty("product-price")
-    private double price;
-    @JsonProperty("product-quantity")
-    private int quantity;
-    @JsonProperty("product-views")
-    private int views;
-    @JsonProperty("product-rating")
-    private double rating;
-    @JsonProperty("product-sale")
-    private double sale;
+    @JsonProperty("productId")
+    private UUID productId;
+    @JsonProperty("productName")
+    private String productName;
+    @JsonProperty("productPrice")
+    private String productPrice;
+    @JsonProperty("productQuantity")
+    private int productQuantity;
+    @JsonProperty("productViews")
+    private int productViews;
+    @JsonProperty("productRating")
+    private double productRating;
+    @JsonProperty("productSale")
+    private double productSale;
+    @JsonProperty("productCategories")
+    private List<CategoryResponseDTO> categoryResponseDTO;
+    @JsonProperty("productYearOfManufacture")
+    private int productYearOfManufacture;
+    @JsonProperty("productPriceSale")
+    private String productPriceSale;
     @JsonIgnore
     private Timestamp createdAt;
     @JsonIgnore
     private Timestamp updatedAt;
-    @JsonProperty("product-images")
+    @JsonProperty("productImages")
     private Set<ProductImageResponseDTO> productImageResponseDTOs;
+    @JsonProperty("productSupplier")
+    private ProductSupplierResponseDTO supplier;
+    @JsonProperty("productSizes")
+    private List<ProductSizeResponseDTO> productSizeResponseDTOs;
 
 
     @Override
@@ -50,11 +60,34 @@ public class ProductResponseDTO implements IDto<Product> {
     @Override
     public void toDto(Product entity) {
         this.productImageResponseDTOs = new HashSet<>();
+        this.categoryResponseDTO = entity.getCategories().stream().map(category -> {
+            CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO();
+            categoryResponseDTO.toDto(category);
+            return categoryResponseDTO;
+        }).toList();
+        this.productSizeResponseDTOs = entity.getSizes().stream().map(productSize -> {
+            ProductSizeResponseDTO productSizeResponseDTO = new ProductSizeResponseDTO();
+            productSizeResponseDTO.toDto(productSize);
+            return productSizeResponseDTO;
+        }).toList();
+        ProductSupplierResponseDTO productSupplierResponse = new ProductSupplierResponseDTO();
+        productSupplierResponse.toDto(entity.getSupplier());
+        this.supplier = productSupplierResponse;
         for (ProductImage productImage : entity.getImages()) {
             ProductImageResponseDTO productImageResponseDTO = new ProductImageResponseDTO();
             productImageResponseDTO.toDto(productImage);
             productImageResponseDTOs.add(productImageResponseDTO);
         }
+
         BeanUtils.copyProperties(entity, this, "createdAt", "updatedAt");
+        this.productPrice = this.formatPrice(entity.getProductPrice());
+        double productPriceSale = entity.getProductPrice() - (entity.getProductPrice() * this.productSale / 100);
+        this.productPriceSale = this.formatPrice(productPriceSale);
+    }
+
+    public static String formatPrice(double price) {
+        NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+        format.setRoundingMode(RoundingMode.HALF_EVEN);
+        return format.format(price);
     }
 }

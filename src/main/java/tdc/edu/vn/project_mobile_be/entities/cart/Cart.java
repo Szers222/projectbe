@@ -26,11 +26,11 @@ public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "cart_id", nullable = false,columnDefinition = "BINARY(16)")
-    private UUID id;
+    private UUID cartId;
 
     @ManyToOne
     @JoinColumn(name = "cart_status_id")
-    private CartStatus status;
+    private CartStatus cartStatus;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CartProduct> cartProducts = new HashSet<>();

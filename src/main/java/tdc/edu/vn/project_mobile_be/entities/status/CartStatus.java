@@ -25,12 +25,12 @@ public class CartStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "cart_status_id", nullable = false,columnDefinition = "BINARY(16)")
-    private UUID id;
+    private UUID cartStatusId;
     @Column(name = "cart_status_type", nullable = false)
-    private int type;
+    private int cartStatusType;
     @Column(name = "cart_status_name", nullable = false)
-    private String name;
+    private String cartStatusName;
 
-    @OneToMany(mappedBy = "status" )
+    @OneToMany(mappedBy = "cartStatus" )
     private Set<Cart> carts = new HashSet<>();
 }

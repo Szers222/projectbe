@@ -10,6 +10,12 @@ import java.util.UUID;
 
 public interface ProductSizeRepository extends JpaRepository<ProductSize, UUID> {
 
-    @Query("SELECT s FROM ProductSize s WHERE s.id IN :ids")
+    @Query("SELECT s FROM ProductSize s WHERE s.productSizeId IN :ids")
     List<ProductSize> findAllById(@Param("ids") List<UUID> ids);
+
+    @Query("SELECT s FROM ProductSize s WHERE s.productSizeType = :type")
+    List<ProductSize> findAllByType(@Param("type") int type);
+
+    @Query("SELECT s FROM ProductSize s left join fetch s.products p WHERE p.productId in :productIds")
+    List<ProductSize> findAllByProductId(@Param("productIds") List<UUID> productIds);
 }

@@ -27,10 +27,10 @@ public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "permission_id", nullable = false, columnDefinition = "BINARY(16)")
-    private UUID id;
+    private UUID permissionId;
 
     @Column(name = "permission_name", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String name;
+    private String permissionName;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
