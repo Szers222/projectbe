@@ -5,6 +5,8 @@ import org.springframework.data.domain.Pageable;
 import tdc.edu.vn.project_mobile_be.dtos.requests.ProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.ProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
 import tdc.edu.vn.project_mobile_be.interfaces.IService;
 
 import java.math.BigDecimal;
@@ -27,4 +29,8 @@ public interface ProductService extends IService<Product, UUID> {
     Page<ProductResponseDTO> findByIdSuplier(UUID suplierId, Pageable pageable);
 
     Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable);
+
+    List<ProductSupplier> findProductSuppliersByCategory(ProductRequestParamsDTO params);
+
+    List<ProductSize> findProductSizesByCategory(ProductRequestParamsDTO params);
 }

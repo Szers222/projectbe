@@ -44,27 +44,27 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
     @Override
     public Category createCategory(CreateCategoryRequestDTO categoryRequestDTO) {
 
-        if (categoryRepository.existsBySlug(categoryRequestDTO.getSlug())) {
+        if (categoryRepository.existsByCategorySlug(categoryRequestDTO.getCategorySlug())) {
             throw new ExistsSlugException("Slug đã tồn tại !");
         }
 
 
-        ZonedDateTime releaseZonedDateTime = getReleaseZonedDateTime(categoryRequestDTO.getRelease());
+        ZonedDateTime releaseZonedDateTime = getReleaseZonedDateTime(categoryRequestDTO.getCategoryRelease());
 
 
         Category parent = getParentCategoryById(categoryRequestDTO.getParentId());
 
         Category category = new Category();
-        category.setId(UUID.randomUUID());
-        category.setName(categoryRequestDTO.getName());
-        category.setSlug(categoryRequestDTO.getSlug());
+        category.setCategoryId(UUID.randomUUID());
+        category.setCategoryName(categoryRequestDTO.getCategoryName());
+        category.setCategorySlug(categoryRequestDTO.getCategorySlug());
         category.setParent(parent);
-        category.setRelease(releaseZonedDateTime);
+        category.setCategoryRelease(releaseZonedDateTime);
 
-        if (category.getRelease().isAfter(ZonedDateTime.now())) {
-            category.setStatus(categoryStatusRepository.findByType(0).orElseThrow(() -> new EntityNotFoundException("Status không tồn tại !")));
+        if (category.getCategoryRelease().isAfter(ZonedDateTime.now())) {
+            category.setCategoryStatus(categoryStatusRepository.findByCategoryStatusType(0).orElseThrow(() -> new EntityNotFoundException("Status không tồn tại !")));
         } else {
-            category.setStatus(categoryStatusRepository.findByType(1).orElseThrow(() -> new EntityNotFoundException("Status không tồn tại !")));
+            category.setCategoryStatus(categoryStatusRepository.findByCategoryStatusType(1).orElseThrow(() -> new EntityNotFoundException("Status không tồn tại !")));
         }
 
         return categoryRepository.save(category);
@@ -106,14 +106,14 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
      * @return void
      */
     public void filterCategoryTree(Category category) {
-        category.setChildrens(category.getChildrens()
+        category.setChildren(category.getChildren()
                 .stream()
-                .filter(child -> child.getStatus() != null && child.getStatus().getType() == 1
-                        && child.getRelease() != null
-                        && child.getRelease()
+                .filter(child -> child.getCategoryStatus() != null && child.getCategoryStatus().getCategoryStatusType() == 1
+                        && child.getCategoryRelease() != null
+                        && child.getCategoryRelease()
                         .isBefore(ZonedDateTime.now()))
                 .collect(Collectors.toList()));
-        category.getChildrens().forEach(this::filterCategoryTree);
+        category.getChildren().forEach(this::filterCategoryTree);
     }
 
     /**

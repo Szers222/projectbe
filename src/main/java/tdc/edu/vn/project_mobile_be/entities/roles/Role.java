@@ -30,10 +30,10 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "role_id", nullable = false, columnDefinition = "BINARY(16)")
-    private UUID id;
+    private UUID roleId;
 
     @Column(name = "role_name", nullable = false, columnDefinition = "VARCHAR(50)")
-    private String name;
+    private String roleName;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")

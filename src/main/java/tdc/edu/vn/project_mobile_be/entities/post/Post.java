@@ -28,16 +28,16 @@ public class Post {
     @Id
     @Column(name = "post_id", nullable = false,columnDefinition = "BINARY(16)")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private UUID postId;
 
     @Column(name = "post_name", columnDefinition = "VARCHAR(255)")
-    private String name;
+    private String postName;
 
     @Column(name = "post_slug", columnDefinition = "VARCHAR(255)")
-    private String slug;
+    private String postSlug;
 
     @Column(name = "post_release", columnDefinition = "TIMESTAMP", nullable = false)
-    private Timestamp release;
+    private Timestamp postRelease;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
@@ -49,18 +49,18 @@ public class Post {
 
     @Lob
     @Column(name = "post_content", columnDefinition = "TEXT")
-    private String content;
+    private String postContent;
 
     @Column(name = "post_image_path", columnDefinition = "VARCHAR(255)")
-    private String image_path;
+    private String postImagePath;
 
     @ManyToOne
     @JoinColumn(name = "post_status_id", nullable = false)
-    private PostStatus status;
+    private PostStatus postStatus;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "post_type_id", nullable = false)
-    private PostType type;
+    private PostType postType;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "post_id")

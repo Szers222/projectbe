@@ -14,7 +14,7 @@ import java.util.UUID;
 public class ProductRequestParamsDTO {
     private int page = 0;
     private int size = 20;
-    private String sort = "id";
+    private String sort = "productPrice";
     private String direction = "asc";
     private UUID categoryId;
     private BigDecimal minPrice;

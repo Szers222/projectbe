@@ -18,11 +18,11 @@ import java.util.UUID;
 @NoArgsConstructor
 public class CategoryStatusResponseDTO implements IDto<CategoryStatus> {
     @JsonProperty("name")
-    private String name;
+    private String categoryStatusName;
     @JsonProperty("type")
-    private int type;
+    private int categoryStatusType;
     @JsonIgnore
-    private UUID id;
+    private UUID categoryStatusId;
 
     @Override
     public CategoryStatus toEntity() {

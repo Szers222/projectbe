@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.entities.product;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -31,26 +32,26 @@ public class Product {
     @Id
     @Column(name = "product_id", nullable = false,columnDefinition = "BINARY(16)")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private UUID productId;
 
     @Column(name = "product_name", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String name;
+    private String productName;
 
     @Column(name = "product_price", nullable = false)
-    private double price;
+    private double productPrice;
 
     @Column(name = "product_quantity", nullable = false, columnDefinition = "int default 0")
-    private int quantity;
+    private int productQuantity;
     @Column(name = "product_sale", nullable = true, columnDefinition = "double default 0")
-    private double sale;
+    private double productSale;
     @Column(name = "product_views", columnDefinition = "int default 0")
-    private int views;
+    private int productViews;
 
     @Column(name = "product_rating", columnDefinition = "double default 0")
-    private double rating;
+    private double productRating;
 
     @Column(name = "product_year_of_manufacture", columnDefinition = "int default 2000")
-    private int yearOfManufacture;
+    private int productYearOfManufacture;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
@@ -68,16 +69,19 @@ public class Product {
     private Post post;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private Set<ProductImage> images = new HashSet<>();
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JoinColumn(name = "product_suplier_id")
-    private ProductSupplier suplier;
+    @JsonBackReference
+    @JoinColumn(name = "supplier_id")
+    private ProductSupplier supplier;
 
 
     @ManyToMany(fetch = FetchType.EAGER)
+    @JsonBackReference
     @JoinTable(name = "categories_products",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
@@ -91,7 +95,12 @@ public class Product {
     private Set<CartProduct> cartProducts = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "products_sizes", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "product_size_id"))
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
+    @JoinTable(name = "products_sizes",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_size_id"))
     private Set<ProductSize> sizes = new HashSet<>();
 
 }

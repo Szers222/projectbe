@@ -21,26 +21,26 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CategoryResponseDTO implements IDto<Category> {
-    @JsonProperty("category-id")
-    private UUID id;
-    @JsonProperty("category-name")
-    private String name;
+    @JsonProperty("categoryId")
+    private UUID categoryId;
+    @JsonProperty("categoryName")
+    private String categoryName;
 
-    @JsonProperty("category-slug")
-    private String slug;
+    @JsonProperty("categorySlug")
+    private String categorySlug;
 
-    @JsonProperty("category-release")
-    private ZonedDateTime release;
+    @JsonProperty("categoryRelease")
+    private ZonedDateTime categoryRelease;
 
-    @JsonProperty("category-parent")
+    @JsonProperty("categoryParent")
     private UUID parentId = null;
-    @JsonProperty("category-level")
+    @JsonProperty("categoryLevel")
     private int level;
-    @JsonProperty("status")
-    private CategoryStatusResponseDTO status;
+    @JsonProperty("categoryStatus")
+    private CategoryStatusResponseDTO categoryStatus;
 
-    @JsonProperty("childrens")
-    private List<CategoryResponseDTO> childrens;
+    @JsonProperty("categoryChildren")
+    private List<CategoryResponseDTO> children;
 
     @JsonIgnore
     private Timestamp createdAt;
@@ -59,13 +59,13 @@ public class CategoryResponseDTO implements IDto<Category> {
     public void toDto(Category entity) {
         BeanUtils.copyProperties(entity, this, "createdAt", "updatedAt");
 
-        if (entity.getStatus() != null) {
-            this.status = new CategoryStatusResponseDTO();
-            this.status.toDto(entity.getStatus());
+        if (entity.getCategoryStatus() != null) {
+            this.categoryStatus = new CategoryStatusResponseDTO();
+            this.categoryStatus.toDto(entity.getCategoryStatus());
         }
-        this.parentId = entity.getParent() != null ? entity.getParent().getId() : null;
+        this.parentId = entity.getParent() != null ? entity.getParent().getCategoryId() : null;
         this.level = entity.getLevel();
-        this.childrens = entity.getChildrens().stream()
+        this.children = entity.getChildren().stream()
                 .map(child -> {
                     CategoryResponseDTO childDto = new CategoryResponseDTO();
                     childDto.toDto(child);

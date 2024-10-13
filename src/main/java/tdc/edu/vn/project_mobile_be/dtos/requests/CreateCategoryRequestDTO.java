@@ -21,23 +21,25 @@ import java.util.UUID;
 public class CreateCategoryRequestDTO implements IDto<Category> {
 
     @NotBlank(message = "Tên Danh Mục Không được để trống")
-    @JsonProperty("category-name")
-    private String name;
+    @JsonProperty("categoryName")
+    private String categoryName;
 
     @NotBlank(message = "Slug Danh Mục Không được để trống")
-    @JsonProperty("category-slug")
-    private String slug;
+    @JsonProperty("categorySlug")
+    private String categorySlug;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
-    @JsonProperty("category-release")
-    private Timestamp release;
+    @JsonProperty("categoryRelease")
+    private Timestamp categoryRelease;
 
     @JsonIgnore
     private UUID statusId;
 
-    @JsonProperty("category-parent")
+    @JsonProperty("categoryParent")
     private UUID parentId = null;
+
+    @JsonProperty("categoryChildren")
 
     @JsonIgnore
     private Timestamp createdAt;

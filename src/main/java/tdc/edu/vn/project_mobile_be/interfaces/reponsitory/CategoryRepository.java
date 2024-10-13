@@ -8,18 +8,17 @@ import tdc.edu.vn.project_mobile_be.dtos.responses.CategoryResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, UUID> , JpaSpecificationExecutor<Category> {
-    boolean existsBySlug(String slug);
+    boolean existsByCategorySlug(String slug);
 
     Category save(Category category);
 
-    CategoryResponseDTO findBySlug(String slug);
+    CategoryResponseDTO findByCategorySlug(String slug);
 
-    @Query("SELECT c FROM Category c LEFT JOIN FETCH c.childrens WHERE c.parent IS NULL")
+    @Query("SELECT c FROM Category c LEFT JOIN FETCH c.children WHERE c.parent IS NULL")
     List<Category> findAllRootCategoriesWithChildren();
 
 

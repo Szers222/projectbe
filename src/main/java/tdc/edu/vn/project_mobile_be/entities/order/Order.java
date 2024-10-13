@@ -30,7 +30,7 @@ public class Order {
     @Id
     @Column(name = "order_id",nullable = false,columnDefinition = "BINARY(16)")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private UUID orderId;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
@@ -39,16 +39,16 @@ public class Order {
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
     @Column(name = "order_payment",nullable = false,columnDefinition = "int default 0")
-    private int payment;
+    private int orderPayment;
 
     @Column(name = "order_fee_ship",nullable = false,columnDefinition = "double default 0")
-    private double feeShip;
+    private double orderFeeShip;
     @Column(name = "order_product_price",nullable = false,columnDefinition = "double default 0")
     private double productPrice;
 
     @ManyToOne
     @JoinColumn(name = "order_status_id",nullable = false)
-    private OrderStatus status;
+    private OrderStatus orderStatus;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

@@ -17,19 +17,19 @@ public class ProductSpecifications {
         return (root, query, cb) -> {
             // Join giữa Product và Category
             Join<Product, Category> categories = root.join("categories", JoinType.INNER);
-            return cb.equal(categories.get("id"), categoryId);
+            return cb.equal(categories.get("categoryId"), categoryId);
         };
     }
 
 
     // Lọc theo khoảng giá
     public static Specification<Product> priceBetween(BigDecimal minPrice, BigDecimal maxPrice) {
-        return (root, query, cb) -> cb.between(root.get("price"), minPrice, maxPrice);
+        return (root, query, cb) -> cb.between(root.get("productPrice"), minPrice, maxPrice);
     }
 
     // Lọc theo danh sách kích cỡ
     public static Specification<Product> hasSizes(List<UUID> sizeIds) {
-        return (root, query, cb) -> root.join("sizes").get("id").in(sizeIds);
+        return (root, query, cb) -> root.join("sizes").get("sizeId").in(sizeIds);
     }
 
     // Lọc theo nhà cung cấp (supplier)
@@ -38,7 +38,21 @@ public class ProductSpecifications {
         return (root, query, cb) -> {
             // Join giữa Product và Category
             Join<Product, ProductSupplier> suppliers = root.join("suplier", JoinType.INNER);
-            return cb.equal(suppliers.get("id"), supplierId);
+            return cb.equal(suppliers.get("supplierId"), supplierId);
+        };
+    }
+
+    // Sắp xếp
+    public static Specification<Product> hasSort(String sort, String direction) {
+
+        return (root, query, cb) -> {
+
+            if (direction.equals("asc")) {
+                query.orderBy(cb.asc(root.get(sort)));
+            } else {
+                query.orderBy(cb.desc(root.get(sort)));
+            }
+            return query.getRestriction();
         };
     }
 }

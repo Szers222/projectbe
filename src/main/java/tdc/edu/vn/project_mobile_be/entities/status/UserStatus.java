@@ -24,15 +24,15 @@ public class UserStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "user_status_id", nullable = false, columnDefinition = "BINARY(16)")
-    private UUID id;
+    private UUID userStatusId;
 
     @Column(name = "user_status_name", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String name;
+    private String userStatusName;
 
     @Column(name = "user_status_type", nullable = false, columnDefinition = "int default 0")
-    private String type;
+    private String userStatusType;
 
-    @OneToMany(mappedBy = "status")
+    @OneToMany(mappedBy = "userStatus")
     private Set<User> users = new HashSet<>();
 
 }

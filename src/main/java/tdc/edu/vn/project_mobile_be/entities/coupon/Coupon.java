@@ -29,28 +29,28 @@ public class Coupon {
     @Id
     @Column(name = "coupon_id",nullable = false,columnDefinition = "BINARY(16)")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private UUID couponId;
 
     @Column(name = "coupon_name", nullable = false)
-    private String name;
+    private String couponName;
 
     @Column(name = "coupon_code", nullable = false)
-    private String code;
+    private String couponCode;
 
     @Column(name = "coupon_release", nullable = false)
-    private Timestamp release;
+    private Timestamp couponRelease;
 
     @Column(name = "coupon_expire")
-    private Timestamp expire;
+    private Timestamp couponExpire;
 
     @Column(name = "coupon_quantity", nullable = false)
-    private int quantity;
+    private int couponQuantity;
 
     @Column(name = "coupon_per_hundred")
-    private float perHundred;
+    private float couponPerHundred;
 
     @Column(name = "coupon_price")
-    private String price;
+    private String couponPrice;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
@@ -65,7 +65,7 @@ public class Coupon {
 
     @ManyToOne
     @JoinColumn(name = "coupon_type_id")
-    private CouponType type;
+    private CouponType couponType;
 
     @ManyToMany(mappedBy = "coupons")
     @ToString.Exclude

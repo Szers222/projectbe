@@ -15,12 +15,12 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ProductSupplierResponseDTO implements IDto<ProductSupplier> {
 
-    @JsonProperty("product-size-id")
-    private UUID id;
-    @JsonProperty("product-size-name")
-    private String name;
-    @JsonProperty("product-size-type")
-    private int type;
+    @JsonProperty("productSupplierSd")
+    private UUID productSupplierId;
+    @JsonProperty("productSupplierName")
+    private String productSupplierName;
+    @JsonProperty("productSupplierType")
+    private int productSupplierType;
 
     @Override
     public ProductSupplier toEntity() {

@@ -7,11 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -26,12 +24,12 @@ public class PostStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "post_status_id",nullable = false,columnDefinition = "BINARY(16)")
-    private UUID id;
+    private UUID postStatusId;
     @Column(name = "post_status_type",nullable = false)
-    private int type;
+    private int postStatusType;
     @Column(name = "post_status_name",nullable = false)
-    private String name;
+    private String postStatusName;
 
-    @OneToMany(mappedBy = "status")
+    @OneToMany(mappedBy = "postStatus")
     private Set<Post> posts= new HashSet<>();
 }

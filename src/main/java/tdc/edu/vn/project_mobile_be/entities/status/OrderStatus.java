@@ -24,12 +24,12 @@ public class OrderStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "order_status_id", nullable = false,columnDefinition = "BINARY(16)")
-    private UUID id;
+    private UUID orderStatusId;
     @Column(name = "order_status_type", nullable = false)
-    private int type;
+    private int orderStatusType;
     @Column(name = "order_status_name", nullable = false)
-    private String name;
+    private String orderStatusName;
 
-    @OneToMany(mappedBy = "status" )
+    @OneToMany(mappedBy = "orderStatus" )
     private Set<Order> oders = new HashSet<>();
 }

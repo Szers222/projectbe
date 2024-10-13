@@ -35,7 +35,7 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
         if (productRepository.findById(productId) == null) {
             throw new EntityNotFoundException("Product not found");
         }
-        List<ProductImage> productImages = productImageRepository.findByProduct_Id(productId);
+        List<ProductImage> productImages = productImageRepository.findByProductImageId(productId);
         return productImages.stream().map(productImage -> {
             ProductImageResponseDTO dto = new ProductImageResponseDTO();
             dto.toDto(productImage);  // Giới hạn độ sâu nếu cần
@@ -58,9 +58,9 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
                 String imagePath = saveImage(file);
                 Product product = productOptional.get();
                 ProductImage productImage = createProductImageRequestDTO.toEntity();
-                productImage.setId(UUID.randomUUID());
+                productImage.setProductImageId(UUID.randomUUID());
                 productImage.setProduct(product);
-                productImage.setImagePath(imagePath);
+                productImage.setProductImagePath(imagePath);
                 return productImageRepository.save(productImage);
             } catch (IOException e) {
                 throw new EntityNotFoundException("Error when save image");

@@ -25,12 +25,12 @@ public class CouponType {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "coupon_type_id",nullable = false,columnDefinition = "BINARY(16)")
-    private UUID id;
+    private UUID couponTypeId;
     @Column(name = "coupon_type",nullable = false)
-    private int type;
+    private int couponType;
     @Column(name = "coupon_type_name",nullable = false)
-    private String name;
+    private String couponTypeName;
 
-    @OneToMany(mappedBy = "type")
+    @OneToMany(mappedBy = "couponType")
     private Set<Coupon> coupons = new HashSet<>();
 }

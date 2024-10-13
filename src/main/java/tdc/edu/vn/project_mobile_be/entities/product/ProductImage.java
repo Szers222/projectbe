@@ -23,16 +23,16 @@ public class ProductImage {
     @Id
     @Column(name = "product_image_id", nullable = false, columnDefinition = "BINARY(16)")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private UUID productImageId;
 
 
     @Column(name = "product_image_path", nullable = false)
-    private String imagePath;
+    private String productImagePath;
     @Column(name = "product_image_alt", nullable = false)
-    private String imageAlt;
+    private String productImageAlt;
 
     @Column(name = "product_image_index")
-    private int imageIndex;
+    private int productImageIndex;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
