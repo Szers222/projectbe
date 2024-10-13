@@ -27,7 +27,10 @@ public class CreateCategoryRequestDTO implements IDto<Category> {
     @NotBlank(message = "Slug Danh Mục Không được để trống")
     @JsonProperty("categorySlug")
     private String categorySlug;
-
+    /**
+     * 0: Đang hoạt động
+     * 1: Đã xóa
+     */
     @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
     @JsonProperty("categoryRelease")
