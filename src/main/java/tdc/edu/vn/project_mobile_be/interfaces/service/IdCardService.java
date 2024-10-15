@@ -12,4 +12,5 @@ public interface IdCardService {
     void deleteIdCard(UUID cardId);
     IdCardResponseDTO updateIdCard(UUID cardId, CreateIdCardRequestDTO idCardRequestDTO);
     IdCardResponseDTO getIdCardById(UUID cardId);
+
 }

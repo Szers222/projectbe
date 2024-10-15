@@ -15,6 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class IdCardResponseDTO {
 
+
     @JsonProperty("cardId")
     private UUID cardId;
     @JsonProperty("idCardNumber")
