@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import org.springframework.beans.BeanUtils;
 
-import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
