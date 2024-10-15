@@ -84,5 +84,16 @@ public class ControllerAdvitor extends ResponseEntityExceptionHandler {
         errorResponseDTO.setMessage(List.of(ex.getMessage()));
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(ValidateException.class)
+    public ResponseEntity<Object> handleValidateException(
+            ValidateException ex, WebRequest request) {
+        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO();
+        errorResponseDTO.setError(ex.getMessage());
+        List<String> details = new ArrayList<>();
+        details.add("Danh sách không tồn tại!");
+        errorResponseDTO.setMessage(details);
+        errorResponseDTO.setMessage(List.of(ex.getMessage()));
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+    }
 
 }
