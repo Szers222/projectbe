@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/idcards")
+@RequestMapping("/api/v1")
 public class IdCardController {
 
 
@@ -27,24 +27,19 @@ public class IdCardController {
     private IdCardService idCardService;
 
     //Them du lieu idCard
-    @PostMapping
-    public ResponseEntity<ResponseData<IdCardResponseDTO>> createIdCard(
-            @RequestBody @Valid CreateIdCardRequestDTO idCardRequestDTO,
+    @PostMapping("/idcard")
+    public ResponseEntity<ResponseData<?>> createIdCard(
+            @RequestBody @Valid CreateIdCardRequestDTO params,
              BindingResult bindingResult) {
-        if(bindingResult.hasErrors() ){
-            Map<String, String> errors = new HashMap<>();
-            bindingResult.getFieldErrors().forEach(fieldError -> {
-                errors.put(fieldError.getField(), fieldError.getDefaultMessage());
-            });
-            String errorString = "";
-            for (String key : errors.keySet()){
-                errorString += key + errors.get(key);
-            }
-            throw  new ValidateException(errorString);
+        if (bindingResult.hasErrors()) {
+            throw new ValidateException(bindingResult.getFieldError().getDefaultMessage());
         }
-        IdCardResponseDTO createdIdCard = idCardService.createIdCard(idCardRequestDTO);
+
+        IdCardResponseDTO createdIdCard = idCardService.createIdCard(params);
         ResponseData<IdCardResponseDTO> responseData =
-                new ResponseData<>(HttpStatus.CREATED, "Thêm mới thành công", createdIdCard);
+                new ResponseData<>(HttpStatus.CREATED,
+                        "Thêm mới thành công",
+                        createdIdCard);
         return new ResponseEntity<>(responseData, HttpStatus.CREATED);
     }
 

@@ -2,6 +2,10 @@ package tdc.edu.vn.project_mobile_be.dtos.requests;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,31 +13,34 @@ import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import org.springframework.beans.BeanUtils;
 
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateIdCardRequestDTO {
 
-    @NotEmpty
+    @NotEmpty(message = "Không đuợc để trống")
     @NotBlank(message = "Số CMND không được để trống")
     @JsonProperty("idCardNumber")
+    @NotNull(message = "Không được để null")
     private String idCardNumber;
 
-    @NotBlank(message = "Ảnh trươớc không được để trôngs")
-    @JsonProperty("imageFrontPath")
+    @NotEmpty(message = "Không được để trống")
+    @NotBlank(message = "Ảnh CMND không được để trống")
+    @JsonProperty("idCardNumber")
+    @NotNull(message = "khong duoc null")
     private String imageFrontPath;
 
-    @NotBlank(message = "Ảnh sau khong de trong")
-    @JsonProperty("imageBackPath")
+    @NotEmpty(message = "Không được để trống")
+    @NotBlank(message = "Ảnh CMND không được để trống")
+    @JsonProperty("idCardNumber")
+    @NotNull(message = "Không được để null")
     private String imageBackPath;
 
-    @NotBlank(message = "Ảnh sau khong de trong")
+    @NotBlank(message = "Ngày CMND khong de trong")
     @JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
     @JsonProperty("idCardDate")
+    @NotNull(message = "Không được để null")
     private String idCardDate;
 
 
