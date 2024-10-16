@@ -24,7 +24,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // Create a new User
+    // Create a new user
     @PostMapping
     public ResponseEntity<ResponseData<UserResponseDTO>> createUser(
             @RequestBody @Valid CreateUserRequestDTO createUserRequestDTO,
