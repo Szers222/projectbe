@@ -21,5 +21,5 @@ public class ProductRequestParamsDTO {
     private BigDecimal maxPrice;
     private List<UUID> sizeIds;
     private UUID supplierId;
-    private String search = "Ao";
+    private String search;
 }

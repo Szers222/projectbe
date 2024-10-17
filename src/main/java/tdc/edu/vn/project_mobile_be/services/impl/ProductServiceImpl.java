@@ -84,6 +84,9 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             spec = spec.and(ProductSpecifications.hasSort(params.getSort(), params.getDirection()));
         }
         if (params.getSearch() == null || params.getSearch().isEmpty() || params.getSearch().isBlank()) {
+
+        }
+        if (params.getSearch() == null || params.getSearch().isEmpty() || params.getSearch().isBlank()) {
             throw new InvalidLinkException("Đường dẫn không hợp lệ");
         } else {
             spec = spec.and(ProductSpecifications.hasSearch(params.getSearch()));
