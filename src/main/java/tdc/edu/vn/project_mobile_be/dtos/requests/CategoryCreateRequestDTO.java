@@ -1,6 +1,7 @@
 package tdc.edu.vn.project_mobile_be.dtos.requests;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -12,6 +13,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -33,9 +35,24 @@ public class CategoryCreateRequestDTO implements IDto<Category> {
     @NotNull(message = "StatusId không được để trống")
     @JsonProperty("statusId")
     private UUID statusId;
-    @NotNull(message = "ParentId không được để trống")
+
+    @NotBlank(message = "Ảnh danh mục không được để trống")
+    @JsonProperty("categoryImgPath")
+    private String categoryImgPath;
+
     @JsonProperty("categoryParent")
     private UUID parentId = null;
+
+    @JsonIgnore
+    private Timestamp createdAt;
+    @JsonIgnore
+    private Timestamp updatedAt;
+    @JsonIgnore
+    private LocalDate deletedAt;
+    @JsonIgnore
+    private Category categoryParent;
+    @JsonIgnore
+    private Category categoryChildren;
 
 
     @Override

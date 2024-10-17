@@ -4,6 +4,7 @@ package tdc.edu.vn.project_mobile_be.dtos.responses;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,6 +41,8 @@ public class CategoryResponseDTO implements IDto<Category> {
     @JsonProperty("categoryChildren")
     private List<CategoryResponseDTO> children;
 
+    @JsonProperty("categoryImgPath")
+    private String categoryImgPath;
 
     @JsonIgnore
     private Timestamp createdAt;
@@ -84,7 +87,6 @@ public class CategoryResponseDTO implements IDto<Category> {
 
         this.parentId = entity.getParent() != null ? entity.getParent().getCategoryId() : null;
         this.level = setLevel(entity);
-
     }
 
     public int setLevel(Category parentEntity) {

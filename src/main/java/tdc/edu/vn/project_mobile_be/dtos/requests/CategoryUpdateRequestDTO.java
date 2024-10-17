@@ -36,13 +36,17 @@ public class CategoryUpdateRequestDTO implements IDto<Category> {
     @NotNull(message = "StatusId không được để trống")
     @JsonProperty("statusId")
     private UUID statusId;
-    @NotNull(message = "ParentId không được để trống")
+
     @JsonProperty("categoryParent")
     private UUID parentId = null;
     @JsonIgnore
     private Timestamp createAt;
     @JsonIgnore
     private Timestamp updateAt;
+
+    @NotBlank(message = "Ảnh danh mục không được để trống")
+    @JsonProperty("categoryImgPath")
+    private String categoryImgPath;
 
     @Override
     public Category toEntity() {

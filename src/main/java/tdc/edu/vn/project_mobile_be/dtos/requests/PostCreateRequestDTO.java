@@ -22,7 +22,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreatePostRequestDTO implements IDto<Post> {
+public class PostCreateRequestDTO implements IDto<Post> {
 
     @NotBlank
     @NotNull(message = "Tên Bài Viết không được để trống")
