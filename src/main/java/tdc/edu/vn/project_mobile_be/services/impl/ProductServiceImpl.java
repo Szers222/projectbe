@@ -92,13 +92,11 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             spec = spec.and(ProductSpecifications.hasSearch(params.getSearch()));
         }
 
-
         // Truy vấn với các tiêu chí kết hợp
         Page<Product> products = productRepository.findAll(spec, pageable);
         if (products.isEmpty() || products.getSize() == 0) {
             throw new ListNotFoundException("Không tìm thấy sản phẩm");
         }
-
 
         return products.map(product -> {
             Product productWithImages = productRepository.findByIdWithImages(product.getProductId())
