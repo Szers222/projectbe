@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.InvalidRoleException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.CategoryCreateRequestDTO;
@@ -70,10 +71,16 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
             throw new EntityNotFoundException("Trạng thái không tồn tại !");
         }
 
-        Category parent = getParentCategoryById(params.getParentId());
-        if (parent == null) {
-            throw new EntityNotFoundException("Parent không tồn tại !");
+        Category parent;
+        if (params.getParentId() != null) {
+            parent = getParentCategoryById(params.getParentId());
+            if (parent == null) {
+                throw new EntityNotFoundException("Parent không tồn tại !");
+            }
+        } else {
+            parent = null;
         }
+
 
         Category category = params.toEntity();
         category.setCategoryId(UUID.randomUUID());
@@ -81,11 +88,9 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
         category.setCategoryStatus(status);
         category.setCategoryRelease(releaseTimestamp);
 
-        System.console().printf("category12321321: " + category);
-
         return categoryRepository.save(category);
     }
-
+    @Transactional
     @Override
     public Category updateCategory(CategoryUpdateRequestDTO params, UUID categoryId) {
 
@@ -106,9 +111,16 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
             throw new EntityNotFoundException("Trạng thái không tồn tại !");
         }
 
-        Category parent = getParentCategoryById(params.getParentId());
-        if (parent == null) {
-            throw new EntityNotFoundException("Parent không tồn tại !");
+
+
+        Category parent;
+        if (params.getParentId() != null) {
+            parent = getParentCategoryById(params.getParentId());
+            if (parent == null) {
+                throw new EntityNotFoundException("Parent không tồn tại !");
+            }
+        } else {
+            parent = null;
         }
 
         Category category = categoryRepository.findById(categoryId).orElseThrow(()
@@ -117,6 +129,7 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
         category.setParent(parent);
         category.setCategoryStatus(status);
         category.setCategoryRelease(releaseTimestamp);
+        category.setDeletionDate(null);
         return categoryRepository.save(category);
     }
 
@@ -160,8 +173,11 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
             throw new EntityNotFoundException("Category không tồn tại !");
         }
         Category category = categoryOptional.get();
-
-        category.setCategoryStatus(categoryStatusRepository.findByCategoryStatusType(this.CATEGORY_STATUS_DELETE));
+        CategoryStatus status = categoryStatusRepository.findByCategoryStatusType(this.CATEGORY_STATUS_DELETE);
+        if (status == null) {
+            throw new EntityNotFoundException("Trạng thái không tồn tại !");
+        }
+        category.setCategoryStatus(status);
         category.setDeletionDate(LocalDate.now().plusDays(this.CATEGORY_DELETE_AFTER_DAYS));
         categoryRepository.save(category);
         return true;
@@ -187,7 +203,8 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
      * @return Category
      */
     private Category getParentCategoryById(UUID parentId) {
-        return parentId != null ? categoryRepository.findById(parentId).orElseThrow(() -> new EntityNotFoundException("Parent không tồn tại!")) : null;
+        return parentId != null ? categoryRepository.findById(parentId).
+                orElseThrow(() -> new EntityNotFoundException("Parent không tồn tại!")) : null;
     }
 
     private CategoryStatus getStatus(UUID statusId) {

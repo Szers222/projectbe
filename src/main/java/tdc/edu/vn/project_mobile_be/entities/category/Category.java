@@ -10,10 +10,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.status.CategoryStatus;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +37,9 @@ public class Category {
     @Column(name = "category_release", nullable = false, columnDefinition = "Timestamp")
     private Timestamp categoryRelease;
 
+    @Column(name = "category_img_path", columnDefinition = "TEXT")
+    private String categoryImgPath;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
@@ -46,6 +47,7 @@ public class Category {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
+
     @Column(name = "deletion_date", columnDefinition = "DATE")
     private LocalDate deletionDate;
     /**

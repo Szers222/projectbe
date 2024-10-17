@@ -41,9 +41,7 @@ public class CategoryController {
         if (bindingResult.hasErrors()) {
             List<String> errorMessages = bindingResult.getFieldErrors().stream()
                     .map(FieldError::getDefaultMessage)
-
                     .collect(Collectors.toList());
-
             throw new MultipleFieldsNullOrEmptyException(errorMessages);
         }
 
@@ -54,15 +52,17 @@ public class CategoryController {
 
 
     @GetMapping("/categories")
-    public ResponseEntity<ResponseData<List<CategoryResponseDTO>>> getCategories(@ModelAttribute CategoryRequestParamsDTO params, Pageable pageable) {
-        List<CategoryResponseDTO> data = categoryService.getCategories(3, pageable);
+    public ResponseEntity<ResponseData<List<CategoryResponseDTO>>> getCategories(
+            @ModelAttribute CategoryRequestParamsDTO params,
+            Pageable pageable) {
+        List<CategoryResponseDTO> data = categoryService.getCategories(1, pageable);
 
         ResponseData<List<CategoryResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Success",
                 data);
         return ResponseEntity.ok(responseData);
     }
 
-    @DeleteMapping("/category/")
+    @DeleteMapping({"/category/","/category"})
     public ResponseEntity<ResponseData<?>> deleteCategory(
             @RequestBody CategoryRemoveRequestDTO params) {
         boolean isDeleted = categoryService.deleteCategory(params.getCategoryId());
@@ -79,9 +79,6 @@ public class CategoryController {
             @RequestBody @Valid CategoryUpdateRequestDTO params,
             @RequestParam("categoryId") UUID categoryId,
             BindingResult bindingResult) {
-
-
-
 
         if (bindingResult.hasErrors()) {
             List<String> errorMessages = bindingResult.getFieldErrors().stream()
