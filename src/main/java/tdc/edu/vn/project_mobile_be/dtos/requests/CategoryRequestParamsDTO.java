@@ -14,5 +14,5 @@ public class CategoryRequestParamsDTO {
     private String sort = "categoryName";
     private String direction = "asc";
     private String search = "";
-    private int role;
+
 }

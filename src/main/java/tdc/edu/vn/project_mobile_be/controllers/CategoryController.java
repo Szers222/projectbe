@@ -54,8 +54,11 @@ public class CategoryController {
 
 
     @GetMapping("/categories")
-    public ResponseEntity<ResponseData<List<CategoryResponseDTO>>> getCategories(@ModelAttribute CategoryRequestParamsDTO params, Pageable pageable) {
-        List<CategoryResponseDTO> data = categoryService.getCategories(3, pageable);
+    public ResponseEntity<ResponseData<List<CategoryResponseDTO>>> getCategories(
+            @ModelAttribute CategoryRequestParamsDTO params,
+            Pageable pageable) {
+
+        List<CategoryResponseDTO> data = categoryService.getCategories(1, pageable);
 
         ResponseData<List<CategoryResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Success",
                 data);
