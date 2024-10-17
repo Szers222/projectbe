@@ -1,8 +1,9 @@
 package tdc.edu.vn.project_mobile_be.dtos.requests;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,41 +12,31 @@ import org.springframework.format.annotation.DateTimeFormat;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
-import javax.validation.constraints.NotBlank;
-import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateCategoryRequestDTO implements IDto<Category> {
 
-    @NotBlank(message = "Tên Danh Mục Không được để trống")
+public class CategoryCreateRequestDTO implements IDto<Category> {
+
+    @NotBlank(message = "Tên danh mục không được để trống")
     @JsonProperty("categoryName")
     private String categoryName;
 
-    @NotBlank(message = "Slug Danh Mục Không được để trống")
-    @JsonProperty("categorySlug")
-    private String categorySlug;
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd hh:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Ho_Chi_Minh")
     @JsonProperty("categoryRelease")
-    private Timestamp categoryRelease;
+    private LocalDate categoryRelease;
 
-    @JsonIgnore
+    @NotNull(message = "StatusId không được để trống")
+    @JsonProperty("statusId")
     private UUID statusId;
-
+    @NotNull(message = "ParentId không được để trống")
     @JsonProperty("categoryParent")
     private UUID parentId = null;
 
-    @JsonProperty("categoryChildren")
-
-    @JsonIgnore
-    private Timestamp createdAt;
-
-    @JsonIgnore
-    private Timestamp updatedAt;
 
     @Override
     public Category toEntity() {
@@ -56,8 +47,10 @@ public class CreateCategoryRequestDTO implements IDto<Category> {
         return category;
     }
 
+
     @Override
     public void toDto(Category entity) {
-        throw new UnsupportedOperationException("Unimplemented method 'toDTO' in CreateCategoryRequestDTO");
+        throw new UnsupportedOperationException("Unimplemented method 'toDTO' in CategoryCreateRequestDTO");
     }
+
 }

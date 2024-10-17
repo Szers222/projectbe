@@ -7,21 +7,15 @@ import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.PostRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.PostService;
 
+import java.time.LocalDate;
+
 @Service
 public class PostServiceImpl implements PostService {
     @Autowired
     private PostRepository postRepository;
 
-
     @Override
     public Post createPost(CreatePostRequestDTO createPostRequestDTO) {
         return null;
     }
-
-    @Override
-    public boolean existsBySlug(String slug) {
-        return false;
-    }
-
-
 }

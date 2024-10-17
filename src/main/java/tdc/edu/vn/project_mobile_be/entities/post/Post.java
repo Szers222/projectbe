@@ -1,6 +1,5 @@
 package tdc.edu.vn.project_mobile_be.entities.post;
 
-import jakarta.jws.soap.SOAPBinding;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,19 +32,16 @@ public class Post {
     @Column(name = "post_name", columnDefinition = "VARCHAR(255)")
     private String postName;
 
-    @Column(name = "post_slug", columnDefinition = "VARCHAR(255)")
-    private String postSlug;
-
     @Column(name = "post_release", columnDefinition = "TIMESTAMP", nullable = false)
     private Timestamp postRelease;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
+
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
-
 
     @Lob
     @Column(name = "post_content", columnDefinition = "TEXT")

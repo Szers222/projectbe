@@ -10,7 +10,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.status.CategoryStatus;
 
+import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -31,33 +33,21 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID categoryId;
 
-    @Transient
-    private int categoryLevel;
-
-    public int getLevel() {
-        if (this.parent == null) {
-            return 0;
-        } else {
-            return this.parent.getLevel() + 1;
-        }
-
-    }
     @Column(name = "category_name", nullable = false)
     private String categoryName;
 
-    @Column(name = "category_slug", nullable = false)
-    private String categorySlug;
-
-    @Column(name = "category_release", nullable = false, columnDefinition = "TIMESTAMP")
-    private ZonedDateTime categoryRelease;
+    @Column(name = "category_release", nullable = false, columnDefinition = "Timestamp")
+    private Timestamp categoryRelease;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
+
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
-
+    @Column(name = "deletion_date", columnDefinition = "DATE")
+    private LocalDate deletionDate;
     /**
      * ManyToOne
      */
@@ -70,17 +60,20 @@ public class Category {
     @ManyToOne
     @JoinColumn(name = "parent_id")
     @JsonBackReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Category parent;
 
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+    @JsonBackReference
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Category> children;
 
     // ManyToMany - Product - Category
-    @ManyToMany(mappedBy = "categories")
+    @ManyToMany(mappedBy = "categories" , cascade = CascadeType.ALL)
     @ToString.Exclude
     @JsonBackReference
     @EqualsAndHashCode.Exclude
     private Set<Product> products = new HashSet<>();
-
 }

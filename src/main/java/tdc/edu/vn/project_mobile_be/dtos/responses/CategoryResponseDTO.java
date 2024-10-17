@@ -1,6 +1,7 @@
 package tdc.edu.vn.project_mobile_be.dtos.responses;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -12,7 +13,6 @@ import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
 import java.sql.Timestamp;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -26,11 +26,9 @@ public class CategoryResponseDTO implements IDto<Category> {
     @JsonProperty("categoryName")
     private String categoryName;
 
-    @JsonProperty("categorySlug")
-    private String categorySlug;
-
     @JsonProperty("categoryRelease")
-    private ZonedDateTime categoryRelease;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "Asia/Ho_Chi_Minh")
+    private Timestamp categoryRelease;
 
     @JsonProperty("categoryParent")
     private UUID parentId = null;
@@ -41,6 +39,7 @@ public class CategoryResponseDTO implements IDto<Category> {
 
     @JsonProperty("categoryChildren")
     private List<CategoryResponseDTO> children;
+
 
     @JsonIgnore
     private Timestamp createdAt;
@@ -63,8 +62,6 @@ public class CategoryResponseDTO implements IDto<Category> {
             this.categoryStatus = new CategoryStatusResponseDTO();
             this.categoryStatus.toDto(entity.getCategoryStatus());
         }
-        this.parentId = entity.getParent() != null ? entity.getParent().getCategoryId() : null;
-        this.level = entity.getLevel();
         this.children = entity.getChildren().stream()
                 .map(child -> {
                     CategoryResponseDTO childDto = new CategoryResponseDTO();
@@ -72,5 +69,29 @@ public class CategoryResponseDTO implements IDto<Category> {
                     return childDto;
                 })
                 .collect(Collectors.toList());
+        this.parentId = entity.getParent() != null ? entity.getParent().getCategoryId() : null;
+        this.level = setLevel(entity);
+
+    }
+
+    public void toDto(Category entity,int role) {
+        BeanUtils.copyProperties(entity, this, "createdAt", "updatedAt");
+
+        if (entity.getCategoryStatus() != null) {
+            this.categoryStatus = new CategoryStatusResponseDTO();
+            this.categoryStatus.toDto(entity.getCategoryStatus());
+        }
+
+        this.parentId = entity.getParent() != null ? entity.getParent().getCategoryId() : null;
+        this.level = setLevel(entity);
+
+    }
+
+    public int setLevel(Category parentEntity) {
+        if (parentEntity.getParent() == null) {
+            return 0;
+        } else {
+            return setLevel(parentEntity.getParent()) + 1;
+        }
     }
 }

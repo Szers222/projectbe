@@ -34,7 +34,7 @@ public class ProductResponseDTO implements IDto<Product> {
     private double productRating;
     @JsonProperty("productSale")
     private double productSale;
-    @JsonProperty("productCategories")
+    @JsonIgnore
     private List<CategoryResponseDTO> categoryResponseDTO;
     @JsonProperty("productYearOfManufacture")
     private int productYearOfManufacture;
@@ -77,7 +77,7 @@ public class ProductResponseDTO implements IDto<Product> {
             ProductImageResponseDTO productImageResponseDTO = new ProductImageResponseDTO();
             productImageResponseDTO.toDto(productImage);
             productImageResponseDTOs.add(productImageResponseDTO);
-        }
+        } 
 
         BeanUtils.copyProperties(entity, this, "createdAt", "updatedAt");
         this.productPrice = this.formatPrice(entity.getProductPrice());

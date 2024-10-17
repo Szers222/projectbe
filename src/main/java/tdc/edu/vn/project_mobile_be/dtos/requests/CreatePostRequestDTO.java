@@ -1,19 +1,22 @@
 package tdc.edu.vn.project_mobile_be.dtos.requests;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.format.annotation.DateTimeFormat;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
-import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
-import tdc.edu.vn.project_mobile_be.entities.type.PostType;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
+import javax.validation.constraints.NotBlank;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -21,39 +24,44 @@ import java.util.UUID;
 @NoArgsConstructor
 public class CreatePostRequestDTO implements IDto<Post> {
 
+    @NotBlank
+    @NotNull(message = "Tên Bài Viết không được để trống")
     @JsonProperty("postName")
-    public String postName;
-    @JsonProperty("postSlug")
-    public String postSlug;
+    private String postName;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Ho_Chi_Minh")
     @JsonProperty("postRelease")
-    public Timestamp postRelease;
+    private LocalDate postRelease;
+
     @JsonProperty("postContent")
-    public String postContent;
+    private String postContent;
+
     @JsonProperty("postImagePath")
-    public String postImagePath;
-    @JsonProperty("postStatus")
-    public String postStatus;
-    @JsonProperty("postType")
-    public String postType;
-    @JsonProperty("userName")
-    public String userName;
+    private String postImagePath;
+
+    @NotNull(message = "User ID không được để trống")
+    @JsonProperty("userId")
+    private UUID userId;
+
     @JsonProperty("postStatusId")
-    UUID postStatusId;
+    private UUID postStatusId;
+
     @JsonProperty("postTypeId")
-    UUID postTypeId;
+    private UUID postTypeId;
 
     @JsonIgnore
-    String createdAt;
+    private Timestamp createdAt;
     @JsonIgnore
-    String updatedAt;
+    private Timestamp updatedAt;
     @JsonIgnore
-    Product product;
+    private Product product;
 
 
     @Override
     public Post toEntity() {
         Post entity = new Post();
-        BeanUtils.copyProperties(this, entity, "postStatusId", "postTypeId");
+        BeanUtils.copyProperties(this, entity, "id", "createdAt", "updatedAt");
         return entity;
     }
 
