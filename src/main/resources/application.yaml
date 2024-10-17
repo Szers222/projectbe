@@ -37,6 +37,12 @@ spring:
             enabled: true
           api-docs:
             enabled: true
-
+spring.devtools:
+  restart:
+    enabled: true  # Kích hoạt tự động tải lại
+    exclude: static/**,public/** # Loại trừ thư mục static và public
+    spring:
+      jackson:
+        time-zone: Asia/Ho_Chi_Minh
 
 
