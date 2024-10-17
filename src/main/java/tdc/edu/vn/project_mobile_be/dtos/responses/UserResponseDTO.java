@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 
 
@@ -60,24 +61,18 @@ public class UserResponseDTO {
     @JsonProperty("updatedAt")
     private Timestamp updatedAt;
 
-    // Method to convert Entity to DTO
+    // Phương thức để chuyển đổi từ Entity sang DTO
     public void toDto(User user) {
-        this.userId = user.getUserId();
-        this.userEmail = user.getUserEmail();
-        this.userPhone = user.getUserPhone();
-        this.userBirthday = user.getUserBirthday();
-        this.userAddress = user.getUserAddress();
-        this.userImagePath = user.getUserImagePath();
-        this.userPasswordLevel2 = user.getUserPasswordLevel2();
-        this.userLastName = user.getUserLastName();
-        this.userFirstName = user.getUserFirstName();
-        this.userMoney = user.getUserMoney();
-        this.userPoint = user.getUserPoint();
-        this.userWrongPassword = user.getUserWrongPassword();
+        // Sao chép các thuộc tính từ entity sang DTO, ngoại trừ createdAt và updatedAt
+        BeanUtils.copyProperties(user, this, "createdAt", "updatedAt");
+
+        // Xử lý thẻ ID nếu có
         if (user.getICard() != null) {
             this.iCard = new IdCardResponseDTO();
             this.iCard.toDto(user.getICard());
         }
+
+        // Lấy createdAt và updatedAt từ entity
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();
     }

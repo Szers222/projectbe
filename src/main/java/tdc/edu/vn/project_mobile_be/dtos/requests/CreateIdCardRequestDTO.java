@@ -12,36 +12,36 @@ import lombok.NoArgsConstructor;
 import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import org.springframework.beans.BeanUtils;
 
-
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateIdCardRequestDTO {
 
-    @NotEmpty(message = "Không đuợc để trống")
+    @NotEmpty(message = "Không được để trống")
     @NotBlank(message = "Số CMND không được để trống")
     @JsonProperty("idCardNumber")
     @NotNull(message = "Không được để null")
-    private String idCardNumber;
+    private String idCardNumber;  // Số CMND/ID Card Number
 
     @NotEmpty(message = "Không được để trống")
-    @NotBlank(message = "Ảnh CMND không được để trống")
-    @JsonProperty("idCardNumber")
-    @NotNull(message = "khong duoc null")
-    private String imageFrontPath;
-
-    @NotEmpty(message = "Không được để trống")
-    @NotBlank(message = "Ảnh CMND không được để trống")
-    @JsonProperty("idCardNumber")
+    @NotBlank(message = "Ảnh mặt trước không được để trống")
+    @JsonProperty("imageFrontPath")
     @NotNull(message = "Không được để null")
-    private String imageBackPath;
+    private String imageFrontPath;  // Đường dẫn ảnh mặt trước
 
-    @NotBlank(message = "Ngày CMND khong de trong")
+    @NotEmpty(message = "Không được để trống")
+    @NotBlank(message = "Ảnh mặt sau không được để trống")
+    @JsonProperty("imageBackPath")
+    @NotNull(message = "Không được để null")
+    private String imageBackPath;  // Đường dẫn ảnh mặt sau
+
+    @NotBlank(message = "Ngày cấp không được để trống")
     @JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
     @JsonProperty("idCardDate")
     @NotNull(message = "Không được để null")
-    private String idCardDate;
+    private String idCardDate;  // Ngày cấp ID Card
 
 
     public IdCard toEntity() {

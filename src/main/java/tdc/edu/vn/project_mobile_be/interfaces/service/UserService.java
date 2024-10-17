@@ -6,6 +6,6 @@ import tdc.edu.vn.project_mobile_be.dtos.responses.UserResponseDTO;
 import java.util.List;
 
 public interface UserService {
-    UserResponseDTO createUser(CreateUserRequestDTO createUserRequestDTO);
+    //UserResponseDTO createUser(CreateUserRequestDTO createUserRequestDTO);
     List<UserResponseDTO> getAllUsers();
 }

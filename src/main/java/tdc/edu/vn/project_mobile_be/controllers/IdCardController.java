@@ -44,7 +44,7 @@ public class IdCardController {
     }
 
     //Lay tat ca danh sach IdCard
-    @GetMapping
+    @GetMapping("/idcard")
     public ResponseEntity<ResponseData<List<IdCardResponseDTO>>> getAllIdCards() {
         //Lay tat ca danh sach IdCard
         List<IdCardResponseDTO> idCards = idCardService.getAllIdCards();
@@ -85,19 +85,19 @@ public class IdCardController {
         return new ResponseEntity<>(responseData,HttpStatus.OK);
 
     }
-    //Lay ID
-    @GetMapping("/{id}")
-    public ResponseEntity<ResponseData<IdCardResponseDTO>> getIdCardById
-    (@PathVariable("id") UUID cardId) {
-        IdCardResponseDTO idCardResponseDTO = idCardService.getIdCardById(cardId);
-        ResponseData<IdCardResponseDTO> responseData =
-                new ResponseData<>(
-                        HttpStatus.OK, //Trang thai Http 200 OK
-                        "Lay du lieu thanh cong", //Messger
-                        idCardResponseDTO // UpdateIdCard
-                );
-        return new ResponseEntity<>(responseData,HttpStatus.OK);
-    }
+//    //Lay ID
+//    @GetMapping("/{id}")
+//    public ResponseEntity<ResponseData<IdCardResponseDTO>> getIdCardById
+//    (@PathVariable("id") UUID cardId) {
+//        IdCardResponseDTO idCardResponseDTO = idCardService.getIdCardById(cardId);
+//        ResponseData<IdCardResponseDTO> responseData =
+//                new ResponseData<>(
+//                        HttpStatus.OK, //Trang thai Http 200 OK
+//                        "Lay du lieu thanh cong", //Messger
+//                        idCardResponseDTO // UpdateIdCard
+//                );
+//        return new ResponseEntity<>(responseData,HttpStatus.OK);
+//    }
 
 
 }

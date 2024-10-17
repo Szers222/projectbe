@@ -25,24 +25,24 @@ public class UserController {
     private UserService userService;
 
     // Create a new user
-    @PostMapping
-    public ResponseEntity<ResponseData<UserResponseDTO>> createUser(
-            @RequestBody @Valid CreateUserRequestDTO createUserRequestDTO,
-            BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = new HashMap<>();
-            bindingResult.getFieldErrors().forEach(fieldError -> {
-                errors.put(fieldError.getField(), fieldError.getDefaultMessage());
-            });
-            StringBuilder errorString = new StringBuilder();
-            errors.forEach((key, value) -> errorString.append(key).append(": ").append(value).append("; "));
-            throw new ValidateException(errorString.toString());
-        }
-        UserResponseDTO createdUser = userService.createUser(createUserRequestDTO);
-        ResponseData<UserResponseDTO> responseData =
-                new ResponseData<>(HttpStatus.CREATED, "Thêm mới thành công", createdUser);
-        return new ResponseEntity<>(responseData, HttpStatus.CREATED);
-    }
+//    @PostMapping
+//    public ResponseEntity<ResponseData<UserResponseDTO>> createUser(
+//            @RequestBody @Valid CreateUserRequestDTO createUserRequestDTO,
+//            BindingResult bindingResult) {
+//        if (bindingResult.hasErrors()) {
+//            Map<String, String> errors = new HashMap<>();
+//            bindingResult.getFieldErrors().forEach(fieldError -> {
+//                errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+//            });
+//            StringBuilder errorString = new StringBuilder();
+//            errors.forEach((key, value) -> errorString.append(key).append(": ").append(value).append("; "));
+//            throw new ValidateException(errorString.toString());
+//        }
+//        UserResponseDTO createdUser = userService.createUser(createUserRequestDTO);
+//        ResponseData<UserResponseDTO> responseData =
+//                new ResponseData<>(HttpStatus.CREATED, "Thêm mới thành công", createdUser);
+//        return new ResponseEntity<>(responseData, HttpStatus.CREATED);
+//    }
 
     // Get All Users
     @GetMapping

@@ -32,12 +32,10 @@ public class IdCardResponseDTO {
 
     // Phương thức để chuyển đổi từ entity sang DTO
     public void toDto(IdCard idCard) {
-        this.cardId = idCard.getCardId();
-        this.idCardNumber = idCard.getIdCardNumber();
-        this.imageFrontPath = idCard.getImageFrontPath();
-        this.imageBackPath = idCard.getImageBackPath();
-        this.idCardDate = idCard.getIdCardDate();
-        this.createdAt = idCard.getCreatedAt();
-        this.updatedAt = idCard.getUpdatedAt();
+        // Sao chép các thuộc tính từ entity sang DTO
+        BeanUtils.copyProperties(idCard, this, "createdAt", "updatedAt");
+        this.cardId = idCard.getCardId(); // Lấy cardId từ entity
+        this.createdAt = idCard.getCreatedAt(); // Lấy createdAt từ entity
+        this.updatedAt = idCard.getUpdatedAt(); // Lấy updatedAt từ entity
     }
 }
