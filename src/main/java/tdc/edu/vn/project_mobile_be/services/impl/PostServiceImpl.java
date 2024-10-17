@@ -8,6 +8,7 @@ import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.PostRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.PostService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -15,7 +16,15 @@ public class PostServiceImpl implements PostService {
     private PostRepository postRepository;
 
     @Override
-    public Post createPost(CreatePostRequestDTO createPostRequestDTO) {
+    public Post createPost(CreatePostRequestDTO params) {
+
+        LocalDateTime releaseDateTime;
+        if (params.getPostRelease() == null) {
+            releaseDateTime = LocalDateTime.now();
+
+        } else {
+            releaseDateTime = params.getPostRelease().atStartOfDay();
+        }
         return null;
     }
 }

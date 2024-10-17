@@ -62,7 +62,6 @@ public class ProductController {
         if (params.getSort() == null || params.getSort().isEmpty()) {
             params.setSort("productPrice");
         }
-        System.console().printf("params: " + params.getSearch());
         Sort.Direction sortDirection = params.getDirection().equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sortBy = Sort.by(sortDirection, params.getSort());
         Pageable pageable = PageRequest.of(params.getPage(), params.getSize(), sortBy);

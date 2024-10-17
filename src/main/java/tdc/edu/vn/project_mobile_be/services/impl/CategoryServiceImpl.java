@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.InvalidRoleException;
-import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.CategoryCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.CategoryUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.CategoryResponseDTO;
@@ -62,9 +61,9 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
         } else {
             releaseDateTime = params.getCategoryRelease().atStartOfDay();
         }
-        System.console().printf("releaseDateTime: " + releaseDateTime);
+
         Timestamp releaseTimestamp = Timestamp.valueOf(releaseDateTime);
-        System.console().printf("releaseTimestamp: " + releaseTimestamp);
+
         CategoryStatus status = getStatus(params.getStatusId());
 
         if (status == null) {
