@@ -14,7 +14,10 @@ import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -45,7 +48,7 @@ public class ProductResponseDTO implements IDto<Product> {
     @JsonIgnore
     private Timestamp updatedAt;
     @JsonProperty("productImages")
-    private Set<ProductImageResponseDTO> productImageResponseDTOs;
+    private List<ProductImageResponseDTO> productImageResponseDTOs;
     @JsonProperty("productSupplier")
     private ProductSupplierResponseDTO supplier;
     @JsonProperty("productSizes")
@@ -59,7 +62,7 @@ public class ProductResponseDTO implements IDto<Product> {
 
     @Override
     public void toDto(Product entity) {
-        this.productImageResponseDTOs = new HashSet<>();
+        this.productImageResponseDTOs = new ArrayList<>();
         this.categoryResponseDTO = entity.getCategories().stream().map(category -> {
             CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO();
             categoryResponseDTO.toDto(category);
@@ -73,11 +76,15 @@ public class ProductResponseDTO implements IDto<Product> {
         ProductSupplierResponseDTO productSupplierResponse = new ProductSupplierResponseDTO();
         productSupplierResponse.toDto(entity.getSupplier());
         this.supplier = productSupplierResponse;
+
+
         for (ProductImage productImage : entity.getImages()) {
             ProductImageResponseDTO productImageResponseDTO = new ProductImageResponseDTO();
             productImageResponseDTO.toDto(productImage);
             productImageResponseDTOs.add(productImageResponseDTO);
-        } 
+        }
+
+
 
         BeanUtils.copyProperties(entity, this, "createdAt", "updatedAt");
         this.productPrice = this.formatPrice(entity.getProductPrice());

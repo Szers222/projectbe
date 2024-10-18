@@ -25,7 +25,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
 
     Product save(Product product);
 
-    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.images i WHERE p.productId = :productId ORDER BY i.productImageIndex ASC")
+
+    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.images i WHERE p.productId= :productId ORDER BY i.productImageIndex desc")
     Optional<Product> findByIdWithImages(@Param("productId") UUID productId);
 
 

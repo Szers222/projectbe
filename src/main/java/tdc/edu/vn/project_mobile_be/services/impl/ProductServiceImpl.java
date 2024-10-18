@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.commond.ProductSpecifications;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
@@ -144,11 +143,11 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         return products.map(product -> {
             Product productWithImages = productRepository.findByIdWithImages(product.getProductId())
                     .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-
             ProductResponseDTO dto = new ProductResponseDTO();
             dto.toDto(productWithImages);  // Mapping product with images to the DTO
             return dto;
         });
+
     }
 
     @Override
