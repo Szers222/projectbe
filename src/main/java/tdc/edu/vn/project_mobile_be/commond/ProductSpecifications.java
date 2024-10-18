@@ -26,10 +26,6 @@ public class ProductSpecifications implements Specification<Product> {
     }
 
     public static Specification<Product> hasSearch(String search) {
-        if (search == null || search.isEmpty()) {
-            return null;
-        }
-
         String likePattern = "%" + search + "%";
         return (root, query, cb) -> {
             Join<Product, Category> categories = root.join("categories", JoinType.INNER);

@@ -10,7 +10,6 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
-import tdc.edu.vn.project_mobile_be.entities.type.PostType;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 
 import java.sql.Timestamp;
@@ -53,10 +52,6 @@ public class Post {
     @ManyToOne
     @JoinColumn(name = "post_status_id", nullable = false)
     private PostStatus postStatus;
-
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "post_type_id", nullable = false)
-    private PostType postType;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "post_id")
