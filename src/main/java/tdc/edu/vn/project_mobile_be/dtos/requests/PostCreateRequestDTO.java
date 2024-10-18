@@ -40,15 +40,15 @@ public class PostCreateRequestDTO implements IDto<Post> {
     @JsonProperty("postImagePath")
     private String postImagePath;
 
-    @NotNull(message = "User ID không được để trống")
+//    @NotNull(message = "User ID không được để trống")
     @JsonProperty("userId")
     private UUID userId;
 
     @JsonProperty("postStatusId")
     private UUID postStatusId;
 
-    @JsonProperty("postTypeId")
-    private UUID postTypeId;
+
+
 
     @JsonIgnore
     private Timestamp createdAt;

@@ -16,22 +16,19 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
+import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
+import tdc.edu.vn.project_mobile_be.dtos.requests.ProductCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.ProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.ProductResponseDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSizeResponseDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSupplierResponseDTO;
-import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
-import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
+import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -44,8 +41,6 @@ public class ProductController {
     private ProductService productService;
     @Autowired
     private ProductRepository productRepository;
-
-
 
 
     @Operation(summary = "Get all products by Category", description = "Retrieve all products by category with pagination support")
@@ -76,5 +71,20 @@ public class ProductController {
         ResponseData<PagedModel<EntityModel<ProductResponseDTO>>> responseData = new ResponseData<>(HttpStatus.OK, "Success", pagedModel);
 
         return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping(value = {"/product", "/product/"})
+    public ResponseEntity<ResponseData<?>> createProduct(
+            @Valid @RequestBody ProductCreateRequestDTO params,
+            BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            List<String> errorMessages = bindingResult.getFieldErrors().stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
+            throw new MultipleFieldsNullOrEmptyException(errorMessages);
+        }
+        Product product = productService.createProduct(params);
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Tạo Sản Phẩm Thành Công", product);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseData);
     }
 }
