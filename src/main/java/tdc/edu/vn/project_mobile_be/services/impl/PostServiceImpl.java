@@ -47,10 +47,8 @@ public class PostServiceImpl extends AbService<Post, UUID> implements PostServic
         return postRepository.save(post);
     }
 
-
-
-
     private PostStatus getStatus(UUID statusId) {
         return repository.findByPostStatusId((statusId)) != null ? repository.findByPostStatusId((statusId)) : null;
     }
+
 }

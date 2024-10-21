@@ -1,9 +1,12 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.commond.ProductSpecifications;
@@ -44,6 +47,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private PostRepository postRepository;
     @Autowired
     private PostStatusRepository postStatusRepository;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public Product createProduct(ProductCreateRequestDTO params) {
@@ -87,8 +92,18 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         // Lưu product vào cơ sở dữ liệu
         Product savedProduct = productRepository.save(product);
         // Trả về product đã lưu
+//        String productJson = convertProductToJson(savedProduct);
         return savedProduct;
     }
+
+//    private String convertProductToJson(Product product) {
+//        try {
+//            return new ObjectMapper().writeValueAsString(product);
+//        } catch (JsonProcessingException e) {
+//            // Xử lý exception
+//            return null;
+//        }
+//    }
 
     @Override
     public Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable) {

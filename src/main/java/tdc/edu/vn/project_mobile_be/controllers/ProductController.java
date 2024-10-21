@@ -5,12 +5,15 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -86,5 +89,22 @@ public class ProductController {
         Product product = productService.createProduct(params);
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Tạo Sản Phẩm Thành Công", product);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseData);
+    }
+
+    @Autowired
+    private RedisConnectionFactory redisConnectionFactory;
+
+    @PostConstruct
+    public void checkRedisConnection() {
+        try (RedisConnection connection = redisConnectionFactory.getConnection()) {
+            String response = connection.ping();
+            if ("PONG".equals(response)) {
+                System.out.println("Redis is running!");
+            } else {
+                System.err.println("Redis connection failed.");
+            }
+        } catch (Exception e) {
+            System.err.println("Error connecting to Redis: " + e.getMessage());
+        }
     }
 }
