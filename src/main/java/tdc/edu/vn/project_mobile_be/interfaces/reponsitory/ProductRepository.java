@@ -11,6 +11,8 @@ import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,9 +31,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
     Optional<Product> findByIdWithImages(@Param("productId") UUID productId);
 
 
-    @Query("SELECT p.sizes FROM Product p JOIN p.categories c WHERE c.categoryId = :categoryId")
-    List<ProductSize> findProductSizesByCategory(@Param("categoryId") UUID categoryId);
+    @Query("SELECT MAX(p.updatedAt) FROM Product p")
+    Timestamp getLatestUpdatedTimestamp();
 
-    @Query("SELECT DISTINCT p.supplier FROM Product p JOIN p.categories c WHERE c.categoryId = :categoryId")
-    List<ProductSupplier> findProductSuplierByCategory(@Param("categoryId") UUID categoryId);
 }

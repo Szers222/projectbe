@@ -12,5 +12,5 @@ import java.util.UUID;
 @NoArgsConstructor
 public class RemoveByIdRequestDTO {
     @JsonProperty("categoryId")
-    private UUID categoryId;
+    private UUID id;
 }

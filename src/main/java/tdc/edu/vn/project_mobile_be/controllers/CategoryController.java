@@ -19,7 +19,6 @@ import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.CategoryRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CategoryService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -65,7 +64,7 @@ public class CategoryController {
     @DeleteMapping({"/category/","/category"})
     public ResponseEntity<ResponseData<?>> deleteCategory(
             @RequestBody CategoryRemoveRequestDTO params) {
-        boolean isDeleted = categoryService.deleteCategory(params.getCategoryId());
+        boolean isDeleted = categoryService.deleteCategory(params.getId());
         if (isDeleted) {
             ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Category đã được xóa !", null);
             return new ResponseEntity<>(responseData, HttpStatus.OK);

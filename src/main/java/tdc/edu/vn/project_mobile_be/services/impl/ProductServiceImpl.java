@@ -1,13 +1,13 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.commond.ProductSpecifications;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
@@ -16,6 +16,7 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.NumberErrorException
 import tdc.edu.vn.project_mobile_be.dtos.requests.ProductCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.ProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.ProductUpdateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.cache.CachedPage;
 import tdc.edu.vn.project_mobile_be.dtos.responses.ProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
@@ -26,8 +27,7 @@ import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class ProductServiceImpl extends AbService<Product, UUID> implements ProductService {
@@ -47,6 +47,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private PostRepository postRepository;
     @Autowired
     private PostStatusRepository postStatusRepository;
+
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
@@ -91,8 +92,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
         // Lưu product vào cơ sở dữ liệu
         Product savedProduct = productRepository.save(product);
-        // Trả về product đã lưu
-//        String productJson = convertProductToJson(savedProduct);
+
         return savedProduct;
     }
 
@@ -105,8 +105,86 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 //        }
 //    }
 
+
+
+    @Override
+    public boolean deleteProduct(UUID productId) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if (productOptional.isEmpty()) {
+            throw new EntityNotFoundException("Product không tồn tại !");
+        }
+        Product product = productOptional.get();
+        productRepository.delete(product);
+        return true;
+    }
+
+    @Override
+    @CacheEvict(value = "products", allEntries = true)
+    public Product updateProduct(ProductUpdateRequestDTO params, UUID productId) {
+        LocalDateTime releaseDateTime;
+
+        // Kiểm tra nếu postRelease là null, dùng thời gian hiện tại
+        if (params.getPostDTO().getPostRelease() == null) {
+            releaseDateTime = LocalDateTime.now();
+        } else {
+            // Nếu có, dùng ngày phát hành được cung cấp, đặt vào đầu ngày
+            releaseDateTime = params.getPostDTO().getPostRelease().atStartOfDay();
+        }
+
+        // Chuyển đổi sang Timestamp
+        Timestamp releaseTimestamp = Timestamp.valueOf(releaseDateTime);
+
+        PostStatus status = postStatusRepository.findByPostStatusId(params.getPostDTO().getPostStatusId());
+
+
+        // Tạo đối tượng Post mới
+        Post post = new Post();
+        post.setPostId(UUID.randomUUID());
+        post.setPostRelease(releaseTimestamp);
+        post.setPostName(params.getPostDTO().getPostName());
+        post.setPostContent(params.getPostDTO().getPostContent());
+        post.setPostStatus(status);
+        // Lưu post vào cơ sở dữ liệu
+        Post savedPost = postRepository.save(post);
+
+        // Tạo đối tượng Product mới
+        Product product = productRepository.findByIdWithImages(productId).orElseThrow(() -> new EntityNotFoundException("Product not found"));
+        product.setProductName(params.getProductName()); // Đặt tên product
+        product.setProductPrice(params.getProductPrice()); // Đặt giá
+        product.setProductQuantity(params.getProductQuantity()); // Đặt số lượng
+        product.setProductYearOfManufacture(params.getProductYearOfManufacture()); // Đặt năm sản xuất
+
+        // Liên kết product với post vừa tạo
+        product.setPost(savedPost);
+
+        // Lưu product vào cơ sở dữ liệu
+        Product savedProduct = productRepository.save(product);
+        String cacheKey = "productUpdates";
+        redisTemplate.delete(cacheKey);
+        redisTemplate.convertAndSend("productUpdates", product.getProductId());
+        return savedProduct;
+    }
+
+
     @Override
     public Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable) {
+
+        String cacheKey = "productUpdates";
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        LinkedHashMap<?, ?> map = (LinkedHashMap<?, ?>) redisTemplate.opsForValue().get(cacheKey);
+
+        if (map != null) {
+            // Chuyển đổi từ map sang CachedPage
+            CachedPage<ProductResponseDTO> cachedPage = objectMapper.convertValue(map, CachedPage.class);
+            if (cachedPage != null) {
+                Page<ProductResponseDTO> page = new PageImpl<>(cachedPage.getContent(), pageable, cachedPage.getTotalElements());
+                return page;
+            }
+        } else {
+            System.console().printf("map: %s", "asdsadsadsadsada");
+        }
+
         Specification<Product> spec = Specification.where(null);  // Khởi tạo Specification rỗng
 
         // Lọc theo danh mục (category)
@@ -143,11 +221,10 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         if (params.getDirection() != null && params.getSort() != null) {
             spec = spec.and(ProductSpecifications.hasSort(params.getSort(), params.getDirection()));
         }
-        if (params.getSearch() == null || params.getSearch().isEmpty() || params.getSearch().isBlank()) {
-
-        }
         if (params.getSearch() != null) {
             spec = spec.and(ProductSpecifications.hasSearch(params.getSearch()));
+        } else {
+            spec = spec.and(ProductSpecifications.hasSearch(""));
         }
 
         // Truy vấn với các tiêu chí kết hợp
@@ -155,71 +232,24 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         if (products.isEmpty() || products.getSize() == 0) {
             throw new ListNotFoundException("Không tìm thấy sản phẩm");
         }
-
-        return products.map(product -> {
-            Product productWithImages = productRepository.findByIdWithImages(product.getProductId())
-                    .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-
-            ProductResponseDTO dto = new ProductResponseDTO();
-            dto.toDto(productWithImages);  // Mapping product with images to the DTO
-            return dto;
-        });
-    }
-
-    @Override
-    public boolean deleteProduct(UUID productId) {
-        Optional<Product> productOptional = productRepository.findById(productId);
-        if (productOptional.isEmpty()) {
-            throw new EntityNotFoundException("Product không tồn tại !");
+        Page<ProductResponseDTO> result = products.map(this::convertToDto);
+        System.console().printf("result: %s", result);
+        List<ProductResponseDTO> content = result.getContent();
+        if (content == null) {
+            content = Collections.emptyList(); // Hoặc xử lý theo logic của bạn
         }
-        Product product = productOptional.get();
-        productRepository.delete(product);
-        return true;
+        // Tạo CachedPage và lưu vào Redis
+        CachedPage<ProductResponseDTO> cachedPage = new CachedPage<>(content, result.getTotalElements(), result.getTotalPages(), result.getNumber(), result.getSize());
+
+        // Lưu vào Redis
+        redisTemplate.opsForValue().set(cacheKey, cachedPage);
+        return result;
     }
 
-    @Override
-    public Product updateProduct(ProductUpdateRequestDTO params, UUID productId) {
-        LocalDateTime releaseDateTime;
-
-        // Kiểm tra nếu postRelease là null, dùng thời gian hiện tại
-        if (params.getPostDTO().getPostRelease() == null) {
-            releaseDateTime = LocalDateTime.now();
-        } else {
-            // Nếu có, dùng ngày phát hành được cung cấp, đặt vào đầu ngày
-            releaseDateTime = params.getPostDTO().getPostRelease().atStartOfDay();
-        }
-
-        // Chuyển đổi sang Timestamp
-        Timestamp releaseTimestamp = Timestamp.valueOf(releaseDateTime);
-
-        PostStatus status = postStatusRepository.findByPostStatusId(params.getPostDTO().getPostStatusId());
-
-
-        // Tạo đối tượng Post mới
-        Post post = new Post();
-        post.setPostId(UUID.randomUUID());
-        post.setPostRelease(releaseTimestamp);
-        post.setPostName(params.getPostDTO().getPostName());
-        post.setPostContent(params.getPostDTO().getPostContent());
-        post.setPostStatus(status);
-        // Lưu post vào cơ sở dữ liệu
-        Post savedPost = postRepository.save(post);
-
-        // Tạo đối tượng Product mới
-        Product product = new Product();
-        product.setProductId(UUID.randomUUID()); // Tạo UUID cho product
-        product.setProductName(params.getProductName()); // Đặt tên product
-        product.setProductPrice(params.getProductPrice()); // Đặt giá
-        product.setProductQuantity(params.getProductQuantity()); // Đặt số lượng
-        product.setProductYearOfManufacture(params.getProductYearOfManufacture()); // Đặt năm sản xuất
-
-        // Liên kết product với post vừa tạo
-        product.setPost(savedPost);
-
-        // Lưu product vào cơ sở dữ liệu
-        Product savedProduct = productRepository.save(product);
-        // Trả về product đã lưu
-        return savedProduct;
+    private ProductResponseDTO convertToDto(Product product) {
+        Product productWithImages = productRepository.findByIdWithImages(product.getProductId()).orElseThrow(() -> new EntityNotFoundException("Product not found"));
+        ProductResponseDTO dto = new ProductResponseDTO();
+        dto.toDto(productWithImages);
+        return dto;
     }
-
 }

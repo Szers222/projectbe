@@ -52,7 +52,7 @@ public class ProductSpecifications implements Specification<Product> {
 
         return (root, query, cb) -> {
             // Join giữa Product và Category
-            Join<Product, ProductSupplier> suppliers = root.join("suplier", JoinType.INNER);
+            Join<Product, ProductSupplier> suppliers = root.join("supplier", JoinType.INNER);
             return cb.equal(suppliers.get("supplierId"), supplierId);
         };
     }
@@ -68,9 +68,9 @@ public class ProductSpecifications implements Specification<Product> {
             } else if (direction.equals("desc")) {
                 assert query != null;
                 query.orderBy(cb.desc(root.get(sort)));
-            } else if (sort.equals("productPriceSale")) {
+            } else if (sort.equals("productSale")) {
                 assert query != null;
-                query.orderBy(cb.desc(root.get("productPriceSale")));
+                query.orderBy(cb.desc(root.get("productSale")));
             }
             assert query != null;
             return query.getRestriction();

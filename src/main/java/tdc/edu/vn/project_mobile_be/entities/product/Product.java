@@ -12,6 +12,7 @@ import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
 import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
+import tdc.edu.vn.project_mobile_be.services.impl.DatabaseChangeListener;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import java.util.UUID;
 @Data
 @Table(name = "products")
 @Entity
+@EntityListeners(DatabaseChangeListener.class)
 @AllArgsConstructor
 @NoArgsConstructor
 @DynamicInsert
