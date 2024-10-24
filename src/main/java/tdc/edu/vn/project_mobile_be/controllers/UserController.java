@@ -1,6 +1,10 @@
 package tdc.edu.vn.project_mobile_be.controllers;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,16 +19,23 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users")
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserController {
 
     @Autowired
-    private UserService userService;
+    @Qualifier("user_ServiceImpl")
+    UserService userService;
 
 
     @PostMapping
     public ResponseEntity<ResponseData<?>> createUser(@RequestBody CreateUserRequestDTO createUserRequestDTO) {
+
         User createdUser = userService.createUser(createUserRequestDTO);
-        ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "User tạo thành công!", createdUser);
+        ResponseData<?> responseData = new ResponseData<>(
+                HttpStatus.CREATED
+                , "User tạo thành công!"
+                , createdUser);
         return new ResponseEntity<>(responseData, HttpStatus.CREATED);
     }
 
