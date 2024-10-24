@@ -86,6 +86,7 @@ public class ProductResponseDTO implements IDto<Product> {
 
 
 
+
         BeanUtils.copyProperties(entity, this, "createdAt", "updatedAt");
         this.productPrice = this.formatPrice(entity.getProductPrice());
         double productPriceSale = entity.getProductPrice() - (entity.getProductPrice() * this.productSale / 100);

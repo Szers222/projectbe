@@ -30,9 +30,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
     Optional<Product> findByIdWithImages(@Param("productId") UUID productId);
 
 
-    @Query("SELECT p.sizes FROM Product p JOIN p.categories c WHERE c.categoryId = :categoryId")
-    List<ProductSize> findProductSizesByCategory(@Param("categoryId") UUID categoryId);
 
-    @Query("SELECT DISTINCT p.supplier FROM Product p JOIN p.categories c WHERE c.categoryId = :categoryId")
-    List<ProductSupplier> findProductSuplierByCategory(@Param("categoryId") UUID categoryId);
+
+
+
 }
