@@ -102,9 +102,9 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         Specification<Product> spec = Specification.where(null);  // Khởi tạo Specification rỗng
 
         // Lọc theo danh mục (category)
-        if (params.getCategoryId() != null && categoryRepository.findById(params.getCategoryId()).isPresent()) {
-            spec = spec.and(ProductSpecifications.hasCategory(params.getCategoryId()));
-        }
+//        if (params.getCategoryId() != null && categoryRepository.findById(params.getCategoryId()).isPresent()) {
+//            spec = spec.and(ProductSpecifications.hasCategory(params.getCategoryId()));
+//        }
 
         // Lọc theo khoảng giá
         if (params.getMinPrice() != null && params.getMaxPrice() != null) {
@@ -119,9 +119,10 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         }
 
         // Lọc theo nhà cung cấp (supplier)
-        if (params.getSupplierId() != null && !productSupplierRepository.findById(params.getSupplierId()).isEmpty()) {
-            spec = spec.and(ProductSpecifications.hasSupplier(params.getSupplierId()));
+        if (params.getSupplierIds() != null && !params.getSupplierIds().isEmpty()) {
+            spec = spec.and(ProductSpecifications.hasSupplier(params.getSupplierIds()));
         }
+
         if (params.getDirection() != null && params.getSort() != null) {
             spec = spec.and(ProductSpecifications.hasSort(params.getSort(), params.getDirection()));
         }
