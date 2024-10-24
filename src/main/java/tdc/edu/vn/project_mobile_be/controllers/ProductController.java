@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import tdc.edu.vn.project_mobile_be.commond.Breadcrumb;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductCreateRequestDTO;
@@ -28,7 +29,9 @@ import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -86,6 +89,17 @@ public class ProductController {
         Product product = productService.createProduct(params);
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Tạo Sản Phẩm Thành Công", product);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseData);
+    }
+
+    @GetMapping("/products/{categoryId}/{productId}")
+    public ResponseEntity<List<Breadcrumb>> productDetail(@PathVariable UUID categoryId, @PathVariable UUID productId) {
+
+        List<Breadcrumb> breadcrumbs = new ArrayList<>();
+        breadcrumbs.add(new Breadcrumb("Trang chủ", "/"));
+        breadcrumbs.add(new Breadcrumb("Danh mục", "/categories/" + categoryId));
+        breadcrumbs.add(new Breadcrumb("Sản phẩm", "/products/" + categoryId + "/" + productId));
+
+        return new ResponseEntity<>(breadcrumbs, HttpStatus.OK);
     }
 
 
