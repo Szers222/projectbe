@@ -9,4 +9,6 @@ import java.util.UUID;
 
 @Repository
 public interface IdCardRepository extends JpaRepository<IdCard, UUID> {
+
+    IdCard findByCardId(UUID idCard);
 }

@@ -3,6 +3,7 @@ package tdc.edu.vn.project_mobile_be.entities.status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -24,13 +25,17 @@ import java.util.UUID;
 public class CartStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "cart_status_id", nullable = false,columnDefinition = "BINARY(16)")
+    @Column(name = "cart_status_id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID cartStatusId;
+
     @Column(name = "cart_status_type", nullable = false)
     private int cartStatusType;
+
     @Column(name = "cart_status_name", nullable = false)
     private String cartStatusName;
 
-    @OneToMany(mappedBy = "cartStatus" )
+    // Loại trừ trường 'carts' khỏi hashCode và equals để tránh lỗi đệ quy
+    @OneToMany(mappedBy = "cartStatus")
+    @EqualsAndHashCode.Exclude
     private Set<Cart> carts = new HashSet<>();
 }

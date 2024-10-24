@@ -1,6 +1,7 @@
 package tdc.edu.vn.project_mobile_be.dtos.requests;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 
 import java.sql.Timestamp;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -33,6 +35,7 @@ public class CreateUserRequestDTO {
     private String userPhone;
 
     @JsonProperty("userBirthday")
+    @Min(value = 1990, message = "")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Timestamp userBirthday;
 
@@ -64,9 +67,11 @@ public class CreateUserRequestDTO {
     @JsonProperty("userWrongPassword")
     private int userWrongPassword;
 
-    //@NotNull(message = "ID Card không được để trống")
-    @JsonProperty("iCard")
-    private IdCard iCard;
+    @JsonProperty("icardId")
+    private UUID iCardId;
+
+    @JsonProperty("statusId")
+    private UUID statusId;
 
     // Method to convert DTO to Entity
     public User toEntity() {
