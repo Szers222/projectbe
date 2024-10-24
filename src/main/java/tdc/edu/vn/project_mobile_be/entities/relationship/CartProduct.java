@@ -1,29 +1,34 @@
 package tdc.edu.vn.project_mobile_be.entities.relationship;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
-import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
 
-@Entity
-@Table(name = "carts_products")
+import java.util.UUID;
+
 @Data
-
+@Table(name = "cart_products")
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
 public class CartProduct {
-    @EmbeddedId
-    private CartProductId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "cart_product_id", nullable = false, columnDefinition = "BINARY(16)")
+    private UUID cartProductId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @MapsId("product_id")
-    @JoinColumn(name = "product_id")
-    private Product product;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @MapsId("cart_id")
-    @JoinColumn(name = "cart_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cart_id", nullable = false)
     private Cart cart;
 
-    @Column(name = "carts_products_quantity", nullable = false, columnDefinition = "int default 0")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
+    @Column(name = "quantity", nullable = false, columnDefinition = "int default 1")
     private int quantity;
+
+    @Column(name = "price", nullable = false)
+    private double price;
 }
