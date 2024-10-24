@@ -102,9 +102,9 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         Specification<Product> spec = Specification.where(null);  // Khởi tạo Specification rỗng
 
         // Lọc theo danh mục (category)
-//        if (params.getCategoryId() != null && categoryRepository.findById(params.getCategoryId()).isPresent()) {
-//            spec = spec.and(ProductSpecifications.hasCategory(params.getCategoryId()));
-//        }
+        if (params.getCategoryId() != null && categoryRepository.findById(params.getCategoryId()).isPresent()) {
+            spec = spec.and(ProductSpecifications.hasCategory(params.getCategoryId()));
+        }
 
         // Lọc theo khoảng giá
         if (params.getMinPrice() != null && params.getMaxPrice() != null) {
