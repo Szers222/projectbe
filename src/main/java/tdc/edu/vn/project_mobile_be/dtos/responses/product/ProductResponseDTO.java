@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import tdc.edu.vn.project_mobile_be.dtos.responses.category.CategoryResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.post.PostResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
@@ -37,7 +39,7 @@ public class ProductResponseDTO implements IDto<Product> {
     private double productRating;
     @JsonProperty("productSale")
     private double productSale;
-    @JsonIgnore
+    @JsonProperty("categories")
     private List<CategoryResponseDTO> categoryResponseDTO;
     @JsonProperty("productYearOfManufacture")
     private int productYearOfManufacture;
@@ -53,7 +55,8 @@ public class ProductResponseDTO implements IDto<Product> {
     private ProductSupplierResponseDTO supplier;
     @JsonProperty("productSizes")
     private List<ProductSizeResponseDTO> productSizeResponseDTOs;
-
+    @JsonProperty("post")
+    private PostResponseDTO postResponseDTO;
 
     @Override
     public Product toEntity() {
@@ -62,40 +65,41 @@ public class ProductResponseDTO implements IDto<Product> {
 
     @Override
     public void toDto(Product entity) {
-        this.productImageResponseDTOs = new ArrayList<>();
-        this.categoryResponseDTO = entity.getCategories().stream().map(category -> {
-            CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO();
-            categoryResponseDTO.toDto(category);
-            return categoryResponseDTO;
-        }).toList();
-        this.productSizeResponseDTOs = entity.getSizes().stream().map(productSize -> {
-            ProductSizeResponseDTO productSizeResponseDTO = new ProductSizeResponseDTO();
-            productSizeResponseDTO.toDto(productSize);
-            return productSizeResponseDTO;
-        }).toList();
-        ProductSupplierResponseDTO productSupplierResponse = new ProductSupplierResponseDTO();
-        productSupplierResponse.toDto(entity.getSupplier());
-        this.supplier = productSupplierResponse;
-
-
-        for (ProductImage productImage : entity.getImages()) {
-            ProductImageResponseDTO productImageResponseDTO = new ProductImageResponseDTO();
-            productImageResponseDTO.toDto(productImage);
-            productImageResponseDTOs.add(productImageResponseDTO);
-        }
-
-
+//        this.productImageResponseDTOs = new ArrayList<>();
+//
+//        this.categoryResponseDTO = entity.getCategories().stream().map(category -> {
+//            CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO();
+//            categoryResponseDTO.toDto(category);
+//            return categoryResponseDTO;
+//        }).toList();
+//
+//        this.productSizeResponseDTOs = entity.getSizes().stream().map(productSize -> {
+//            ProductSizeResponseDTO productSizeResponseDTO = new ProductSizeResponseDTO();
+//            productSizeResponseDTO.toDto(productSize);
+//            return productSizeResponseDTO;
+//        }).toList();
+//
+//        ProductSupplierResponseDTO productSupplierResponse = new ProductSupplierResponseDTO();
+//        productSupplierResponse.toDto(entity.getSupplier());
+//        this.supplier = productSupplierResponse;
+//
+//
+//        for (ProductImage productImage : entity.getImages()) {
+//            ProductImageResponseDTO productImageResponseDTO = new ProductImageResponseDTO();
+//            productImageResponseDTO.toDto(productImage);
+//            productImageResponseDTOs.add(productImageResponseDTO);
+//        }
+//
+//        PostResponseDTO postResponseDTO = new PostResponseDTO();
+//        postResponseDTO.toDto(entity.getPost());
+//        this.postResponseDTO = postResponseDTO;
 
 
         BeanUtils.copyProperties(entity, this, "createdAt", "updatedAt");
-        this.productPrice = this.formatPrice(entity.getProductPrice());
-        double productPriceSale = entity.getProductPrice() - (entity.getProductPrice() * this.productSale / 100);
-        this.productPriceSale = this.formatPrice(productPriceSale);
+//        this.productPrice = this.formatPrice(entity.getProductPrice());
+//        double productPriceSale = entity.getProductPrice() - (entity.getProductPrice() * this.productSale / 100);
+//        this.productPriceSale = this.formatPrice(productPriceSale);
     }
 
-    public static String formatPrice(double price) {
-        NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-        format.setRoundingMode(RoundingMode.HALF_EVEN);
-        return format.format(price);
-    }
+
 }
