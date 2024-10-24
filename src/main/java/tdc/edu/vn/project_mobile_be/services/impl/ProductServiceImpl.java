@@ -18,6 +18,7 @@ import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSizeResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSupplierResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.category.CategoryResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.post.PostResponseDTO;
+import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
@@ -80,13 +81,21 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         // Lưu post vào cơ sở dữ liệu
         Post savedPost = postRepository.save(post);
 
+        Set<Category> categories = new HashSet<>();
+
+        for (UUID categoryId : params.getCategoryId()) {
+            Category category = categoryRepository.findByCategoryId(categoryId);
+            categories.add(category);
+        }
+
         // Tạo đối tượng Product mới
         Product product = new Product();
         product.setProductId(UUID.randomUUID()); // Tạo UUID cho product
         product.setProductName(params.getProductName()); // Đặt tên product
         product.setProductPrice(params.getProductPrice()); // Đặt giá
         product.setProductQuantity(params.getProductQuantity()); // Đặt số lượng
-        product.setProductYearOfManufacture(params.getProductYearOfManufacture()); // Đặt năm sản xuất
+        product.setProductYearOfManufacture(params.getProductYearOfManufacture());
+        product.setCategories(categories);// Đặt năm sản xuất
 
         // Liên kết product với post vừa tạo
         product.setPost(savedPost);
