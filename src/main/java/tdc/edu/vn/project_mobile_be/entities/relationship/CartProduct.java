@@ -13,22 +13,19 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CartProduct {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "cart_product_id", nullable = false, columnDefinition = "BINARY(16)")
-    private UUID cartProductId;
 
+    @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
+    @EqualsAndHashCode.Exclude
     private Cart cart;
-
+    @Id
     @ManyToOne(fetch = FetchType.LAZY)
+    @EqualsAndHashCode.Exclude
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
     @Column(name = "quantity", nullable = false, columnDefinition = "int default 1")
     private int quantity;
 
-    @Column(name = "price", nullable = false)
-    private double price;
 }

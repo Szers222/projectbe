@@ -1,13 +1,20 @@
 package tdc.edu.vn.project_mobile_be.dtos.requests;
 
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.util.UUID;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CartRequestDTO {
-    private UUID userId;
-    private UUID productId;
-    private int quantity;
+    UUID userId;
+    UUID productId;
+    int quantity;
+    // Default value for cartStatusId
+    UUID cartStatusId = UUID.fromString("00000000-0000-0000-0000-000000000000");
 }
 

@@ -30,9 +30,12 @@ public class Cart {
 
     @Column(name = "user_id", nullable = false)
     private UUID userId;
+
     @ManyToOne
     @JoinColumn(name = "cart_status_id")
+    @EqualsAndHashCode.Exclude // Loại trừ khỏi hashCode và equals
     private CartStatus cartStatus;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
@@ -41,6 +44,7 @@ public class Cart {
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
 
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CartProduct> cartProducts = new HashSet<>();
 }
