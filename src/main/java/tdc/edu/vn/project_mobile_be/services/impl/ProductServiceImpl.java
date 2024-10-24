@@ -40,7 +40,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     public final int PRODUCT_CLOTHES = 0;
     public final int PRODUCT_SHOES = 1;
     public final int PRODUCT_ACCESSORIES = 2;
-
+    private final int PRODUCT_RELATE_SIZE = 6;
 
     @Autowired
     private ProductRepository productRepository;
@@ -266,6 +266,86 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         // Trả về product đã lưu
         return savedProduct;
     }
+
+    @Override
+    public Page<ProductResponseDTO> findProductRelate(UUID categoryId, Pageable pageable) {
+        Page<Product> productPage = productRepository.findByIdWithCategories(categoryId, pageable);
+        if (productPage.isEmpty()) {
+            throw new ListNotFoundException("Product không tồn tại !");
+        }
+        if (productPage.getContent().size() < PRODUCT_RELATE_SIZE) {
+            List<Product> products = productRepository.findAll();
+            for (Product product : products) {
+                if (productPage.getContent().size() == PRODUCT_RELATE_SIZE) {
+                    break;
+                }
+                productPage.getContent().add(product);
+            }
+        }
+        return productPage.map(product -> {
+            double price = product.getProductPrice();
+            if (price < 0) {
+                throw new NumberErrorException("Price must be greater than 0");
+            }
+
+            List<CategoryResponseDTO> categoryResponseDTOs = convertToDTOList(
+                    product.getCategories() != null ?
+                            product.getCategories().stream().collect(Collectors.toList())
+                            : Collections.emptyList(),
+                    category -> {
+                        CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO();
+                        categoryResponseDTO.toDto(category);
+                        return categoryResponseDTO;
+                    }
+            );
+
+            List<ProductImageResponseDTO> productImageResponseDTOS = convertToDTOList(
+                    product.getImages() != null ?
+                            product.getImages().stream().collect(Collectors.toList())
+                            : Collections.emptyList(),
+                    productImage -> {
+                        ProductImageResponseDTO productImageResponseDTO = new ProductImageResponseDTO();
+                        productImageResponseDTO.toDto(productImage);
+                        return productImageResponseDTO;
+                    }
+            );
+
+            List<ProductSizeResponseDTO> productSizeResponseDTOS = convertToDTOList(
+                    product.getSizes() != null ?
+                            product.getSizes().stream().collect(Collectors.toList())
+                            : Collections.emptyList(),
+                    productSize -> {
+                        ProductSizeResponseDTO productSizeResponseDTO = new ProductSizeResponseDTO();
+                        productSizeResponseDTO.toDto(productSize);
+                        return productSizeResponseDTO;
+                    }
+            );
+
+            ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
+            if (product.getSupplier() != null) {
+                productSupplierResponseDTO.toDto(product.getSupplier());
+            }
+
+            PostResponseDTO postResponseDTO = new PostResponseDTO();
+            if (product.getPost() != null) {
+                postResponseDTO.toDto(product.getPost());
+            }
+
+            ProductResponseDTO dto = new ProductResponseDTO();
+            dto.toDto(product);
+            dto.setProductPrice(formatPrice(product.getProductPrice()));
+            dto.setProductPriceSale(formatPrice(price - (price * dto.getProductSale() / 100)));
+            dto.setCategoryResponseDTO(categoryResponseDTOs);
+            dto.setProductSizeResponseDTOs(productSizeResponseDTOS);
+            dto.setSupplier(productSupplierResponseDTO);
+            dto.setPostResponseDTO(postResponseDTO);
+            dto.setProductImageResponseDTOs(productImageResponseDTOS);
+            return dto;
+        });
+
+    }
+
+
 
     public String formatPrice(double price) {
         NumberFormat format = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN"));

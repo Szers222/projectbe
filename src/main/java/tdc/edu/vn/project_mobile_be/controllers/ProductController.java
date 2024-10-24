@@ -7,10 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -28,7 +25,7 @@ import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -86,6 +83,34 @@ public class ProductController {
         Product product = productService.createProduct(params);
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Tạo Sản Phẩm Thành Công", product);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseData);
+    }
+
+    @GetMapping(value = {"/products/{categoryId}", "/product/{categoryId}/"})
+    public ResponseEntity<ResponseData<PagedModel<EntityModel<ProductResponseDTO>>>> getProductsByCategory(
+            @PathVariable("categoryId") UUID categoryId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            PagedResourcesAssembler<ProductResponseDTO> assembler) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("productSale").descending());
+        Page<ProductResponseDTO> productDtoPage = productService.findProductRelate(categoryId, pageable);
+        if (productDtoPage.isEmpty()) {
+            ResponseData<PagedModel<EntityModel<ProductResponseDTO>>> responseData = new ResponseData<>(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm", null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseData);
+        }
+        List<ProductResponseDTO> list = productDtoPage.getContent();
+        if (list.isEmpty()) {
+            ResponseData<PagedModel<EntityModel<ProductResponseDTO>>> responseData = new ResponseData<>(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm", null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseData);
+        }
+        List<ProductResponseDTO> listRnd = new ArrayList<>(list);
+
+        Collections.shuffle(listRnd, new Random());
+        listRnd = listRnd.subList(0, Math.min(listRnd.size(), 6));
+
+        PagedModel<EntityModel<ProductResponseDTO>> pagedModel = assembler.toModel(new PageImpl<>(listRnd, pageable, listRnd.size()));
+        ResponseData<PagedModel<EntityModel<ProductResponseDTO>>> responseData = new ResponseData<>(HttpStatus.OK, "Success", pagedModel);
+        return ResponseEntity.ok(responseData);
     }
 
 
