@@ -21,8 +21,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
-import tdc.edu.vn.project_mobile_be.dtos.requests.ProductCreateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.ProductRequestParamsDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.ProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
@@ -87,4 +87,6 @@ public class ProductController {
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Tạo Sản Phẩm Thành Công", product);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseData);
     }
+
+
 }

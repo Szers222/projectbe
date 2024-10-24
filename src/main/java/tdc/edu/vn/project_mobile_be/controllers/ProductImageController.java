@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
-import tdc.edu.vn.project_mobile_be.dtos.requests.CreateProductImageRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.ProductImageResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductImageRepository;
@@ -26,7 +26,7 @@ public class ProductImageController {
 
     @PostMapping(value = {"/product-image", "/product-image/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseData<?>> createProducImage(@RequestParam("product-id") UUID productId, @RequestParam("image-alt") String imageAlt, @RequestParam("file") MultipartFile file) {
-        CreateProductImageRequestDTO createProductImageRequestDTO = new CreateProductImageRequestDTO();
+        ProductImageCreateRequestDTO createProductImageRequestDTO = new ProductImageCreateRequestDTO();
         createProductImageRequestDTO.setProductId(productId);
         createProductImageRequestDTO.setImageAlt(imageAlt);
 

@@ -1,4 +1,4 @@
-package tdc.edu.vn.project_mobile_be.dtos.requests;
+package tdc.edu.vn.project_mobile_be.dtos.requests.productimage;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
@@ -17,7 +16,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateProductImageRequestDTO implements IDto<ProductImage> {
+public class ProductImageCreateRequestDTO implements IDto<ProductImage> {
 
     @JsonIgnore
     private String imagePath;

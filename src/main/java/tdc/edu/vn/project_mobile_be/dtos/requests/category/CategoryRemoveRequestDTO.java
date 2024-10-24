@@ -1,9 +1,7 @@
-package tdc.edu.vn.project_mobile_be.dtos.requests;
+package tdc.edu.vn.project_mobile_be.dtos.requests.category;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import tdc.edu.vn.project_mobile_be.dtos.requests.RemoveByIdRequestDTO;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
