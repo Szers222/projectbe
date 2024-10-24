@@ -2,6 +2,7 @@ package tdc.edu.vn.project_mobile_be.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -270,18 +271,20 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Override
     public Page<ProductResponseDTO> findProductRelate(UUID categoryId, Pageable pageable) {
         Page<Product> productPage = productRepository.findByIdWithCategories(categoryId, pageable);
-        if (productPage.isEmpty()) {
-            throw new ListNotFoundException("Product không tồn tại !");
-        }
-        if (productPage.getContent().size() < PRODUCT_RELATE_SIZE) {
-            List<Product> products = productRepository.findAll();
-            for (Product product : products) {
-                if (productPage.getContent().size() == PRODUCT_RELATE_SIZE) {
+
+        if (productPage.getContent().size() < PRODUCT_RELATE_SIZE || (productPage.isEmpty())) {
+            List<Product> products = new ArrayList<>(productPage.getContent());
+
+            for (Product product : productRepository.findAll()) {
+                if (products.size() == PRODUCT_RELATE_SIZE) {
                     break;
                 }
-                productPage.getContent().add(product);
+                Collections.shuffle(products, new Random());
+                products.add(product);
+                productPage = new PageImpl<>(products, pageable, products.size());
             }
         }
+
         return productPage.map(product -> {
             double price = product.getProductPrice();
             if (price < 0) {
