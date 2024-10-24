@@ -9,16 +9,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.dtos.requests.post.PostCreateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.category.CategoryResponseDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductImageResponseDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSizeResponseDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSupplierResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Set;
+import java.util.UUID;
 
 
 @Data
@@ -41,9 +38,6 @@ public class ProductCreateRequestDTO implements IDto<Product> {
     @JsonProperty("productSale")
     private double productSale;
 
-    @JsonIgnore
-    private List<CategoryResponseDTO> categoryResponseDTO;
-
     @Min(value = 1900, message = "ProductYearOfManufacture không hợp lệ")
     @JsonProperty("productYearOfManufacture")
     private int productYearOfManufacture;
@@ -54,14 +48,17 @@ public class ProductCreateRequestDTO implements IDto<Product> {
     @JsonIgnore
     private Timestamp updatedAt;
 
-    @JsonIgnore
-    private Set<ProductImageResponseDTO> productImageResponseDTOs;
+    @JsonProperty("productImages")
+    private List<ProductImageCreateRequestDTO> productImageResponseDTOs;
 
-    @JsonIgnore
-    private ProductSupplierResponseDTO supplier;
+    @JsonProperty("productSizes")
+    private List<UUID> sizeIds;
 
-    @JsonIgnore
-    private List<ProductSizeResponseDTO> productSizeResponseDTOs;
+    @JsonProperty("productSupplier")
+    private UUID supplierId;
+
+    @JsonProperty("categories")
+    private List<UUID> categoryId;
 
     @JsonProperty("postDTO")
     private PostCreateRequestDTO postDTO;
