@@ -1,4 +1,4 @@
-package tdc.edu.vn.project_mobile_be.dtos.requests;
+package tdc.edu.vn.project_mobile_be.dtos.requests.product;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,7 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import tdc.edu.vn.project_mobile_be.dtos.responses.CategoryResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.post.PostCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.category.CategoryResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.ProductImageResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSizeResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSupplierResponseDTO;

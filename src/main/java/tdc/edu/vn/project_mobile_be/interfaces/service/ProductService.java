@@ -2,10 +2,10 @@ package tdc.edu.vn.project_mobile_be.interfaces.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import tdc.edu.vn.project_mobile_be.dtos.requests.ProductCreateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.ProductRequestParamsDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.ProductUpdateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductRequestParamsDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductUpdateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.interfaces.IService;
 

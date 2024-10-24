@@ -1,4 +1,4 @@
-package tdc.edu.vn.project_mobile_be.dtos.requests;
+package tdc.edu.vn.project_mobile_be.dtos.requests.product;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

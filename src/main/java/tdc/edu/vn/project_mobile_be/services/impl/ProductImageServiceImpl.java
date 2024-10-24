@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.FileEmptyException;
-import tdc.edu.vn.project_mobile_be.dtos.requests.CreateProductImageRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.ProductImageResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
@@ -19,7 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -44,7 +43,7 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
     }
 
     @Override
-    public ProductImage create(CreateProductImageRequestDTO createProductImageRequestDTO, MultipartFile file) {
+    public ProductImage create(ProductImageCreateRequestDTO createProductImageRequestDTO, MultipartFile file) {
         if (createProductImageRequestDTO.getProductId() != null) {
             Optional<Product> productOptional = productRepository.findById(createProductImageRequestDTO.getProductId());
             if (productOptional.isEmpty()) {

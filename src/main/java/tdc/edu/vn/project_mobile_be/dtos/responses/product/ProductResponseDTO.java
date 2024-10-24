@@ -1,4 +1,4 @@
-package tdc.edu.vn.project_mobile_be.dtos.responses;
+package tdc.edu.vn.project_mobile_be.dtos.responses.product;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -7,6 +7,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import tdc.edu.vn.project_mobile_be.dtos.responses.ProductImageResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSizeResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSupplierResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.category.CategoryResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
@@ -83,8 +87,6 @@ public class ProductResponseDTO implements IDto<Product> {
             productImageResponseDTO.toDto(productImage);
             productImageResponseDTOs.add(productImageResponseDTO);
         }
-
-
 
         BeanUtils.copyProperties(entity, this, "createdAt", "updatedAt");
         this.productPrice = this.formatPrice(entity.getProductPrice());
