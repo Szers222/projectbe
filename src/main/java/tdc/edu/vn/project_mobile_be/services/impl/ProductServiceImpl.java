@@ -107,9 +107,12 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         }
 
         // Lọc theo khoảng giá
-        if (this.validatePriceRange(params.getMinPrice(), params.getMaxPrice()) == false) {
-            spec = spec.and(ProductSpecifications.priceBetween(params.getMinPrice(), params.getMaxPrice()));
+        if (params.getMinPrice() != null && params.getMaxPrice() != null) {
+            if (this.validatePriceRange(params.getMinPrice(), params.getMaxPrice()) == false) {
+                spec = spec.and(ProductSpecifications.priceBetween(params.getMinPrice(), params.getMaxPrice()));
+            }
         }
+
         // Lọc theo kích thước
         if (params.getSizeIds() != null && !params.getSizeIds().isEmpty()) {
             spec = spec.and(ProductSpecifications.hasSizes(params.getSizeIds()));
