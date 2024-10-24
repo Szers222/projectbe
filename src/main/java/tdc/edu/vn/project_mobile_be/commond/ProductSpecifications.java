@@ -17,13 +17,13 @@ public class ProductSpecifications implements Specification<Product> {
 
     private static final Logger logger = LoggerFactory.getLogger(ProductSpecifications.class);
 
-//    public static Specification<Product> hasCategory(UUID categoryId) {
-//        return (root, query, cb) -> {
-//            // Join giữa Product và Category
-//            Join<Product, Category> categories = root.join("categories", JoinType.INNER);
-//            return cb.equal(categories.get("categoryId"), categoryId);
-//        };
-//    }
+    public static Specification<Product> hasCategory(UUID categoryId) {
+        return (root, query, cb) -> {
+            // Join giữa Product và Category
+            Join<Product, Category> categories = root.join("categories", JoinType.INNER);
+            return cb.equal(categories.get("categoryId"), categoryId);
+        };
+    }
 
     public static Specification<Product> hasSearch(String search) {
         String likePattern = "%" + search + "%";
