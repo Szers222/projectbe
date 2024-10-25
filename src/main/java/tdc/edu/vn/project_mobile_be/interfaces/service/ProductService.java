@@ -19,4 +19,6 @@ public interface ProductService extends IService<Product, UUID> {
     boolean deleteProduct(UUID productId);
 
     Product updateProduct(ProductUpdateRequestDTO params, UUID productId);
+
+
 }

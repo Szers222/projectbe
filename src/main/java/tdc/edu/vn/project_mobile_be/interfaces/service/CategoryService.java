@@ -10,6 +10,7 @@ import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.interfaces.IService;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface CategoryService extends IService<Category, UUID> {
@@ -21,4 +22,6 @@ public interface CategoryService extends IService<Category, UUID> {
     boolean deleteCategory(UUID id);
 
     Category updateCategory(CategoryUpdateRequestDTO category,UUID id);
+
+
 }

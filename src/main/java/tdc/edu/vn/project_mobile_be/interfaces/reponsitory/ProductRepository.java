@@ -26,12 +26,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
     Product save(Product product);
 
     @Query("SELECT p FROM Product p LEFT JOIN FETCH p.images i WHERE p.productId = :productId ORDER BY i.productImageIndex ASC")
+
     Optional<Product> findByIdWithImages(@Param("productId") UUID productId);
 
-
-    @Query("SELECT p.sizes FROM Product p JOIN p.categories c WHERE c.categoryId = :categoryId")
-    List<ProductSize> findProductSizesByCategory(@Param("categoryId") UUID categoryId);
-
-    @Query("SELECT DISTINCT p.supplier FROM Product p JOIN p.categories c WHERE c.categoryId = :categoryId")
-    List<ProductSupplier> findProductSuplierByCategory(@Param("categoryId") UUID categoryId);
 }
