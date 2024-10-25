@@ -12,6 +12,7 @@ public enum ErrorCode {
     PASSWORD_EXISTED(1004, "Pass phải có ít nhất 8 ký tự và tối đa 20"),
     INVALID_KEY(1001,"invalid message key"),
     USER_NOT_EXISTED(1002,"Email khong ton tai"),
+    UNAUTHENTICATED(1005,"unauthenticated user"),
 
     ;
 
