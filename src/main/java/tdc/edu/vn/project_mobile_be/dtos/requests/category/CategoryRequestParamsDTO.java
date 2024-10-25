@@ -1,4 +1,4 @@
-package tdc.edu.vn.project_mobile_be.dtos.requests;
+package tdc.edu.vn.project_mobile_be.dtos.requests.category;
 
 
 import lombok.AllArgsConstructor;

@@ -10,16 +10,15 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
-import tdc.edu.vn.project_mobile_be.dtos.requests.CategoryCreateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.CategoryRemoveRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.CategoryRequestParamsDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.CategoryUpdateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.CategoryResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.category.CategoryCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.category.CategoryRemoveRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.category.CategoryRequestParamsDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.category.CategoryUpdateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.category.CategoryResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.CategoryRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CategoryService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -74,10 +73,10 @@ public class CategoryController {
         return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
     }
 
-    @PutMapping({"/category", "/category/"})
+    @PutMapping({"/category/{categoryId}", "/category/"})
     public ResponseEntity<ResponseData<?>> updateCategory(
             @RequestBody @Valid CategoryUpdateRequestDTO params,
-            @RequestParam("categoryId") UUID categoryId,
+            @PathVariable UUID categoryId,
             BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {

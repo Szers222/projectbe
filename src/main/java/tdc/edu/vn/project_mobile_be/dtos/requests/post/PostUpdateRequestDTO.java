@@ -1,5 +1,4 @@
-package tdc.edu.vn.project_mobile_be.dtos.requests;
-
+package tdc.edu.vn.project_mobile_be.dtos.requests.post;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -22,7 +21,8 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostCreateRequestDTO implements IDto<Post> {
+public class PostUpdateRequestDTO implements IDto<Post> {
+
 
     @NotBlank
     @NotNull(message = "Tên Bài Viết không được để trống")
@@ -40,23 +40,20 @@ public class PostCreateRequestDTO implements IDto<Post> {
     @JsonProperty("postImagePath")
     private String postImagePath;
 
-//    @NotNull(message = "User ID không được để trống")
-    @JsonProperty("userId")
-    private UUID userId;
+    @JsonProperty("postType")
+    private int postType;
 
     @JsonProperty("postStatusId")
     private UUID postStatusId;
 
-
-
-
+    @JsonIgnore
+    private UUID userId;
     @JsonIgnore
     private Timestamp createdAt;
     @JsonIgnore
     private Timestamp updatedAt;
     @JsonIgnore
     private Product product;
-
 
     @Override
     public Post toEntity() {
@@ -67,6 +64,6 @@ public class PostCreateRequestDTO implements IDto<Post> {
 
     @Override
     public void toDto(Post entity) {
-        throw new UnsupportedOperationException("Unimplemented method 'toDTO' in CreatePostRequestDTO");
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
