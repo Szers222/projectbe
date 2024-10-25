@@ -16,6 +16,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -45,7 +46,11 @@ public class ProductController {
     private ProductService productService;
     @Autowired
     private ProductRepository productRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
+    public ProductController(SimpMessagingTemplate messagingTemplate) {
+        this.messagingTemplate = messagingTemplate;
+    }
 
     @Operation(summary = "Get all products by Category", description = "Retrieve all products by category with pagination support")
     @ApiResponses(value = {
@@ -105,6 +110,7 @@ public class ProductController {
         }
         Product product = productService.updateProduct(params, productId);
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Cập nhật sản phẩm thành công", product);
+        messagingTemplate.convertAndSend("/topic/products", product);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseData);
     }
 

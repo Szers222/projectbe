@@ -161,7 +161,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         Product savedProduct = productRepository.save(product);
         String cacheKey = "productUpdates";
         redisTemplate.delete(cacheKey);
-        redisTemplate.convertAndSend("productUpdates", product.getProductId());
+        redisTemplate.convertAndSend("/topic/products", product);
         return savedProduct;
     }
 
@@ -233,16 +233,15 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             throw new ListNotFoundException("Không tìm thấy sản phẩm");
         }
         Page<ProductResponseDTO> result = products.map(this::convertToDto);
-        System.console().printf("result: %s", result);
         List<ProductResponseDTO> content = result.getContent();
-        if (content == null) {
-            content = Collections.emptyList(); // Hoặc xử lý theo logic của bạn
-        }
-        // Tạo CachedPage và lưu vào Redis
-        CachedPage<ProductResponseDTO> cachedPage = new CachedPage<>(content, result.getTotalElements(), result.getTotalPages(), result.getNumber(), result.getSize());
-
-        // Lưu vào Redis
-        redisTemplate.opsForValue().set(cacheKey, cachedPage);
+//        if (content == null) {
+//            content = Collections.emptyList();
+//        }
+//        // Tạo CachedPage và lưu vào Redis
+//        CachedPage<ProductResponseDTO> cachedPage = new CachedPage<>(content, result.getTotalElements(), result.getTotalPages(), result.getNumber(), result.getSize());
+//
+//        // Lưu vào Redis
+//        redisTemplate.opsForValue().set(cacheKey, cachedPage);
         return result;
     }
 
