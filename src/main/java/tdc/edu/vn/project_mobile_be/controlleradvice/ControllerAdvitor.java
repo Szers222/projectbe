@@ -83,6 +83,7 @@ public class ControllerAdvitor extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
     }
 
+
     @ExceptionHandler(ReleaseException.class)
     public ResponseEntity<Object> handleReleaseException(
             ReleaseException ex, WebRequest request) {

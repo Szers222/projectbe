@@ -159,4 +159,5 @@ public class PostServiceImpl extends AbService<Post, UUID> implements PostServic
             postResponseDTO.toDto(post);
         });
     }
+
 }

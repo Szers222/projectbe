@@ -27,7 +27,9 @@ public class PostController {
     private PostService postService;
 
     @PostMapping(value = {"/post", "/post/"})
-    public ResponseEntity<ResponseData<?>> createPost(@RequestBody @Valid PostCreateRequestDTO params, BindingResult bindingResult) {
+    public ResponseEntity<ResponseData<?>> createPost(
+            @RequestBody @Valid PostCreateRequestDTO params,
+            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<String> errorMessages = bindingResult.getFieldErrors().stream()
                     .map(FieldError::getDefaultMessage)
