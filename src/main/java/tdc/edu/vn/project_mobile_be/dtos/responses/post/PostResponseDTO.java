@@ -8,13 +8,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
-import tdc.edu.vn.project_mobile_be.entities.post.PostComment;
 import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
-import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
 import java.sql.Timestamp;
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -32,12 +29,12 @@ public class PostResponseDTO implements IDto<Post> {
     private String postImagePath;
     @JsonProperty("postType")
     private int postType;
-    @JsonProperty("userId")
-    private User user;
-    @JsonProperty("postStatusId")
+    @JsonProperty("userName")
+    private String userName;
+    @JsonProperty("postStatus")
     private PostStatus postStatus;
-    @JsonProperty("postComment")
-    private List<PostComment> postCommentList;
+//    @JsonProperty("postComment")
+//    private List<PostComment> postCommentList;
 
     @JsonIgnore
     private UUID postId;
@@ -55,7 +52,9 @@ public class PostResponseDTO implements IDto<Post> {
     }
 
     @Override
+
     public void toDto(Post entity) {
+        this.userName = entity.getUser().getUserFirstName() + " " + entity.getUser().getUserLastName();
         BeanUtils.copyProperties(entity, this, "createdAt", "updatedAt");
     }
 }
