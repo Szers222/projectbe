@@ -19,6 +19,7 @@ import tdc.edu.vn.project_mobile_be.dtos.responses.post.PostResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
@@ -50,6 +51,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private PostRepository postRepository;
     @Autowired
     private PostStatusRepository postStatusRepository;
+    @Autowired
+    private SizeProductRepository sizeProductRepository;
 
     @Override
     public Product createProduct(ProductCreateRequestDTO params) {
@@ -369,17 +372,23 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
                     return productImageResponseDTO;
                 }
         );
+        List<SizeProduct> sizeProducts = sizeProductRepository.findByProductId(productId);
 
-        List<ProductSizeResponseDTO> productSizeResponseDTOS = convertToDTOList(
-                product.getSizeProducts() != null ?
-                        product.getSizeProducts().stream().collect(Collectors.toList())
-                        : Collections.emptyList(),
-                productSize -> {
+        List<ProductSizeResponseDTO> productSizeResponseDTOS = product.getSizeProducts().stream()
+                .map(productSize -> {
                     ProductSizeResponseDTO productSizeResponseDTO = new ProductSizeResponseDTO();
                     productSizeResponseDTO.toDto(productSize.getSize());
+                    sizeProducts.stream()
+                            .filter(sizeProduct -> sizeProduct.getSize().getProductSizeId().equals(productSize.getSize().getProductSizeId()))
+                            .forEach(sizeProduct -> {
+                                SizeProductResponseDTO sizeProductDTO = new SizeProductResponseDTO();
+                                sizeProductDTO.toDto(sizeProduct);
+                                sizeProductDTO.setProductSizeQuantity(sizeProduct.getQuantity());
+                                productSizeResponseDTO.setSizeProductResponseDTOs(sizeProductDTO);
+                            });
                     return productSizeResponseDTO;
-                }
-        );
+                })
+                .collect(Collectors.toList());
 
         ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
         if (product.getSupplier() != null) {
@@ -391,16 +400,17 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             postResponseDTO.toDto(product.getPost());
         }
 
-        ProductResponseDTO dto = new ProductResponseDTO();
-        dto.toDto(product);
-        dto.setProductPrice(formatPrice(product.getProductPrice()));
-        dto.setProductPriceSale(formatPrice(price - (price * dto.getProductSale() / 100)));
-        dto.setCategoryResponseDTO(categoryResponseDTOs);
-        dto.setProductSizeResponseDTOs(productSizeResponseDTOS);
-        dto.setSupplier(productSupplierResponseDTO);
-        dto.setPostResponseDTO(postResponseDTO);
-        dto.setProductImageResponseDTOs(productImageResponseDTOS);
-        return dto;
+        ProductResponseDTO productDTO = new ProductResponseDTO();
+        productDTO.toDto(product);
+        productDTO.setProductPrice(formatPrice(product.getProductPrice()));
+        productDTO.setProductPriceSale(formatPrice(price - (price * productDTO.getProductSale() / 100)));
+        productDTO.setCategoryResponseDTO(categoryResponseDTOs);
+        productDTO.setProductSizeResponseDTOs(productSizeResponseDTOS);
+        productDTO.setSupplier(productSupplierResponseDTO);
+        productDTO.setPostResponseDTO(postResponseDTO);
+        productDTO.setProductImageResponseDTOs(productImageResponseDTOS);
+
+        return productDTO;
     }
 
 

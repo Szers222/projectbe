@@ -12,7 +12,6 @@ import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductSizeRepository
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.SizeProductRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductSizeService;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -39,9 +38,6 @@ public class ProductSizeServiceImpl extends AbService<ProductSize, UUID> impleme
         if (productSizes.isEmpty()) {
             throw new EntityNotFoundException("Product size not found");
         }
-        List<SizeProduct> sizeProduct = sizeProductRepository.findByProductId(productIds);
-        System.console().printf("sizeProduct: %s", sizeProduct);
-
         return productSizes.stream().map(productSize -> {
             ProductSizeResponseDTO dto = new ProductSizeResponseDTO();
             dto.toDto(productSize);
