@@ -21,4 +21,5 @@ public interface ProductService extends IService<Product, UUID> {
     Product updateProduct(ProductUpdateRequestDTO params, UUID productId);
 
     Page<ProductResponseDTO> findProductRelate(UUID productId, Pageable pageable);
+
 }

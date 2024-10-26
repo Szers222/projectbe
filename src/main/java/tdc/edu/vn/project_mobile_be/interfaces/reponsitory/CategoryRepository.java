@@ -22,6 +22,14 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> , JpaS
 
     @Query("SELECT c FROM Category c")
     Page<Category> findAllCategories(Pageable pageable);
+
+
+    @Query("SELECT c FROM Category c WHERE c.categoryId = :categoryId")
+    Category findByCategoryId(@Param("categoryId") UUID categoryId);
+
+
+
+
     //    void deleteAllByStatusAndDeletionDateLessThanEqual(int status, LocalDate deletionDate);
     @Modifying
     @Query("DELETE FROM Category c WHERE c.categoryStatus.categoryStatusType = :statusType AND c.deletionDate <= :deletionDate")
