@@ -160,7 +160,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
         // Chuyển đổi sang DTO
         return products.map(product -> {
-            double price = Double.parseDouble(product.getProductPrice().toString());
+            double price = product.getProductPrice();
             if (price < 0) {
                 throw new NumberErrorException("Price must be greater than 0");
             }
@@ -210,7 +210,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
             ProductResponseDTO dto = new ProductResponseDTO();
             dto.toDto(product);
-            dto.setProductPrice(formatPrice(Double.parseDouble(product.getProductPrice().toString())));
+            dto.setProductPrice(formatPrice(price));
             dto.setProductPriceSale(formatPrice(price - (price * dto.getProductSale() / 100)));
             dto.setCategoryResponseDTO(categoryResponseDTOs);
             dto.setProductSizeResponseDTOs(productSizeResponseDTOS);
@@ -265,7 +265,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         Product product = new Product();
         product.setProductId(UUID.randomUUID()); // Tạo UUID cho product
         product.setProductName(params.getProductName()); // Đặt tên product
-        product.setProductPrice(BigDecimal.valueOf(params.getProductPrice())); // Đặt giá
+        product.setProductPrice(params.getProductPrice()); // Đặt giá
         product.setProductQuantity(params.getProductQuantity()); // Đặt số lượng
         product.setProductYearOfManufacture(params.getProductYearOfManufacture()); // Đặt năm sản xuất
 

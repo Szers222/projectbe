@@ -40,7 +40,7 @@ public class Product {
     private String productName;
 
     @Column(name = "product_price", nullable = false)
-    private BigDecimal productPrice;
+    private double productPrice;
 
     @Column(name = "product_quantity", nullable = false, columnDefinition = "int default 0")
     private int productQuantity;

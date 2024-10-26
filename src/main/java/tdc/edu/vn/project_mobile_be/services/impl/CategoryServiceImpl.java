@@ -47,12 +47,6 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
     @Autowired
     private CategoryStatusRepository categoryStatusRepository;
 
-    @Autowired
-    private ProductSizeRepository productSizeRepository;
-
-    @Autowired
-    private ProductSupplierRepository productSupplierRepository;
-
     /**
      * Create category
      *
