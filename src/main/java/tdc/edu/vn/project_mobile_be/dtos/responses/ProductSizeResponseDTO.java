@@ -28,8 +28,9 @@ public class ProductSizeResponseDTO implements IDto<ProductSize> {
     @JsonProperty("productSizeType")
     private int productSizeType;
 
-    @JsonProperty("productSizeQuantity")
-    private List<Integer> productSizeQuantity;
+    @JsonProperty("productSize")
+    private SizeProductResponseDTO sizeProductResponseDTOs;
+
 
 
     @Override
