@@ -7,13 +7,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.InvalidRoleException;
+
+import tdc.edu.vn.project_mobile_be.commond.customexception.ListNotFoundException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.CategoryCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.CategoryUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.CategoryResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSizeResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSupplierResponseDTO;
+
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
 import tdc.edu.vn.project_mobile_be.entities.status.CategoryStatus;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.CategoryRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.CategoryStatusRepository;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductSizeRepository;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductSupplierRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CategoryService;
 
 import java.sql.Timestamp;
@@ -44,6 +53,12 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
      */
     @Autowired
     private CategoryStatusRepository categoryStatusRepository;
+
+    @Autowired
+    private ProductSizeRepository productSizeRepository;
+
+    @Autowired
+    private ProductSupplierRepository productSupplierRepository;
 
     /**
      * Create category
@@ -210,5 +225,9 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
     private CategoryStatus getStatus(UUID statusId) {
         return categoryStatusRepository.findByCategoryStatusId((statusId)) != null ? categoryStatusRepository.findByCategoryStatusId((statusId)) : null;
     }
+
+
+
+
 
 }

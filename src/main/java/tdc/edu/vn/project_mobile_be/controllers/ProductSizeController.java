@@ -11,6 +11,7 @@ import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSizeResponseDTO;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductSizeService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -27,6 +28,14 @@ public class ProductSizeController {
 
         ResponseData<List<ProductSizeResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Success", productSizes);
         return ResponseEntity.ok(responseData);
+    }
+    @GetMapping(value = {"/product-sizes/category/{categoryId}", "/product-sizes/category/{categoryId}/"})
+    public ResponseEntity<ResponseData<?>> getAllProductSizesByCategoryID(@PathVariable("categoryId") UUID categoryId) {
+
+            List<ProductSizeResponseDTO> productSizes = productSizeService.getAllProductSizeByCategoryID(categoryId);
+
+            ResponseData<List<ProductSizeResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Success", productSizes);
+            return ResponseEntity.ok(responseData);
     }
 
 }

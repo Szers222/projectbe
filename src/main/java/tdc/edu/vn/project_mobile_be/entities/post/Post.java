@@ -13,6 +13,7 @@ import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -42,6 +43,9 @@ public class Post {
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
 
+    @Column(name = "post_type", columnDefinition = "INT")
+    private int postType;
+
     @Lob
     @Column(name = "post_content", columnDefinition = "TEXT")
     private String postContent;
@@ -52,6 +56,9 @@ public class Post {
     @ManyToOne
     @JoinColumn(name = "post_status_id", nullable = false)
     private PostStatus postStatus;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<PostComment> postComments;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "post_id")

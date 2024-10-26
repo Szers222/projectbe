@@ -8,8 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
-import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
-import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,13 +23,14 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
 
     Product save(Product product);
 
-    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.images i WHERE p.productId = :productId ORDER BY i.productImageIndex ASC")
+
+    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.images i WHERE p.productId= :productId ORDER BY i.productImageIndex desc")
     Optional<Product> findByIdWithImages(@Param("productId") UUID productId);
 
+    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.categories c WHERE c.categoryId= :categoryId ORDER BY  p.productSale desc")
+    Page<Product> findByIdWithCategories(@Param("categoryId") UUID categoryId, Pageable pageable);
 
-    @Query("SELECT p.sizes FROM Product p JOIN p.categories c WHERE c.categoryId = :categoryId")
-    List<ProductSize> findProductSizesByCategory(@Param("categoryId") UUID categoryId);
 
-    @Query("SELECT DISTINCT p.supplier FROM Product p JOIN p.categories c WHERE c.categoryId = :categoryId")
-    List<ProductSupplier> findProductSuplierByCategory(@Param("categoryId") UUID categoryId);
+
+
 }
