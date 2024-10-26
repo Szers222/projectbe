@@ -100,7 +100,6 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Override
     public Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable) {
         Specification<Product> spec = Specification.where(null);  // Khởi tạo Specification rỗng
-
         // Lọc theo danh mục (category)
         if (params.getCategoryId() != null && categoryRepository.findById(params.getCategoryId()).isPresent()) {
             spec = spec.and(ProductSpecifications.hasCategory(params.getCategoryId()));
@@ -108,7 +107,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
         // Lọc theo khoảng giá
         if (params.getMinPrice() != null && params.getMaxPrice() != null) {
-            if (this.validatePriceRange(params.getMinPrice(), params.getMaxPrice()) == false) {
+            if (this.validatePriceRange(params.getMinPrice(), params.getMaxPrice()) == true) {
                 spec = spec.and(ProductSpecifications.priceBetween(params.getMinPrice(), params.getMaxPrice()));
             }
         }
@@ -141,7 +140,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
         // Chuyển đổi sang DTO
         return products.map(product -> {
-            double price = product.getProductPrice();
+            double price = Double.parseDouble(product.getProductPrice().toString());
             if (price < 0) {
                 throw new NumberErrorException("Price must be greater than 0");
             }
@@ -191,7 +190,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
             ProductResponseDTO dto = new ProductResponseDTO();
             dto.toDto(product);
-            dto.setProductPrice(formatPrice(product.getProductPrice()));
+            dto.setProductPrice(formatPrice(Double.parseDouble(product.getProductPrice().toString())));
             dto.setProductPriceSale(formatPrice(price - (price * dto.getProductSale() / 100)));
             dto.setCategoryResponseDTO(categoryResponseDTOs);
             dto.setProductSizeResponseDTOs(productSizeResponseDTOS);
@@ -246,7 +245,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         Product product = new Product();
         product.setProductId(UUID.randomUUID()); // Tạo UUID cho product
         product.setProductName(params.getProductName()); // Đặt tên product
-        product.setProductPrice(params.getProductPrice()); // Đặt giá
+        product.setProductPrice(BigDecimal.valueOf(params.getProductPrice())); // Đặt giá
         product.setProductQuantity(params.getProductQuantity()); // Đặt số lượng
         product.setProductYearOfManufacture(params.getProductYearOfManufacture()); // Đặt năm sản xuất
 
