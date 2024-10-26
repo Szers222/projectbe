@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
 
 import java.math.BigDecimal;
@@ -44,7 +45,10 @@ public class ProductSpecifications implements Specification<Product> {
 
     // Lọc theo danh sách kích cỡ
     public static Specification<Product> hasSizes(List<UUID> sizeIds) {
-        return (root, query, cb) -> root.join("sizes").get("sizeId").in(sizeIds);
+        return (root, query, cb) -> {
+            Join<Product, ProductSize> sizes = root.join("sizes", JoinType.INNER);
+            return sizes.get("productSizeId").in(sizeIds);
+        };
     }
 
     // Lọc theo nhà cung cấp (supplier)
