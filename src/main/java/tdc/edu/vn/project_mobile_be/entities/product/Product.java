@@ -12,6 +12,7 @@ import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
 import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
+import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -95,13 +96,14 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CartProduct> cartProducts = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonBackReference
-    @JoinTable(name = "products_sizes",
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_size_id"))
-    private Set<ProductSize> sizes = new HashSet<>();
+    private Set<SizeProduct> sizeProducts = new HashSet<>();
+
+
 
 }

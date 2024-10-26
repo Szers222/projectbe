@@ -27,9 +27,9 @@ import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductRequestParamsDT
 import tdc.edu.vn.project_mobile_be.dtos.responses.ProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
+import tdc.edu.vn.project_mobile_be.interfaces.service.BreadcrumbService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -44,6 +44,9 @@ public class ProductController {
     private ProductService productService;
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private BreadcrumbService breadcrumbService;
+
 
 
     @Operation(summary = "Get all products by Category", description = "Retrieve all products by category with pagination support")
@@ -93,14 +96,36 @@ public class ProductController {
 
     @GetMapping("/products/{categoryId}/{productId}")
     public ResponseEntity<List<Breadcrumb>> productDetail(@PathVariable UUID categoryId, @PathVariable UUID productId) {
-
-        List<Breadcrumb> breadcrumbs = new ArrayList<>();
-        breadcrumbs.add(new Breadcrumb("Trang chủ", "/"));
-        breadcrumbs.add(new Breadcrumb("Danh mục", "/categories/" + categoryId));
-        breadcrumbs.add(new Breadcrumb("Sản phẩm", "/products/" + categoryId + "/" + productId));
-
+        List<Breadcrumb> breadcrumbs = breadcrumbService.generateProductBreadcrumb(categoryId, productId);
         return new ResponseEntity<>(breadcrumbs, HttpStatus.OK);
     }
 
+    @GetMapping("/products/category/{categoryId}")
+    public ResponseEntity<ResponseData<PagedModel<EntityModel<ProductResponseDTO>>>> getProductByCategoryId(
+            @PathVariable UUID categoryId,
+            @ModelAttribute ProductRequestParamsDTO params,
+            PagedResourcesAssembler<ProductResponseDTO> assembler) {
+        if (params.getSort() == null || params.getSort().isEmpty()) {
+            params.setSort("productPrice");
+        }
+        Sort.Direction sortDirection = params.getDirection().equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sortBy = Sort.by(sortDirection, params.getSort());
+        Pageable pageable = PageRequest.of(params.getPage(), params.getSize(), sortBy);
+
+        Page<ProductResponseDTO> productDtoPage = productService.getProductByCategoryId(categoryId, pageable);
+
+        PagedModel<EntityModel<ProductResponseDTO>> pagedModel = assembler.toModel(productDtoPage);
+
+        ResponseData<PagedModel<EntityModel<ProductResponseDTO>>> responseData = new ResponseData<>(HttpStatus.OK, "Success", pagedModel);
+
+        return ResponseEntity.ok(responseData);
+    }
+
+    @GetMapping("/products/{productId}")
+    public ResponseEntity<ResponseData<ProductResponseDTO>> getProductById(@PathVariable UUID productId) {
+        ProductResponseDTO product = productService.getProductById(productId);
+        ResponseData<ProductResponseDTO> responseData = new ResponseData<>(HttpStatus.OK, "Success", product);
+        return ResponseEntity.ok(responseData);
+    }
 
 }

@@ -6,9 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
+import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Data
@@ -25,6 +28,9 @@ public class ProductSizeResponseDTO implements IDto<ProductSize> {
     @JsonProperty("productSizeType")
     private int productSizeType;
 
+    @JsonProperty("productSizeQuantity")
+    private List<Integer> productSizeQuantity;
+
 
     @Override
     public ProductSize toEntity() {
@@ -33,6 +39,8 @@ public class ProductSizeResponseDTO implements IDto<ProductSize> {
 
     @Override
     public void toDto(ProductSize entity) {
+
+
         BeanUtils.copyProperties(entity, this);
     }
 }
