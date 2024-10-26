@@ -45,10 +45,7 @@ public class ProductSpecifications implements Specification<Product> {
 
     // Lọc theo danh sách kích cỡ
     public static Specification<Product> hasSizes(List<UUID> sizeIds) {
-        return (root, query, cb) -> {
-            Join<Product, ProductSize> sizes = root.join("sizes", JoinType.INNER);
-            return sizes.get("productSizeId").in(sizeIds);
-        };
+        return (root, query, cb) -> root.join("sizeProducts").get("size").get("productSizeId").in(sizeIds);
     }
 
     // Lọc theo nhà cung cấp (supplier)
