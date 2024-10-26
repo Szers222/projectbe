@@ -84,6 +84,7 @@ public class ProductController {
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Tạo Sản Phẩm Thành Công", product);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseData);
     }
+    
 
     @GetMapping(value = {"/products/{categoryId}", "/product/{categoryId}/"})
     public ResponseEntity<ResponseData<PagedModel<EntityModel<ProductResponseDTO>>>> getProductsByCategory(
@@ -112,6 +113,7 @@ public class ProductController {
         ResponseData<PagedModel<EntityModel<ProductResponseDTO>>> responseData = new ResponseData<>(HttpStatus.OK, "Success", pagedModel);
         return ResponseEntity.ok(responseData);
     }
+
 
 
 }

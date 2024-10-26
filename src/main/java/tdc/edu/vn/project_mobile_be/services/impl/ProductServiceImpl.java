@@ -1,5 +1,7 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -104,8 +106,18 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         // Lưu product vào cơ sở dữ liệu
         Product savedProduct = productRepository.save(product);
         // Trả về product đã lưu
+//        String productJson = convertProductToJson(savedProduct);
         return savedProduct;
     }
+
+//    private String convertProductToJson(Product product) {
+//        try {
+//            return new ObjectMapper().writeValueAsString(product);
+//        } catch (JsonProcessingException e) {
+//            // Xử lý exception
+//            return null;
+//        }
+//    }
 
     @Override
     public Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable) {
