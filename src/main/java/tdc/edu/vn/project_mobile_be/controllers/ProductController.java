@@ -54,7 +54,7 @@ public class ProductController {
             @ApiResponse(responseCode = "400", description = "Invalid request parameters", content = @Content)
     })
 
-    @GetMapping(value = {"/products/filters", "/products/filters/"})
+    @GetMapping(value = {"/products/filters", "/products"})
     public ResponseEntity<ResponseData<PagedModel<EntityModel<ProductResponseDTO>>>> getProductsByFilters(
             @ModelAttribute ProductRequestParamsDTO params,
             PagedResourcesAssembler<ProductResponseDTO> assembler) {

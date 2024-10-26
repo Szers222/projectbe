@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
 
 import java.math.BigDecimal;

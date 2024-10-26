@@ -13,6 +13,7 @@ import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreat
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
@@ -29,7 +30,7 @@ public class ProductCreateRequestDTO implements IDto<Product> {
 
     @Min(value = 0, message = "ProductPrice phải lớn hơn hoặc bằng 0")
     @JsonProperty("productPrice")
-    private double productPrice;
+    private BigDecimal productPrice;
 
     @Min(value = 0, message = "ProductQuantity phải lớn hơn hoặc bằng 0")
     @JsonProperty("productQuantity")
