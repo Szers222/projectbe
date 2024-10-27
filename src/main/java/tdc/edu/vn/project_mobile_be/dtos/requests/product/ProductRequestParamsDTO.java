@@ -20,6 +20,6 @@ public class ProductRequestParamsDTO {
     private BigDecimal minPrice;
     private BigDecimal maxPrice;
     private List<UUID> sizeIds;
-    private UUID supplierId;
+    private List<UUID> supplierIds;
     private String search;
 }

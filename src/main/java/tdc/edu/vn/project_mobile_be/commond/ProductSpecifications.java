@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
 
 import java.math.BigDecimal;
@@ -48,12 +49,10 @@ public class ProductSpecifications implements Specification<Product> {
     }
 
     // Lọc theo nhà cung cấp (supplier)
-    public static Specification<Product> hasSupplier(UUID supplierId) {
-
+    public static Specification<Product> hasSupplier(List<UUID> supplierIds) {
         return (root, query, cb) -> {
-            // Join giữa Product và Category
-            Join<Product, ProductSupplier> suppliers = root.join("suplier", JoinType.INNER);
-            return cb.equal(suppliers.get("supplierId"), supplierId);
+            Join<Product, ProductSupplier> suppliers = root.join("supplier", JoinType.INNER);
+            return suppliers.get("productSupplierId").in(supplierIds);
         };
     }
 
@@ -68,9 +67,9 @@ public class ProductSpecifications implements Specification<Product> {
             } else if (direction.equals("desc")) {
                 assert query != null;
                 query.orderBy(cb.desc(root.get(sort)));
-            } else if (sort.equals("productPriceSale")) {
+            } else if (sort.equals("productSale")) {
                 assert query != null;
-                query.orderBy(cb.desc(root.get("productPriceSale")));
+                query.orderBy(cb.desc(root.get("productSale")));
             }
             assert query != null;
             return query.getRestriction();

@@ -1,9 +1,8 @@
 package tdc.edu.vn.project_mobile_be.entities.user;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -80,10 +79,15 @@ public class User {
     private int userWrongPassword;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @JoinColumn(name = "icard_id", nullable = false)
     private IdCard iCard;
 
     @OneToOne(mappedBy = "user")
+    @JsonBackReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Post post;
 
     @ManyToOne

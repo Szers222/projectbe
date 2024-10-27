@@ -13,6 +13,7 @@ import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreat
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
