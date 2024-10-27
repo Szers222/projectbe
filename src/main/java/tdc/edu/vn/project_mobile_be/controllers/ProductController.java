@@ -91,9 +91,9 @@ public class ProductController {
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Tạo Sản Phẩm Thành Công", product);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseData);
     }
-    
 
-    @GetMapping(value = {"/products/{categoryId}", "/product/{categoryId}/"})
+
+    @GetMapping(value = {"/products/relate/{categoryId}", "/product/relate/{categoryId}/"})
     public ResponseEntity<ResponseData<PagedModel<EntityModel<ProductResponseDTO>>>> getProductsByCategory(
             @PathVariable("categoryId") UUID categoryId,
             @RequestParam(value = "page", defaultValue = "0") int page,

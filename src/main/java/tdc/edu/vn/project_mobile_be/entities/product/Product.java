@@ -55,6 +55,9 @@ public class Product {
     @Column(name = "product_year_of_manufacture", columnDefinition = "int default 2000")
     private int productYearOfManufacture;
 
+    @Transient
+    private double productPriceSale;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
