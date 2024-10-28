@@ -198,6 +198,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
                         return productSizeResponseDTO;
                     }
             );
+            String productPriceSaleString = formatPrice(product.getProductPriceSale());
 
             ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
             if (product.getSupplier() != null) {
@@ -212,12 +213,12 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             ProductResponseDTO dto = new ProductResponseDTO();
             dto.toDto(product);
             dto.setProductPrice(formatPrice(price));
-            dto.setProductPriceSale(formatPrice(price - (price * dto.getProductSale() / 100)));
             dto.setCategoryResponseDTO(categoryResponseDTOs);
             dto.setProductSizeResponseDTOs(productSizeResponseDTOS);
             dto.setSupplier(productSupplierResponseDTO);
             dto.setPostResponseDTO(postResponseDTO);
             dto.setProductImageResponseDTOs(productImageResponseDTOS);
+            dto.setProductPriceSale(productPriceSaleString);
             return dto;
         });
 

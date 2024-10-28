@@ -4,6 +4,7 @@ import jakarta.persistence.criteria.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Query;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
@@ -40,7 +41,7 @@ public class ProductSpecifications implements Specification<Product> {
 
     // Lọc theo khoảng giá
     public static Specification<Product> priceBetween(BigDecimal minPrice, BigDecimal maxPrice) {
-        return (root, query, cb) -> cb.between(root.get("productPrice"), minPrice, maxPrice);
+        return (root, query, cb) -> cb.between(root.get("productPriceSale"), minPrice, maxPrice);
     }
 
     // Lọc theo danh sách kích cỡ
