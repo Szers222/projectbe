@@ -162,7 +162,6 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         // Chuyển đổi sang DTO
         return products.map(product -> {
             double price = product.getProductPrice();
-            product.setProductPriceSale(price - (price * product.getProductSale() / 100));
             if (price < 0) {
                 throw new NumberErrorException("Price must be greater than 0");
             }
@@ -199,6 +198,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
                         return productSizeResponseDTO;
                     }
             );
+            String productPriceSaleString = formatPrice(product.getProductPriceSale());
 
             ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
             if (product.getSupplier() != null) {
@@ -213,13 +213,12 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             ProductResponseDTO dto = new ProductResponseDTO();
             dto.toDto(product);
             dto.setProductPrice(formatPrice(price));
-            dto.setProductPriceSale(formatPrice(product.getProductPriceSale()));
             dto.setCategoryResponseDTO(categoryResponseDTOs);
             dto.setProductSizeResponseDTOs(productSizeResponseDTOS);
             dto.setSupplier(productSupplierResponseDTO);
             dto.setPostResponseDTO(postResponseDTO);
             dto.setProductImageResponseDTOs(productImageResponseDTOS);
-
+            dto.setProductPriceSale(productPriceSaleString);
             return dto;
         });
 

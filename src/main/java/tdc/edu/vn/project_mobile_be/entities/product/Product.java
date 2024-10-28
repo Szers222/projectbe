@@ -2,11 +2,10 @@ package tdc.edu.vn.project_mobile_be.entities.product;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Table;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
@@ -15,6 +14,7 @@ import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
@@ -55,7 +55,7 @@ public class Product {
     @Column(name = "product_year_of_manufacture", columnDefinition = "int default 2000")
     private int productYearOfManufacture;
 
-    @Transient
+    @Formula("product_price - (product_price * product_sale / 100)")
     private double productPriceSale;
 
     @CreationTimestamp
