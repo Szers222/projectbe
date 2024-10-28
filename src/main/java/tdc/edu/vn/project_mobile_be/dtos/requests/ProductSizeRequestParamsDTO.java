@@ -13,5 +13,5 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductSizeRequestParamsDTO {
-    private List<UUID> ids;
+    private List<UUID> productIds;
 }

@@ -6,8 +6,11 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundExcept
 import tdc.edu.vn.project_mobile_be.commond.customexception.ListNotFoundException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.ProductSizeRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSizeResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.SizeProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
+import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductSizeRepository;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.SizeProductRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductSizeService;
 
 import java.util.ArrayList;
@@ -25,19 +28,23 @@ public class ProductSizeServiceImpl extends AbService<ProductSize, UUID> impleme
 
     @Autowired
     private ProductSizeRepository productSizeRepository;
+    @Autowired
+    private SizeProductRepository sizeProductRepository;
 
 
     @Override
     public List<ProductSizeResponseDTO> getAllProductSize(ProductSizeRequestParamsDTO productSizeRequestParamsDTO) {
-        List<ProductSize> productSizes = productSizeRepository.findAllByProductId(productSizeRequestParamsDTO.getIds());
-        System.out.println(productSizes.size());
+        List<UUID> productIds = productSizeRequestParamsDTO.getProductIds();
+        System.console().printf("productSizes: %s", productIds);
+        List<ProductSize> productSizes = productSizeRepository.findAllByProductId(productIds);
+
         if (productSizes.isEmpty()) {
             throw new EntityNotFoundException("Product size not found");
         }
-
         return productSizes.stream().map(productSize -> {
             ProductSizeResponseDTO dto = new ProductSizeResponseDTO();
             dto.toDto(productSize);
+
             return dto;
         }).collect(Collectors.toList());
     }

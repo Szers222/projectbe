@@ -149,7 +149,7 @@ public class ProductController {
         return ResponseEntity.ok(responseData);
     }
 
-    @GetMapping("/products/{productId}")
+    @GetMapping("/product/{productId}")
     public ResponseEntity<ResponseData<ProductResponseDTO>> getProductById(@PathVariable UUID productId) {
         ProductResponseDTO product = productService.getProductById(productId);
         ResponseData<ProductResponseDTO> responseData = new ResponseData<>(HttpStatus.OK, "Success", product);
