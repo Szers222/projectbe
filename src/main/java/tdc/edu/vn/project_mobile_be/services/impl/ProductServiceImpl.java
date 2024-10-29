@@ -13,10 +13,13 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.NumberErrorException
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductUpdateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.*;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.ProductImageResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSizeResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSupplierResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.SizeProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.category.CategoryResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.post.PostResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
@@ -40,8 +43,10 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     public final int PRODUCT_CLOTHES = 0;
     public final int PRODUCT_SHOES = 1;
     public final int PRODUCT_ACCESSORIES = 2;
+    private final int PRODUCT_DEFAULT_SIZE = 0;
     private final int PRODUCT_RELATE_SIZE = 6;
-
+    private final int PRODUCT_MIN_PRICE = 0;
+    private final int PRODUCT_MIN_SIZE = 0;
     @Autowired
     private ProductRepository productRepository;
     @Autowired
@@ -155,64 +160,23 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
         // Truy vấn với các tiêu chí kết hợp
         Page<Product> products = productRepository.findAll(spec, pageable);
-        if (products.isEmpty() || products.getSize() == 0) {
+        if (products.isEmpty() || products.getSize() == PRODUCT_MIN_SIZE) {
             throw new ListNotFoundException("Không tìm thấy sản phẩm");
         }
 
         // Chuyển đổi sang DTO
         return products.map(product -> {
-            double price = product.getProductPrice();
-            if (price < 0) {
-                throw new NumberErrorException("Price must be greater than 0");
-            }
-
-            List<CategoryResponseDTO> categoryResponseDTOs = convertToDTOList(
-                    product.getCategories() != null ?
-                            product.getCategories().stream().collect(Collectors.toList())
-                            : Collections.emptyList(),
-                    category -> {
-                        CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO();
-                        categoryResponseDTO.toDto(category);
-                        return categoryResponseDTO;
-                    }
-            );
-
-            List<ProductImageResponseDTO> productImageResponseDTOS = convertToDTOList(
-                    product.getImages() != null ?
-                            product.getImages().stream().collect(Collectors.toList())
-                            : Collections.emptyList(),
-                    productImage -> {
-                        ProductImageResponseDTO productImageResponseDTO = new ProductImageResponseDTO();
-                        productImageResponseDTO.toDto(productImage);
-                        return productImageResponseDTO;
-                    }
-            );
-
-            List<ProductSizeResponseDTO> productSizeResponseDTOS = convertToDTOList(
-                    product.getSizeProducts() != null ?
-                            product.getSizeProducts().stream().collect(Collectors.toList())
-                            : Collections.emptyList(),
-                    productSize -> {
-                        ProductSizeResponseDTO productSizeResponseDTO = new ProductSizeResponseDTO();
-                        productSizeResponseDTO.toDto(productSize.getSize());
-                        return productSizeResponseDTO;
-                    }
-            );
-            String productPriceSaleString = formatPrice(product.getProductPriceSale());
-
-            ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
-            if (product.getSupplier() != null) {
-                productSupplierResponseDTO.toDto(product.getSupplier());
-            }
-
-            PostResponseDTO postResponseDTO = new PostResponseDTO();
-            if (product.getPost() != null) {
-                postResponseDTO.toDto(product.getPost());
-            }
+            List<CategoryResponseDTO> categoryResponseDTOs = getCategoryResponseDTOs(product);
+            List<ProductImageResponseDTO> productImageResponseDTOS = getProductImageResponseDTOs(product);
+            List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
+            ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
+            PostResponseDTO postResponseDTO = getPostResponseDTO(product);
+            String productPriceSaleString = productPriceSale(product);
+            String productPriceString = productPrice(product);
 
             ProductResponseDTO dto = new ProductResponseDTO();
             dto.toDto(product);
-            dto.setProductPrice(formatPrice(price));
+            dto.setProductPrice(productPriceString);
             dto.setCategoryResponseDTO(categoryResponseDTOs);
             dto.setProductSizeResponseDTOs(productSizeResponseDTOS);
             dto.setSupplier(productSupplierResponseDTO);
@@ -286,72 +250,41 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
         if (productPage.getContent().size() < PRODUCT_RELATE_SIZE || (productPage.isEmpty())) {
             List<Product> products = new ArrayList<>(productPage.getContent());
-
-            for (Product product : productRepository.findAll()) {
+            List<Product> allProducts = productRepository.findAll();
+            for (int i = 0; i < allProducts.size(); i++) {
                 if (products.size() == PRODUCT_RELATE_SIZE) {
                     break;
                 }
-                Collections.shuffle(products, new Random());
-                products.add(product);
+                int addRandomProduct = new Random().nextInt(allProducts.size());
+                Product product = allProducts.get(addRandomProduct);
+                System.console().printf("IntproductAdd: %s", addRandomProduct);
+                if (!products.contains(product)) {
+                    products.add(product);
+                }
                 productPage = new PageImpl<>(products, pageable, products.size());
             }
         }
 
-        return productPage.map(product -> {
-            double price = product.getProductPrice();
-            if (price < 0) {
-                throw new NumberErrorException("Price must be greater than 0");
-            }
 
-            List<CategoryResponseDTO> categoryResponseDTOs = convertToDTOList(
-                    product.getCategories() != null ?
-                            product.getCategories().stream().collect(Collectors.toList())
-                            : Collections.emptyList(),
-                    category -> {
-                        CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO();
-                        categoryResponseDTO.toDto(category);
-                        return categoryResponseDTO;
-                    }
-            );
+        Page<Product> productPageRandom = new PageImpl<>(productPage.getContent().subList(PRODUCT_DEFAULT_SIZE, PRODUCT_RELATE_SIZE));
+        List<Product> sortProducts = new ArrayList<>(productPageRandom.getContent());
+        sortProducts.sort(Comparator.comparing(Product::getProductPriceSale));
+        productPageRandom = new PageImpl<>(sortProducts, pageable, sortProducts.size());
 
-            List<ProductImageResponseDTO> productImageResponseDTOS = convertToDTOList(
-                    product.getImages() != null ?
-                            product.getImages().stream().collect(Collectors.toList())
-                            : Collections.emptyList(),
-                    productImage -> {
-                        ProductImageResponseDTO productImageResponseDTO = new ProductImageResponseDTO();
-                        productImageResponseDTO.toDto(productImage);
-                        return productImageResponseDTO;
-                    }
-            );
+        return productPageRandom.map(product -> {
+            List<CategoryResponseDTO> categoryResponseDTOs = getCategoryResponseDTOs(product);
+            List<ProductImageResponseDTO> productImageResponseDTOS = getProductImageResponseDTOs(product);
+            List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
+            ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
+            PostResponseDTO postResponseDTO = getPostResponseDTO(product);
+            String productPriceSaleString = productPriceSale(product);
+            String productPriceString = productPrice(product);
 
-            List<ProductSizeResponseDTO> productSizeResponseDTOS = convertToDTOList(
-
-                    product.getSizeProducts() != null ?
-                            product.getSizeProducts().stream().collect(Collectors.toList())
-                            : Collections.emptyList(),
-                    productSize -> {
-                        ProductSizeResponseDTO productSizeResponseDTO = new ProductSizeResponseDTO();
-                        productSizeResponseDTO.toDto(productSize.getSize());
-
-                        return productSizeResponseDTO;
-                    }
-            );
-
-            ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
-            if (product.getSupplier() != null) {
-                productSupplierResponseDTO.toDto(product.getSupplier());
-            }
-
-            PostResponseDTO postResponseDTO = new PostResponseDTO();
-            if (product.getPost() != null) {
-                postResponseDTO.toDto(product.getPost());
-            }
 
             ProductResponseDTO dto = new ProductResponseDTO();
             dto.toDto(product);
-            dto.setProductPrice(formatPrice(product.getProductPrice()));
-            dto.setProductPriceSale(formatPrice(price - (price * dto.getProductSale() / 100)));
+            dto.setProductPrice(productPriceString);
+            dto.setProductPriceSale(productPriceSaleString);
             dto.setCategoryResponseDTO(categoryResponseDTOs);
             dto.setProductSizeResponseDTOs(productSizeResponseDTOS);
             dto.setSupplier(productSupplierResponseDTO);
@@ -365,63 +298,23 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     public Page<ProductResponseDTO> getProductByCategoryId(UUID categoryId, Pageable pageable) {
 
         Page<Product> products = productRepository.findByCategoryId(categoryId, pageable);
-        if (products.isEmpty() || products.getSize() == 0) {
+        if (products.isEmpty() || products.getSize() == PRODUCT_MIN_SIZE) {
             throw new ListNotFoundException("Không tìm thấy sản phẩm");
         }
 
         return products.map(product -> {
-            double price = product.getProductPrice();
-            if (price < 0) {
-                throw new NumberErrorException("Price must be greater than 0");
-            }
-
-            List<CategoryResponseDTO> categoryResponseDTOs = convertToDTOList(
-                    product.getCategories() != null ?
-                            product.getCategories().stream().collect(Collectors.toList())
-                            : Collections.emptyList(),
-                    category -> {
-                        CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO();
-                        categoryResponseDTO.toDto(category);
-                        return categoryResponseDTO;
-                    }
-            );
-
-            List<ProductImageResponseDTO> productImageResponseDTOS = convertToDTOList(
-                    product.getImages() != null ?
-                            product.getImages().stream().collect(Collectors.toList())
-                            : Collections.emptyList(),
-                    productImage -> {
-                        ProductImageResponseDTO productImageResponseDTO = new ProductImageResponseDTO();
-                        productImageResponseDTO.toDto(productImage);
-                        return productImageResponseDTO;
-                    }
-            );
-
-            List<ProductSizeResponseDTO> productSizeResponseDTOS = convertToDTOList(
-                    product.getSizeProducts() != null ?
-                            product.getSizeProducts().stream().collect(Collectors.toList())
-                            : Collections.emptyList(),
-                    productSize -> {
-                        ProductSizeResponseDTO productSizeResponseDTO = new ProductSizeResponseDTO();
-                        productSizeResponseDTO.toDto(productSize.getSize());
-                        return productSizeResponseDTO;
-                    }
-            );
-
-            ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
-            if (product.getSupplier() != null) {
-                productSupplierResponseDTO.toDto(product.getSupplier());
-            }
-
-            PostResponseDTO postResponseDTO = new PostResponseDTO();
-            if (product.getPost() != null) {
-                postResponseDTO.toDto(product.getPost());
-            }
+            List<CategoryResponseDTO> categoryResponseDTOs = getCategoryResponseDTOs(product);
+            List<ProductImageResponseDTO> productImageResponseDTOS = getProductImageResponseDTOs(product);
+            List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
+            ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
+            PostResponseDTO postResponseDTO = getPostResponseDTO(product);
+            String productPriceSaleString = productPriceSale(product);
+            String productPriceString = productPrice(product);
 
             ProductResponseDTO dto = new ProductResponseDTO();
             dto.toDto(product);
-            dto.setProductPrice(formatPrice(product.getProductPrice()));
-            dto.setProductPriceSale(formatPrice(price - (price * dto.getProductSale() / 100)));
+            dto.setProductPrice(productPriceString);
+            dto.setProductPriceSale(productPriceSaleString);
             dto.setCategoryResponseDTO(categoryResponseDTOs);
             dto.setProductSizeResponseDTOs(productSizeResponseDTOS);
             dto.setSupplier(productSupplierResponseDTO);
@@ -438,64 +331,18 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             throw new EntityNotFoundException("Product không tồn tại !");
         }
         Product product = productOptional.get();
-        double price = product.getProductPrice();
-        if (price < 0) {
-            throw new NumberErrorException("Price must be greater than 0");
-        }
-
-        List<CategoryResponseDTO> categoryResponseDTOs = convertToDTOList(
-                product.getCategories() != null ?
-                        product.getCategories().stream().collect(Collectors.toList())
-                        : Collections.emptyList(),
-                category -> {
-                    CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO();
-                    categoryResponseDTO.toDto(category);
-                    return categoryResponseDTO;
-                }
-        );
-
-        List<ProductImageResponseDTO> productImageResponseDTOS = convertToDTOList(
-                product.getImages() != null ?
-                        product.getImages().stream().collect(Collectors.toList())
-                        : Collections.emptyList(),
-                productImage -> {
-                    ProductImageResponseDTO productImageResponseDTO = new ProductImageResponseDTO();
-                    productImageResponseDTO.toDto(productImage);
-                    return productImageResponseDTO;
-                }
-        );
-        List<SizeProduct> sizeProducts = sizeProductRepository.findByProductId(productId);
-
-        List<ProductSizeResponseDTO> productSizeResponseDTOS = product.getSizeProducts().stream()
-                .map(productSize -> {
-                    ProductSizeResponseDTO productSizeResponseDTO = new ProductSizeResponseDTO();
-                    productSizeResponseDTO.toDto(productSize.getSize());
-                    sizeProducts.stream()
-                            .filter(sizeProduct -> sizeProduct.getSize().getProductSizeId().equals(productSize.getSize().getProductSizeId()))
-                            .forEach(sizeProduct -> {
-                                SizeProductResponseDTO sizeProductDTO = new SizeProductResponseDTO();
-                                sizeProductDTO.toDto(sizeProduct);
-                                sizeProductDTO.setProductSizeQuantity(sizeProduct.getQuantity());
-                                productSizeResponseDTO.setSizeProductResponseDTOs(sizeProductDTO);
-                            });
-                    return productSizeResponseDTO;
-                })
-                .collect(Collectors.toList());
-
-        ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
-        if (product.getSupplier() != null) {
-            productSupplierResponseDTO.toDto(product.getSupplier());
-        }
-
-        PostResponseDTO postResponseDTO = new PostResponseDTO();
-        if (product.getPost() != null) {
-            postResponseDTO.toDto(product.getPost());
-        }
+        List<CategoryResponseDTO> categoryResponseDTOs = getCategoryResponseDTOs(product);
+        List<ProductImageResponseDTO> productImageResponseDTOS = getProductImageResponseDTOs(product);
+        List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
+        ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
+        PostResponseDTO postResponseDTO = getPostResponseDTO(product);
+        String productPriceSaleString = productPriceSale(product);
+        String productPriceString = productPrice(product);
 
         ProductResponseDTO productDTO = new ProductResponseDTO();
         productDTO.toDto(product);
-        productDTO.setProductPrice(formatPrice(product.getProductPrice()));
-        productDTO.setProductPriceSale(formatPrice(price - (price * productDTO.getProductSale() / 100)));
+        productDTO.setProductPrice(productPriceString);
+        productDTO.setProductPriceSale(productPriceSaleString);
         productDTO.setCategoryResponseDTO(categoryResponseDTOs);
         productDTO.setProductSizeResponseDTOs(productSizeResponseDTOS);
         productDTO.setSupplier(productSupplierResponseDTO);
@@ -509,23 +356,23 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
     public String formatPrice(double price) {
         NumberFormat format = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN"));
-        format.setMinimumFractionDigits(0);
-        format.setMaximumFractionDigits(0);
+        format.setMinimumFractionDigits(PRODUCT_MIN_PRICE);
+        format.setMaximumFractionDigits(PRODUCT_MIN_PRICE);
         format.setRoundingMode(RoundingMode.HALF_UP);
         return format.format(price);
     }
 
     private boolean validatePriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
-        if (minPrice.compareTo(maxPrice) > 0) {
+        if (minPrice.compareTo(maxPrice) > PRODUCT_MIN_PRICE) {
             throw new NumberErrorException("Min price must be less than max price");
         }
-        if (minPrice.compareTo(BigDecimal.ZERO) < 0 || maxPrice.compareTo(BigDecimal.ZERO) < 0) {
+        if (minPrice.compareTo(BigDecimal.ZERO) < PRODUCT_MIN_PRICE || maxPrice.compareTo(BigDecimal.ZERO) < PRODUCT_MIN_PRICE) {
             throw new NumberErrorException("Min price and max price must be greater than 0");
         }
-        if (minPrice.compareTo(BigDecimal.ZERO) == 0 && maxPrice.compareTo(BigDecimal.ZERO) == 0) {
+        if (minPrice.compareTo(BigDecimal.ZERO) == PRODUCT_MIN_PRICE && maxPrice.compareTo(BigDecimal.ZERO) == PRODUCT_MIN_PRICE) {
             throw new NumberErrorException("Min price and max price must not be equal to 0");
         }
-        if (maxPrice.compareTo(BigDecimal.valueOf(2000000)) > 0) {
+        if (maxPrice.compareTo(BigDecimal.valueOf(2000000)) > PRODUCT_MIN_PRICE) {
             throw new NumberErrorException("Max price must not be greater than 2 million");
         }
         return true;
@@ -535,4 +382,71 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private <E, D> List<D> convertToDTOList(List<E> entities, Function<E, D> converter) {
         return entities.stream().map(converter).collect(Collectors.toList());
     }
+
+    public List<CategoryResponseDTO> getCategoryResponseDTOs(Product product) {
+        List<CategoryResponseDTO> categoryResponseDTOs = convertToDTOList(product.getCategories() != null ? new ArrayList<>(product.getCategories()) : Collections.emptyList(), category -> {
+            CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO();
+            categoryResponseDTO.toDto(category);
+            return categoryResponseDTO;
+        });
+        return categoryResponseDTOs;
+    }
+
+    public List<ProductImageResponseDTO> getProductImageResponseDTOs(Product product) {
+        List<ProductImageResponseDTO> productImageResponseDTOS = convertToDTOList(product.getImages() != null ? new ArrayList<>(product.getImages()) : Collections.emptyList(), productImage -> {
+            ProductImageResponseDTO productImageResponseDTO = new ProductImageResponseDTO();
+            productImageResponseDTO.toDto(productImage);
+            return productImageResponseDTO;
+        });
+        productImageResponseDTOS.sort(Comparator.comparing(ProductImageResponseDTO::getProductImageIndex));
+        return productImageResponseDTOS;
+    }
+
+    public List<ProductSizeResponseDTO> getProductSizeResponseDTOs(Product product) {
+        List<SizeProduct> sizeProducts = sizeProductRepository.findByProductId(product.getProductId());
+        return product.getSizeProducts().stream().map(productSize -> {
+            ProductSizeResponseDTO productSizeResponseDTO = new ProductSizeResponseDTO();
+            productSizeResponseDTO.toDto(productSize.getSize());
+            sizeProducts.stream().filter(sizeProduct -> sizeProduct.getSize().getProductSizeId().equals(productSize.getSize().getProductSizeId())).forEach(sizeProduct -> {
+                SizeProductResponseDTO sizeProductDTO = new SizeProductResponseDTO();
+                sizeProductDTO.toDto(sizeProduct);
+                sizeProductDTO.setProductSizeQuantity(sizeProduct.getQuantity());
+                productSizeResponseDTO.setSizeProductResponseDTOs(sizeProductDTO);
+            });
+            return productSizeResponseDTO;
+        }).collect(Collectors.toList());
+    }
+
+    public ProductSupplierResponseDTO getProductSupplierResponseDTO(Product product) {
+        ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
+        if (product.getSupplier() != null) {
+            productSupplierResponseDTO.toDto(product.getSupplier());
+        }
+        return productSupplierResponseDTO;
+    }
+
+    public PostResponseDTO getPostResponseDTO(Product product) {
+        PostResponseDTO postResponseDTO = new PostResponseDTO();
+        if (product.getPost() != null) {
+            postResponseDTO.toDto(product.getPost());
+        }
+        return postResponseDTO;
+    }
+
+    public String productPriceSale(Product product) {
+        double priceSale = product.getProductPriceSale();
+        if (priceSale < PRODUCT_MIN_PRICE) {
+            throw new NumberErrorException("Price must be greater than 0");
+        }
+        return formatPrice(priceSale);
+    }
+
+    public String productPrice(Product product) {
+        double price = product.getProductPrice();
+        if (price < PRODUCT_MIN_PRICE) {
+            throw new NumberErrorException("Price must be greater than 0");
+        }
+        return formatPrice(price);
+    }
+
 }
