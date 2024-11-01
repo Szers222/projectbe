@@ -63,7 +63,7 @@ public class Post {
     @JoinColumn(name = "post_id")
     private Product product;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
