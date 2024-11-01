@@ -37,7 +37,7 @@ public class ProductSizeController {
         ResponseData<List<ProductSizeResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Success", productSizes);
         return ResponseEntity.ok(responseData);
     }
-    @GetMapping(value = {"/product-sizes/category", "/product-sizes/category"})
+    @GetMapping(value = {"/product-sizes/category/{categoryId}", "/product-sizes/category"})
     public ResponseEntity<ResponseData<?>> getAllProductSizesByCategoryID(@PathVariable(value = "categoryId",required = false) UUID categoryId) {
 
             List<ProductSizeResponseDTO> productSizes = productSizeService.getAllProductSizeByCategoryID(categoryId);
