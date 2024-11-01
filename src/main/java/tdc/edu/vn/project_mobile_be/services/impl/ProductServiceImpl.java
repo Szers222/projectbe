@@ -1,13 +1,10 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.commond.ProductSpecifications;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
@@ -16,10 +13,10 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.NumberErrorException
 import tdc.edu.vn.project_mobile_be.dtos.requests.ProductCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.ProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.ProductUpdateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.cache.CachedPage;
 import tdc.edu.vn.project_mobile_be.dtos.responses.ProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductListeners;
 import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
@@ -27,7 +24,9 @@ import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class ProductServiceImpl extends AbService<Product, UUID> implements ProductService {
@@ -47,9 +46,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private PostRepository postRepository;
     @Autowired
     private PostStatusRepository postStatusRepository;
-
     @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     public Product createProduct(ProductCreateRequestDTO params) {
@@ -119,7 +117,6 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     }
 
     @Override
-    @CacheEvict(value = "products", allEntries = true)
     public Product updateProduct(ProductUpdateRequestDTO params, UUID productId) {
         LocalDateTime releaseDateTime;
 
@@ -138,30 +135,30 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
 
         // Tạo đối tượng Post mới
-        Post post = new Post();
-        post.setPostId(UUID.randomUUID());
-        post.setPostRelease(releaseTimestamp);
-        post.setPostName(params.getPostDTO().getPostName());
-        post.setPostContent(params.getPostDTO().getPostContent());
-        post.setPostStatus(status);
+//        Post post = new Post();
+//        post.setPostId(UUID.randomUUID());
+//        post.setPostRelease(releaseTimestamp);
+//        post.setPostName(params.getPostDTO().getPostName());
+//        post.setPostContent(params.getPostDTO().getPostContent());
+//        post.setPostStatus(status);
         // Lưu post vào cơ sở dữ liệu
-        Post savedPost = postRepository.save(post);
+//        Post savedPost = postRepository.save(post);
 
         // Tạo đối tượng Product mới
         Product product = productRepository.findByIdWithImages(productId).orElseThrow(() -> new EntityNotFoundException("Product not found"));
+
         product.setProductName(params.getProductName()); // Đặt tên product
         product.setProductPrice(params.getProductPrice()); // Đặt giá
         product.setProductQuantity(params.getProductQuantity()); // Đặt số lượng
         product.setProductYearOfManufacture(params.getProductYearOfManufacture()); // Đặt năm sản xuất
 
         // Liên kết product với post vừa tạo
-        product.setPost(savedPost);
+//        product.setPost(savedPost);
 
         // Lưu product vào cơ sở dữ liệu
         Product savedProduct = productRepository.save(product);
-        String cacheKey = "productUpdates";
-        redisTemplate.delete(cacheKey);
-        redisTemplate.convertAndSend("/topic/products", product);
+        applicationEventPublisher.publishEvent(new ProductListeners(this, product));
+
         return savedProduct;
     }
 
@@ -169,21 +166,6 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Override
     public Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable) {
 
-        String cacheKey = "productUpdates";
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        LinkedHashMap<?, ?> map = (LinkedHashMap<?, ?>) redisTemplate.opsForValue().get(cacheKey);
-
-        if (map != null) {
-            // Chuyển đổi từ map sang CachedPage
-            CachedPage<ProductResponseDTO> cachedPage = objectMapper.convertValue(map, CachedPage.class);
-            if (cachedPage != null) {
-                Page<ProductResponseDTO> page = new PageImpl<>(cachedPage.getContent(), pageable, cachedPage.getTotalElements());
-                return page;
-            }
-        } else {
-            System.console().printf("map: %s", "asdsadsadsadsada");
-        }
 
         Specification<Product> spec = Specification.where(null);  // Khởi tạo Specification rỗng
 

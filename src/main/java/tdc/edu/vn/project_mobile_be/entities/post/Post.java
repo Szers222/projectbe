@@ -35,7 +35,7 @@ public class Post {
     private Timestamp postRelease;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
+    @Column(name = "created_at", nullable = false,updatable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
 
     @UpdateTimestamp

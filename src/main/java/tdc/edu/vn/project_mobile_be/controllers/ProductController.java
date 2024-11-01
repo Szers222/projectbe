@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -27,11 +29,10 @@ import tdc.edu.vn.project_mobile_be.dtos.requests.ProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.ProductUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.ProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductListeners;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -46,11 +47,9 @@ public class ProductController {
     private ProductService productService;
     @Autowired
     private ProductRepository productRepository;
-    private final SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private SimpMessagingTemplate template;
 
-    public ProductController(SimpMessagingTemplate messagingTemplate) {
-        this.messagingTemplate = messagingTemplate;
-    }
 
     @Operation(summary = "Get all products by Category", description = "Retrieve all products by category with pagination support")
     @ApiResponses(value = {
@@ -83,6 +82,7 @@ public class ProductController {
     }
 
     @PostMapping(value = {"/product", "/product/"})
+    @SendTo("/topic/products")
     public ResponseEntity<ResponseData<?>> createProduct(
             @Valid @RequestBody ProductCreateRequestDTO params,
             BindingResult bindingResult) {
@@ -97,11 +97,13 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseData);
     }
 
-    @PutMapping(value = {"/product", "/product/"})
+
+    @PutMapping(value = {"/product/{productId}", "/product/{productId}/"})
     public ResponseEntity<ResponseData<?>> updateProduct(
             @Valid @RequestBody ProductUpdateRequestDTO params,
             BindingResult bindingResult,
-            @RequestParam(value = "productId") UUID productId) {
+//            @RequestParam(value = "productId") UUID productId,
+            @PathVariable UUID productId) {
         if (bindingResult.hasErrors()) {
             List<String> errorMessages = bindingResult.getFieldErrors().stream()
                     .map(FieldError::getDefaultMessage)
@@ -109,26 +111,21 @@ public class ProductController {
             throw new MultipleFieldsNullOrEmptyException(errorMessages);
         }
         Product product = productService.updateProduct(params, productId);
+
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Cập nhật sản phẩm thành công", product);
-        messagingTemplate.convertAndSend("/topic/products", product);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseData);
     }
 
-    @GetMapping(value = {"/test", "/tesst/"})
-    public Long getProducts() {
-        String time = productRepository.getLatestUpdatedTimestamp().toString();
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = null;
-        try {
-            date = dateFormat.parse(time);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        long timeInMilliSeconds = date.getTime();
-
-
-        return timeInMilliSeconds;
+    @EventListener(ProductListeners.class)
+    @SendTo("/topic/products")
+    public String handleProductUpdated(ProductListeners event) {
+        Product product = event.getProduct();
+        this.template.convertAndSend("/topic/products/" + product.getProductId(), product);
+        return "Product Updated";
     }
 
+//    @MessageMapping("/product.joinRoom")
+//    public void joinRoom(@Payload String roomId, SimpMessageHeaderAccessor headerAccessor) {
+//        headerAccessor.getSessionAttributes().put("roomId", roomId);
+//    }
 }

@@ -12,7 +12,6 @@ import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
 import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
-import tdc.edu.vn.project_mobile_be.services.impl.DatabaseChangeListener;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
@@ -23,7 +22,7 @@ import java.util.UUID;
 @Data
 @Table(name = "products")
 @Entity
-@EntityListeners(DatabaseChangeListener.class)
+@EntityListeners(ProductListeners.class)
 @AllArgsConstructor
 @NoArgsConstructor
 @DynamicInsert
@@ -56,7 +55,7 @@ public class Product {
     private int productYearOfManufacture;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
+    @Column(name = "created_at", updatable = false,insertable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
@@ -67,10 +66,15 @@ public class Product {
     private Coupon coupon;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
     @JoinColumn(name = "post_id")
     private Post post;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @JsonBackReference
     private Set<ProductImage> images = new HashSet<>();
 
@@ -83,6 +87,8 @@ public class Product {
 
 
     @ManyToMany(fetch = FetchType.EAGER)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @JsonBackReference
     @JoinTable(name = "categories_products",
             joinColumns = @JoinColumn(name = "product_id"),

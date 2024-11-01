@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.entities.product;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,7 +36,7 @@ public class ProductImage {
     private int productImageIndex;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
+    @Column(name = "created_at", nullable = false,updatable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
@@ -44,6 +45,7 @@ public class ProductImage {
     @ManyToOne
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonBackReference
     @JoinColumn(name = "product_id", nullable = false, columnDefinition = "BINARY(16)")
     private Product product;
 
