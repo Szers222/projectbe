@@ -18,7 +18,7 @@ public class ProductSupplierController {
     @Autowired
     private ProductSupplierService supplierService;
 
-    @GetMapping(value = {"/product-suppliers/category/{categoryId}", "/product-sizes/category/{categoryId}/"})
+    @GetMapping(value = {"/product-suppliers/category/{categoryId}", "/product-suppliers/category"})
     public ResponseEntity<ResponseData<?>> getAllProductSizesByCategoryID(@PathVariable(value = "categoryId", required = false) UUID categoryId) {
 
         List<ProductSupplierResponseDTO> supplierResponseDTOS = supplierService.getAllProductSupplier(categoryId);

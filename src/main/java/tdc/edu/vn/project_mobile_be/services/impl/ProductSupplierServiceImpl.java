@@ -38,7 +38,7 @@ public class ProductSupplierServiceImpl extends AbService<ProductSupplier, UUID>
                 throw new ListNotFoundException("List product size not found");
             }
         }
-        if (categoryId == null) {
+        if (categoryId == null || categoryId.equals("")) {
             List<ProductSupplier> productSuppliers = supplierRepository.findAll();
 
             if (productSuppliers.isEmpty()) {
