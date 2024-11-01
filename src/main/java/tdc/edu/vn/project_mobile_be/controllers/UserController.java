@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.*;
 
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.dtos.requests.CreateUserRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.UpdateUserRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.UserResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.service.UserService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -50,5 +52,16 @@ public class UserController {
                         users
                 );
         return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+    @PutMapping("{userId}")
+    public ResponseEntity<ResponseData<?>> updateUser(@PathVariable UUID userId, @RequestBody UpdateUserRequestDTO request) {
+        User user = userService.updateUser(userId,request);
+
+        ResponseData<?> responseData = new ResponseData<>(
+                HttpStatus.CREATED
+                , "User tạo thành công!"
+                , user);
+        return new ResponseEntity<>(responseData, HttpStatus.CREATED);
+
     }
 }

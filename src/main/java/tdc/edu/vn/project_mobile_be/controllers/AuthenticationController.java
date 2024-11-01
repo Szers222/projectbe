@@ -19,7 +19,7 @@ import tdc.edu.vn.project_mobile_be.services.impl.AuthenticationServiceImp;
 import java.text.ParseException;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/v1/auth")
 @Builder
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

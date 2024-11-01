@@ -8,6 +8,7 @@ import tdc.edu.vn.project_mobile_be.entities.user.User;
 
 
 import java.sql.Timestamp;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -61,6 +62,8 @@ public class UserResponseDTO {
 
     @JsonProperty("updatedAt")
     Timestamp updatedAt;
+
+    Set<RoleResponseDTO> roles;
 
     // Phương thức để chuyển đổi từ Entity sang DTO
     public void toDto(User user) {
