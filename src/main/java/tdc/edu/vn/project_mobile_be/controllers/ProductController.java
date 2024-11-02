@@ -32,6 +32,7 @@ import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductListeners;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
+import tdc.edu.vn.project_mobile_be.services.impl.MessageService;
 
 import java.util.List;
 import java.util.UUID;
@@ -49,6 +50,8 @@ public class ProductController {
     private ProductRepository productRepository;
     @Autowired
     private SimpMessagingTemplate template;
+    @Autowired
+    private MessageService messageService;
 
 
     @Operation(summary = "Get all products by Category", description = "Retrieve all products by category with pagination support")
@@ -124,8 +127,9 @@ public class ProductController {
         return "Product Updated";
     }
 
-//    @MessageMapping("/product.joinRoom")
-//    public void joinRoom(@Payload String roomId, SimpMessageHeaderAccessor headerAccessor) {
-//        headerAccessor.getSessionAttributes().put("roomId", roomId);
-//    }
+    @GetMapping("/send")
+    public String sendNotification() {
+        messageService.sendMessageToClients("This is a test message from server");
+        return "Message sent to clients!";
+    }
 }

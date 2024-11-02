@@ -88,4 +88,5 @@ logging:
     org:
       springframework:
         web:
-          socket: DEBUG
+          socket: TRACE
+        messaging: TRACE
