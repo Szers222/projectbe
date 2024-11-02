@@ -264,12 +264,10 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
                 productPage = new PageImpl<>(products, pageable, products.size());
             }
         }
-
-
-        Page<Product> productPageRandom = new PageImpl<>(productPage.getContent().subList(PRODUCT_DEFAULT_SIZE, PRODUCT_RELATE_SIZE));
-        List<Product> sortProducts = new ArrayList<>(productPageRandom.getContent());
+        List<Product> sortProducts = new ArrayList<>(productPage.getContent());
         sortProducts.sort(Comparator.comparing(Product::getProductPriceSale));
-        productPageRandom = new PageImpl<>(sortProducts, pageable, sortProducts.size());
+
+        Page<Product> productPageRandom = new PageImpl<>(sortProducts.subList(PRODUCT_DEFAULT_SIZE, PRODUCT_RELATE_SIZE));
 
         return productPageRandom.map(product -> {
             List<CategoryResponseDTO> categoryResponseDTOs = getCategoryResponseDTOs(product);
