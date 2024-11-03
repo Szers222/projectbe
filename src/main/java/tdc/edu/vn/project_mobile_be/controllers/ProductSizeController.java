@@ -21,21 +21,28 @@ public class ProductSizeController {
     @Autowired
     private ProductSizeService productSizeService;
 
-    @GetMapping(value = {"/product-sizes", "/product-sizes/"})
-    public ResponseEntity<ResponseData<?>> getAllProductSizes(@ModelAttribute ProductSizeRequestParamsDTO productSizeRequestParamsDTO) {
+    @GetMapping(value = {"/product-sizes/product", "/product-sizes/"})
+    public ResponseEntity<ResponseData<?>> getAllProductSizesByProductId(@ModelAttribute ProductSizeRequestParamsDTO productSizeRequestParamsDTO) {
 
-        List<ProductSizeResponseDTO> productSizes = productSizeService.getAllProductSize(productSizeRequestParamsDTO);
+        List<ProductSizeResponseDTO> productSizes = productSizeService.getAllProductSizeByProductId(productSizeRequestParamsDTO);
 
         ResponseData<List<ProductSizeResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Success", productSizes);
         return ResponseEntity.ok(responseData);
     }
-    @GetMapping(value = {"/product-sizes/category/{categoryId}", "/product-sizes/category/{categoryId}/"})
-    public ResponseEntity<ResponseData<?>> getAllProductSizesByCategoryID(@PathVariable("categoryId") UUID categoryId) {
+    @GetMapping(value = {"/product-sizes", "/product-sizes/"})
+    public ResponseEntity<ResponseData<?>> getAllProductSizes() {
+
+        List<ProductSizeResponseDTO> productSizes = productSizeService.getAllProductSize();
+
+        ResponseData<List<ProductSizeResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Success", productSizes);
+        return ResponseEntity.ok(responseData);
+    }
+    @GetMapping(value = {"/product-sizes/category/{categoryId}", "/product-sizes/category"})
+    public ResponseEntity<ResponseData<?>> getAllProductSizesByCategoryID(@PathVariable(value = "categoryId",required = false) UUID categoryId) {
 
             List<ProductSizeResponseDTO> productSizes = productSizeService.getAllProductSizeByCategoryID(categoryId);
 
             ResponseData<List<ProductSizeResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Success", productSizes);
             return ResponseEntity.ok(responseData);
     }
-
 }

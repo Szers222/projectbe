@@ -10,7 +10,9 @@ import java.util.UUID;
 
 public interface ProductSizeService extends IService<ProductSize, UUID> {
 
-    List<ProductSizeResponseDTO> getAllProductSize(ProductSizeRequestParamsDTO productSizeRequestParamsDTO);
+    List<ProductSizeResponseDTO> getAllProductSizeByProductId(ProductSizeRequestParamsDTO productSizeRequestParamsDTO);
 
     List<ProductSizeResponseDTO> getAllProductSizeByCategoryID(UUID categoryId);
+
+    List<ProductSizeResponseDTO> getAllProductSize();
 }
