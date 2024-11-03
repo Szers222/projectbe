@@ -22,6 +22,7 @@ import tdc.edu.vn.project_mobile_be.dtos.responses.post.PostResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import tdc.edu.vn.project_mobile_be.entities.status.CategoryStatus;
 import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
@@ -30,6 +31,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -98,14 +100,9 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         product.setProductYearOfManufacture(params.getProductYearOfManufacture());
         product.setCategories(categories);// Đặt năm sản xuất
 
-        // Liên kết product với post vừa tạo
         product.setPost(savedPost);
 
-        // Lưu product vào cơ sở dữ liệu
-        Product savedProduct = productRepository.save(product);
-        // Trả về product đã lưu
-//        String productJson = convertProductToJson(savedProduct);
-        return savedProduct;
+        return  productRepository.save(product);
     }
 
 //    private String convertProductToJson(Product product) {
@@ -231,6 +228,10 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         Product product = productOptional.get();
         productRepository.delete(product);
         return true;
+        Optional<Category> categoryOptional = categoryRepository.findById(categoryId);
+        if (categoryOptional.isEmpty()) {
+            throw new EntityNotFoundException("Category không tồn tại !");
+        }
     }
 
     @Override
