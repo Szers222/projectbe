@@ -7,6 +7,7 @@ spring:
     username: "root"
     password: ''
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     database: mysql
     show-sql: true
@@ -25,68 +26,69 @@ spring:
                 fetch_size: 100
                 batch_size: 30
 
-    servlet:
-      multipart:
-        max-file-size: 20MB
-        max-request-size: 50MB
-    server:
-      port: 8080
-      file:
-        upload-dir: C:\Users\Vinh\Desktop\project_mobile\project_mobile_be\src\main\java\tdc\edu\vn\project_mobile_be\services\impl
-        springdoc:
-          swagger-ui:
-            enabled: true
-          api-docs:
-            enabled: true
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 50MB
 
-spring.devtools:
-  restart:
-    enabled: true  # Kích hoạt tự động tải lại
-    exclude: static/**,public/** # Loại trừ thư mục static và public
-    spring:
-      jackson:
-        time-zone: Asia/Ho_Chi_Minh
+  server:
+    port: 8080
+    file:
+      upload-dir: C:\\Users\\Vinh\\Desktop\\project_mobile\\project_mobile_be\\src\\main\\java\\tdc\\edu\\vn\\project_mobile_be\\services\\impl
+
+  jackson:
+    time-zone: Asia/Ho_Chi_Minh
+
+  devtools:
+    restart:
+      enabled: true
+      exclude: static/**,public/**
+
+springdoc:
+  swagger-ui:
+    enabled: true
+  api-docs:
+    enabled: true
+
 rabbitmq:
-  # Thông tin kết nối
-  host: localhost                 # Địa chỉ host của RabbitMQ server
-  port: 15672                     # Port mặc định của RabbitMQ
-  username: guest                 # Tên đăng nhập mặc định
-  password: guest                 # Mật khẩu mặc định
+  host: localhost
+  port: 5672                     # Changed port for application use
+  username: guest
+  password: guest
+  virtual-host: /
+  connection-timeout: 60000
 
-  # Cấu hình cho virtual host (nếu có)
-  virtual-host: /                 # Virtual host mặc định
-
-  # Cấu hình connection
-  connection-timeout: 60000       # Thời gian timeout kết nối (ms)
-
-  # Cấu hình cho publisher (người gửi message)
   publisher:
-    confirm-type: correlated     # Xác nhận message đã được gửi đến exchange
-    returns: true                # Nhận thông báo khi message không thể routing đến queue
+    confirm-type: correlated
+    returns: true
 
-  # Cấu hình cho consumer (người nhận message)
   listener:
     simple:
       retry:
-        enabled: true            # Bật chế độ retry khi xử lý message thất bại
-        initial-interval: 1000   # Thời gian chờ giữa các lần retry đầu tiên (ms)
-        max-attempts: 3          # Số lần retry tối đa
-        max-interval: 10000      # Thời gian chờ tối đa giữa các lần retry (ms)
-        multiplier: 2            # Hệ số nhân cho thời gian chờ giữa các lần retry
-
-      # Cấu hình prefetch (số message tối đa một consumer có thể xử lý cùng lúc)
-      prefetch: 1                # Chỉ lấy 1 message một lần để đảm bảo xử lý tuần tự
-
-      # Cấu hình acknowledge mode
-      acknowledge-mode: auto     # Tự động xác nhận message đã được xử lý
-
-      # Số consumer tối đa cho mỗi queue
-      concurrency: 1             # Số minimum consumers
+        enabled: true
+        initial-interval: 1000
+        max-attempts: 3
+        max-interval: 10000
+        multiplier: 2
+      prefetch: 1
+      acknowledge-mode: auto
+      concurrency: 1
       max-concurrency: 5
+
 logging:
   level:
     org:
       springframework:
         web:
-          socket: TRACE
-        messaging: TRACE
+          socket:
+            messaging:
+              StompSubProtocolHandler: TRACE
+        messaging:
+          simp:
+            stomp:
+              StompDecoder: TRACE
+
+websocket:
+  message-size-limit: 2MB
+  buffer-size-limit: 2MB
+  send-time-limit: 10000

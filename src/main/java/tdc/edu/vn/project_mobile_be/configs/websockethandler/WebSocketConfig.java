@@ -17,17 +17,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic", "/queue")
-                .setHeartbeatValue(new long[]{10000, 10000})  // Tăng tần suất heartbeat
-                .setTaskScheduler(heartBeatScheduler());       // Scheduler riêng cho heartbeat
+
+        config.enableSimpleBroker("/topic", "/queue");
         config.setApplicationDestinationPrefixes("/app");
         config.setUserDestinationPrefix("/user");
-
     }
 
 
     @Override
-    @CrossOrigin(origins = "*")
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("*")
@@ -35,9 +32,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     }
     @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
-        registration.setMessageSizeLimit(128 * 1024)     // Tăng giới hạn kích thước tin nhắn (mặc định 64KB)
-                .setSendTimeLimit(20 * 1000)          // Tăng timeout gửi tin nhắn (20 giây)
-                .setSendBufferSizeLimit(512 * 1024);  // Tăng buffer size
+        registration.setMessageSizeLimit(1024 * 1024); // Đặt giới hạn kích thước tin nhắn lên 1 MB
+        registration.setSendBufferSizeLimit(1024 * 1024); // Đặt giới hạn bộ đệm gửi lên 1 MB
+        registration.setSendTimeLimit(20000); // Tăng thời gian gửi nếu cần
     }
     @Bean
     public ThreadPoolTaskScheduler heartBeatScheduler() {
