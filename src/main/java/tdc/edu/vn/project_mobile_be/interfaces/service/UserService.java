@@ -16,4 +16,5 @@ public interface UserService extends IService<User, UUID> {
     User createUser(CreateUserRequestDTO userRequestDTO);
     @Mapping(target = "roles", ignore = true)
     User updateUser(@MappingTarget UUID userId, UpdateUserRequestDTO request);
+    UserResponseDTO getUserById(UUID id);
 }

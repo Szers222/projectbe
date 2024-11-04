@@ -42,11 +42,10 @@ public class Role {
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
 
-    @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @ToString.Exclude
-    private Set<User> users = new HashSet<>();
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
+    private Set<User> users;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
             name = "roles_permissions",
             joinColumns = @JoinColumn(name = "role_id"),

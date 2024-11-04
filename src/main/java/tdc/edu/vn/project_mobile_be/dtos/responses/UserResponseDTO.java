@@ -10,6 +10,7 @@ import tdc.edu.vn.project_mobile_be.entities.user.User;
 import java.sql.Timestamp;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -68,7 +69,7 @@ public class UserResponseDTO {
     // Phương thức để chuyển đổi từ Entity sang DTO
     public void toDto(User user) {
         // Sao chép các thuộc tính từ entity sang DTO, ngoại trừ createdAt và updatedAt
-        BeanUtils.copyProperties(user, this, "createdAt", "updatedAt");
+        BeanUtils.copyProperties(user, this, "createdAt", "updatedAt", "roles");
 
         // Xử lý thẻ ID nếu có
         if (user.getICard() != null) {
@@ -79,5 +80,17 @@ public class UserResponseDTO {
         // Lấy createdAt và updatedAt từ entity
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();
+
+        // Chuyển đổi roles từ Entity sang DTO
+        if (user.getRoles() != null) {
+            this.roles = user.getRoles().stream()
+                    .map(role -> {
+                        RoleResponseDTO roleResponseDTO = new RoleResponseDTO();
+                        BeanUtils.copyProperties(role, roleResponseDTO);
+                        return roleResponseDTO;
+                    })
+                    .collect(Collectors.toSet());
+        }
     }
+
 }

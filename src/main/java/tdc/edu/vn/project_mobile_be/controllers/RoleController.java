@@ -14,20 +14,20 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/v1/auth/role")
 @Builder
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RoleController {
     RoleServiceImp roleServiceImp;
 
-    @PostMapping("/role")
+    @PostMapping
     ApiResponse<RoleResponseDTO> create(@RequestBody RoleRequestDTO request) {
         return ApiResponse.<RoleResponseDTO>builder()
                 .result(roleServiceImp.create(request))
                 .build();
     }
-    @GetMapping("/role")
+    @GetMapping
     ApiResponse<List<RoleResponseDTO>> getAll(){
         return ApiResponse.<List<RoleResponseDTO>>builder()
                 .result(roleServiceImp.findAll())

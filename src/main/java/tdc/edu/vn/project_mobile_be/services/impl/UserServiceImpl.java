@@ -4,9 +4,12 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tdc.edu.vn.project_mobile_be.commond.AppException;
 import tdc.edu.vn.project_mobile_be.commond.ErrorCode;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
@@ -116,15 +119,29 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
         return userRepository.save(user);
     }
 
+    @Override
+    public UserResponseDTO getUserById(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(()-> new RuntimeException("User not found"));
+        UserResponseDTO responseDTO = new UserResponseDTO();
+        responseDTO.toDto(user);
+
+        return responseDTO;
+    }
+
 
     // Get All Users
+    @Transactional
     @Override
     public List<UserResponseDTO> getAllUsers() {
         List<User> users = userRepository.findAll();
 
+        // Kiểm tra nếu không có người dùng nào
         if (users.isEmpty()) {
             throw new EntityNotFoundException("No users found");
         }
+
+        // Chuyển đổi từ User sang UserResponseDTO
         return users.stream()
                 .map(user -> {
                     UserResponseDTO responseDTO = new UserResponseDTO();

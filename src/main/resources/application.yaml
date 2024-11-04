@@ -7,6 +7,7 @@ spring:
     username: "root"
     password: ''
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     database: mysql
     show-sql: true
@@ -37,6 +38,9 @@ spring:
             enabled: true
           api-docs:
             enabled: true
+
+jwt:
+  signerKey: "CHpSZnAya03fnmgaxVnU9u4gdxZvnx+UFcrrC5i9+ZwI4+f5CNP0BlQEDCjNeyHh"
 
 
 

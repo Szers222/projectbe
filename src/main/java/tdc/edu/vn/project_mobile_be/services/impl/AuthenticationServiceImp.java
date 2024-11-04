@@ -7,61 +7,73 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tdc.edu.vn.project_mobile_be.commond.AppException;
 import tdc.edu.vn.project_mobile_be.commond.ErrorCode;
 import tdc.edu.vn.project_mobile_be.dtos.requests.AuthenticationRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.IntrospectRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.AuthenticationResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.IntrospectResponseDTO;
+import tdc.edu.vn.project_mobile_be.entities.roles.Role;
+import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
 
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AuthenticationServiceImp {
     @Autowired
     UserRepository userRepository;
 
     @NonFinal
-    protected static final String SIGNER_KEY = "CHpSZnAya03fnmgaxVnU9u4gdxZvnx+UFcrrC5i9+ZwI4+f5CNP0BlQEDCjNeyHh\n";
+    @Value("${jwt.signerKey}")
+    protected String SIGNER_KEY;
 
-    //Dang Nhap
+    @Transactional
     public AuthenticationResponseDTO authenticate(AuthenticationRequestDTO request) {
-        var userName = userRepository.findByUserEmail(request.getUserEmail())
+        var user = userRepository.findByEmailWithRoles(request.getUserEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
+
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-        boolean authenticated = passwordEncoder.matches(request.getUserPassword(), userName.getUserPassword());
-        if (!authenticated)
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        boolean authenticated = passwordEncoder.matches(request.getUserPassword(), user.getUserPassword());
 
-        var token = generateToken(request.getUserEmail());
+        if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
 
+        var token = generateToken(user);
+
+        // Lấy các ID vai trò
+        List<UUID> roleIds = user.getRoles().stream()
+                .map(Role::getRoleId) // Giả sử Role có phương thức getRoleId() để lấy ID
+                .collect(Collectors.toList());
 
         return AuthenticationResponseDTO.builder()
-                    .token(token)
-                    .authenticated(true)
-                    .build();
-
+                .token(token)
+                .authenticated(true)
+                .roles(roleIds) // Trả về danh sách ID vai trò
+                .build();
     }
-    //JWT
+
+
     public IntrospectResponseDTO introspect(IntrospectRequestDTO request) throws JOSEException, ParseException {
         var token = request.getToken();
-
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
-
-        // Kiểm tra token hết hạn hay chưa
         Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
         boolean isVerified = signedJWT.verify(verifier);
         boolean isValid = isVerified && expirationTime.after(new Date());
@@ -69,33 +81,59 @@ public class AuthenticationServiceImp {
         return IntrospectResponseDTO.builder()
                 .valid(isValid)
                 .build();
-
     }
-    //Thuat toan token
-    String generateToken(String email) {
-        //Header(nội dung thuật toán)
+
+    @Transactional
+    public String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
-        //Body(Nội dụng gửi đi token)
+
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(email) // tai khoan
-                .issuer("22211tt4420.mail.tdc.edu.vn") // định danh do ai issuer
-                .issueTime(new Date()) // thời điểm hiện tại
-                .expirationTime(new Date( // het han sau 1 gio
+                .subject(user.getUserEmail())
+                .issuer("22211tt4420.mail.tdc.edu.vn")
+                .issueTime(new Date())
+                .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
                 ))
-                .claim("customClaim","Custom")
+                .claim("scope", buildScope(user)) // Thêm các scope
                 .build();
+
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);
 
         try {
-            //Ky
             jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
-            // tra ve theo kieu string
             return jwsObject.serialize();
         } catch (JOSEException e) {
             throw new RuntimeException(e);
         }
     }
+
+    private String buildScope(User user) {
+        StringJoiner stringJoiner = new StringJoiner(" ");
+        if (user != null) {
+            Set<Role> roles = user.getRoles(); // Lấy danh sách roles
+            log.info("User ID: {}, Roles: {}", user.getUserId(), roles);
+
+            // Kiểm tra nếu roles là null hoặc rỗng
+            if (roles != null && !roles.isEmpty()) {
+                roles.forEach(role -> {
+                    stringJoiner.add("ROLE_" + role.getRoleName());
+                    // Kiểm tra nếu role có permissions không
+                    if (role.getPermissions() != null) {
+                        role.getPermissions().forEach(permission -> {
+                            stringJoiner.add(permission.getPermissionName());
+                        });
+                    }
+                });
+            } else {
+                log.warn("User has no roles assigned.");
+            }
+        } else {
+            log.warn("User is null.");
+        }
+
+        return stringJoiner.toString();
+    }
+
 
 }

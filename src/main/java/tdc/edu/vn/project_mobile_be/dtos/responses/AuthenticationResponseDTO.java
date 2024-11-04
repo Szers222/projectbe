@@ -3,6 +3,10 @@ package tdc.edu.vn.project_mobile_be.dtos.responses;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -11,4 +15,5 @@ import lombok.experimental.FieldDefaults;
 public class AuthenticationResponseDTO {
     String token;
     boolean authenticated;
+    List<UUID> roles;
 }

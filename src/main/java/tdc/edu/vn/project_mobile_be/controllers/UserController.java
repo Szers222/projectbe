@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
@@ -20,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/v1/auth/users")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserController {
@@ -43,6 +44,7 @@ public class UserController {
 
     // Get All Users
     @GetMapping
+    //@PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ResponseData<List<UserResponseDTO>>> getAllUsers() {
         List<UserResponseDTO> users = userService.getAllUsers();
         ResponseData<List<UserResponseDTO>> responseData =
@@ -62,6 +64,15 @@ public class UserController {
                 , "User tạo thành công!"
                 , user);
         return new ResponseEntity<>(responseData, HttpStatus.CREATED);
-
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseData<UserResponseDTO>> getUser(@PathVariable UUID id) {
+        UserResponseDTO user = userService.getUserById(id);
+        ResponseData<UserResponseDTO> responseData = new ResponseData<>(
+                HttpStatus.OK,
+                "Lay theo ID USER",
+                user
+        );
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 }
