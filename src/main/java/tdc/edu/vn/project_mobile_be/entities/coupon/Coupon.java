@@ -1,10 +1,8 @@
 package tdc.edu.vn.project_mobile_be.entities.coupon;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -64,10 +62,15 @@ public class Coupon {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "product_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
     private Product product;
 
 
     @ManyToMany(mappedBy = "coupons")
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
     private Set<Order> order = new HashSet<>();
 }

@@ -67,6 +67,9 @@ public class Product {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "coupon_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
     private Coupon coupon;
 
     @OneToOne(cascade = CascadeType.ALL)
