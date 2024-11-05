@@ -19,12 +19,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tdc.edu.vn.project_mobile_be.commond.AppException;
 import tdc.edu.vn.project_mobile_be.commond.ErrorCode;
+import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.AuthenticationRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.IntrospectRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.LogoutRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.AuthenticationResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.IntrospectResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
+import tdc.edu.vn.project_mobile_be.entities.token.InvalidatedToken;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.InvalidatedTokenRepository;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.RoleRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
 
 import java.text.ParseException;
@@ -40,16 +45,21 @@ import java.util.stream.Collectors;
 public class AuthenticationServiceImp {
     @Autowired
     UserRepository userRepository;
-
+    @Autowired
+    InvalidatedTokenRepository invalidatedTokenRepository;
+    @Autowired
+    RoleRepository roleRepository;
     @NonFinal
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
 
     @Transactional
     public AuthenticationResponseDTO authenticate(AuthenticationRequestDTO request) {
-        var user = userRepository.findByEmailWithRoles(request.getUserEmail())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
-
+        Optional<User> optionalUser = userRepository.findByUserEmail(request.getUserEmail());
+        if(optionalUser.isEmpty()){
+            throw new EntityNotFoundException("Khong tim thay");
+        }
+        User user = optionalUser.get();
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(request.getUserPassword(), user.getUserPassword());
 
@@ -57,30 +67,61 @@ public class AuthenticationServiceImp {
 
         var token = generateToken(user);
 
-        // Lấy các ID vai trò
-        List<UUID> roleIds = user.getRoles().stream()
-                .map(Role::getRoleId) // Giả sử Role có phương thức getRoleId() để lấy ID
-                .collect(Collectors.toList());
+        // Lấy các đối tượng Role
+        //List<Role> roles = new ArrayList<>(user.getRoles());
 
         return AuthenticationResponseDTO.builder()
                 .token(token)
                 .authenticated(true)
-                .roles(roleIds) // Trả về danh sách ID vai trò
+                //.roles(roles)
                 .build();
     }
-
-
-    public IntrospectResponseDTO introspect(IntrospectRequestDTO request) throws JOSEException, ParseException {
+    //Kiem tra token
+    public IntrospectResponseDTO introspect(IntrospectRequestDTO request)
+            throws JOSEException, ParseException {
         var token = request.getToken();
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
-        SignedJWT signedJWT = SignedJWT.parse(token);
-        Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-        boolean isVerified = signedJWT.verify(verifier);
-        boolean isValid = isVerified && expirationTime.after(new Date());
-
+        boolean isValid = true;
+        try {
+            verifyToken(token);
+        } catch (Exception e) {
+            isValid = false;
+        }
         return IntrospectResponseDTO.builder()
                 .valid(isValid)
                 .build();
+
+    }
+
+    public void logout(LogoutRequestDTO request) throws ParseException, JOSEException {
+        var signToken = verifyToken(request.getToken());
+
+        String jit = signToken.getJWTClaimsSet().getJWTID();
+        Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jit)
+                .expires(expiryTime)
+                .build();
+        invalidatedTokenRepository.save(invalidatedToken);
+
+
+    }
+
+    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        var verified = signedJWT.verify(verifier);
+        if(!(verified && expirationTime.after(new Date())))
+            throw new RuntimeException("Token het han hoac khong dung");
+
+        if(invalidatedTokenRepository
+                .existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+            throw new RuntimeException("Token het han");
+
+
+        return signedJWT;
     }
 
     @Transactional
@@ -94,7 +135,8 @@ public class AuthenticationServiceImp {
                 .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
                 ))
-                .claim("scope", buildScope(user)) // Thêm các scope
+                .jwtID(UUID.randomUUID().toString())
+                .claim("scope", buildScope(user))
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -111,10 +153,7 @@ public class AuthenticationServiceImp {
     private String buildScope(User user) {
         StringJoiner stringJoiner = new StringJoiner(" ");
         if (user != null) {
-            Set<Role> roles = user.getRoles(); // Lấy danh sách roles
-            log.info("User ID: {}, Roles: {}", user.getUserId(), roles);
-
-            // Kiểm tra nếu roles là null hoặc rỗng
+            Set<Role> roles = user.getRoles();
             if (roles != null && !roles.isEmpty()) {
                 roles.forEach(role -> {
                     stringJoiner.add("ROLE_" + role.getRoleName());
@@ -134,6 +173,4 @@ public class AuthenticationServiceImp {
 
         return stringJoiner.toString();
     }
-
-
 }

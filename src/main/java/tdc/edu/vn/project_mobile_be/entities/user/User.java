@@ -93,7 +93,10 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private Set<OneTimePassword> oneTimePasswords = new HashSet<>();
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
     @JoinTable(
             name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),

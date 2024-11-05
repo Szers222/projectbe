@@ -2,9 +2,11 @@ package tdc.edu.vn.project_mobile_be.services.impl;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,6 +36,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service("user_ServiceImpl")
 @Primary
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -78,7 +81,7 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
         user.setUserPassword(encodedPassword);
         user.setUserPasswordLevel2(encodedPasswordLevel2);
 
-        UUID roleId = UUID.fromString("9e50a2d4-d2cc-46e3-a040-f3da335309fd"); // Thay thế bằng UUID của vai trò ADMIN
+        UUID roleId = UUID.fromString("9e50a2d4-d2cc-46e3-a040-f3da335309fd");
         Role role = roleRepository.findById(roleId).orElse(null);
         if (role != null) {
             user.getRoles().add(role);
@@ -129,18 +132,26 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
         return responseDTO;
     }
 
+    @Override
+    public UserResponseDTO getMyInfo() {
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName();
+
+        User user = userRepository.findByUserEmail(email)
+                .orElseThrow(() -> new RuntimeException("Tai khong khon ton tai"));
+        UserResponseDTO responseDTO = new UserResponseDTO();
+        responseDTO.toDto(user);
+
+        return responseDTO;
+    }
 
     // Get All Users
-    @Transactional
     @Override
     public List<UserResponseDTO> getAllUsers() {
         List<User> users = userRepository.findAll();
-
-        // Kiểm tra nếu không có người dùng nào
         if (users.isEmpty()) {
             throw new EntityNotFoundException("No users found");
         }
-
         // Chuyển đổi từ User sang UserResponseDTO
         return users.stream()
                 .map(user -> {
@@ -150,6 +161,4 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
                 })
                 .collect(Collectors.toList());
     }
-
-
 }

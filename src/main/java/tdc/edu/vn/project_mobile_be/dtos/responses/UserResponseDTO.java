@@ -3,8 +3,10 @@ package tdc.edu.vn.project_mobile_be.dtos.responses;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
+import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
 
 import java.sql.Timestamp;
@@ -16,8 +18,9 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponseDTO {
+public class UserResponseDTO implements IDto<User> {
 
     @JsonProperty("userId")
     UUID userId;
@@ -66,7 +69,12 @@ public class UserResponseDTO {
 
     Set<RoleResponseDTO> roles;
 
-    // Phương thức để chuyển đổi từ Entity sang DTO
+    @Override
+    public User toEntity() {
+        return null;
+    }
+
+   @Override
     public void toDto(User user) {
         // Sao chép các thuộc tính từ entity sang DTO, ngoại trừ createdAt và updatedAt
         BeanUtils.copyProperties(user, this, "createdAt", "updatedAt", "roles");
@@ -83,6 +91,7 @@ public class UserResponseDTO {
 
         // Chuyển đổi roles từ Entity sang DTO
         if (user.getRoles() != null) {
+            log.info("Role" + user.getRoles());
             this.roles = user.getRoles().stream()
                     .map(role -> {
                         RoleResponseDTO roleResponseDTO = new RoleResponseDTO();
