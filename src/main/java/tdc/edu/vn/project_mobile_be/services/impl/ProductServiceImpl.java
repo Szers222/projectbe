@@ -45,6 +45,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private final int PRODUCT_RELATE_SIZE = 6;
     private final int PRODUCT_MIN_PRICE = 0;
     private final int PRODUCT_MIN_SIZE = 0;
+    private final double SOLVE_SALE = 1;
+    private final double MAX_PER = 100;
 
     @Autowired
     private ProductRepository productRepository;
@@ -442,7 +444,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             if (coupon.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
                 productSale = coupon.getCouponPerHundred();
             } else if (coupon.getCouponType() == COUPON_PRICE_TYPE) {
-                productSale = coupon.getCouponPrice();
+                double total = product.getProductPrice() - coupon.getCouponPrice();
+                productSale = (SOLVE_SALE - (total/product.getProductPrice())) * MAX_PER;
             }
         }
         return productSale;
