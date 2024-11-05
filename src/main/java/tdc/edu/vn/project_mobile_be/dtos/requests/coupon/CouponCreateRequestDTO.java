@@ -36,7 +36,7 @@ public class CouponCreateRequestDTO implements IDto<Coupon> {
     @JsonProperty("couponPerHundred")
     private float couponPerHundred;
     @JsonProperty("couponPrice")
-    private String couponPrice;
+    private double couponPrice;
     @JsonProperty("couponType")
     private int couponType;
 

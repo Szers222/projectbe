@@ -48,7 +48,7 @@ public class Coupon {
     private float couponPerHundred;
 
     @Column(name = "coupon_price")
-    private String couponPrice;
+    private double couponPrice;
 
     @Column(name = "coupon_type")
     private int couponType;

@@ -46,7 +46,7 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
             coupon.setCouponRelease(releaseDateTime);
             coupon.setCouponExpire(expireDateTime);
             if (params.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
-                coupon.setCouponPrice(null);
+                coupon.setCouponPrice(0);
                 coupon.setCouponPerHundred(params.getCouponPerHundred());
             }
             if (params.getCouponType() == COUPON_PRICE_TYPE) {
@@ -74,7 +74,7 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
             coupon.setCouponRelease(releaseDateTime);
             coupon.setCouponExpire(expireDateTime);
             if (params.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
-                coupon.setCouponPrice(null);
+                coupon.setCouponPrice(0);
                 coupon.setCouponPerHundred(params.getCouponPerHundred());
             }
             if (params.getCouponType() == COUPON_PRICE_TYPE) {
@@ -84,7 +84,6 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
         }
         return couponRepository.save(coupon);
     }
-
     @Override
     public Coupon updateCouponByProductId(CouponUpdateRequestDTO couponDTO, UUID productId) {
         boolean check = false;
@@ -102,7 +101,7 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
             coupon.setCouponRelease(releaseDateTime);
             coupon.setCouponExpire(expireDateTime);
             if (couponDTO.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
-                coupon.setCouponPrice(null);
+                coupon.setCouponPrice(0);
                 coupon.setCouponPerHundred(couponDTO.getCouponPerHundred());
             }
             if (couponDTO.getCouponType() == COUPON_PRICE_TYPE) {
@@ -117,7 +116,7 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
     public boolean deleteCoupon(CouponRemoveRequestDTO params) {
         Optional<Coupon> couponOptional = couponRepository.findCouponByCouponId(params.getId());
         if (couponOptional.isEmpty()) {
-            throw new EntityNotFoundException("Coupon không tồn tại !");
+            throw new EntityNotFoundException("Category không tồn tại !");
         }
         Coupon coupon = couponOptional.get();
         couponRepository.delete(coupon);
@@ -147,18 +146,19 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
     }
 
 
+
     public boolean validateCoupon(CouponCreateRequestDTO params) {
         if (params.getCouponPerHundred() < 0 || params.getCouponPerHundred() > 100) {
             throw new NumberErrorException("CouponPerHundred phải nằm trong khoảng từ 0 đến 100");
         }
-        int couponPrice = Integer.parseInt(params.getCouponPrice());
-        if (couponPrice <= 0) {
+        double couponPrice = params.getCouponPrice();
+        if (couponPrice < 0) {
             throw new NumberErrorException("CouponPrice phải lớn hơn 0 và không thể bằng 0");
         }
-        if (params.getCouponPerHundred() != 0 && !params.getCouponPrice().isEmpty()) {
+        if (params.getCouponPerHundred() != 0 && couponPrice != 0) {
             throw new CouponPricePerHundredException("CouponPerHundred và CouponPrice không thể cùng tồn tại");
         }
-        if (params.getCouponPerHundred() == 0 && params.getCouponPrice().isEmpty()) {
+        if (params.getCouponPerHundred() == 0 && params.getCouponPrice() == 0) {
             throw new CouponPricePerHundredException("CouponPerHundred hoặc CouponPrice phải tồn tại");
         }
         if (params.getCouponExpire().isBefore(params.getCouponRelease()) || params.getCouponExpire().isEqual(params.getCouponRelease())) {
@@ -183,14 +183,14 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
         if (params.getCouponPerHundred() < 0 || params.getCouponPerHundred() > 100) {
             throw new NumberErrorException("CouponPerHundred phải nằm trong khoảng từ 0 đến 100");
         }
-        int couponPrice = Integer.parseInt(params.getCouponPrice());
-        if (couponPrice <= 0) {
+        double couponPrice = params.getCouponPrice();
+        if (couponPrice < 0) {
             throw new NumberErrorException("CouponPrice phải lớn hơn 0 và không thể bằng 0");
         }
-        if (params.getCouponPerHundred() != 0 && !params.getCouponPrice().isEmpty()) {
+        if (params.getCouponPerHundred() != 0 && couponPrice != 0) {
             throw new CouponPricePerHundredException("CouponPerHundred và CouponPrice không thể cùng tồn tại");
         }
-        if (params.getCouponPerHundred() == 0 && params.getCouponPrice().isEmpty()) {
+        if (params.getCouponPerHundred() == 0 && params.getCouponPrice() == 0) {
             throw new CouponPricePerHundredException("CouponPerHundred hoặc CouponPrice phải tồn tại");
         }
         if (params.getCouponExpire().isBefore(params.getCouponRelease()) || params.getCouponExpire().isEqual(params.getCouponRelease())) {
