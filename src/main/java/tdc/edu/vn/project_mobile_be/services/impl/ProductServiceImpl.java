@@ -22,7 +22,6 @@ import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
-import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CouponService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.PostService;
