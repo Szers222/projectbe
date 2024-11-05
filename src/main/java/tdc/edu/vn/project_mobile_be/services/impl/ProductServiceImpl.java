@@ -94,7 +94,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             Category category = categoryRepository.findByCategoryId(categoryId);
             categories.add(category);
         }
-
+        double productSale = solveProductSale(params.getProductPrice(), coupon);
 
 
         // Tạo đối tượng Product mới
@@ -103,6 +103,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         product.setCategories(categories);
         product.setPost(post);
         product.setCoupon(coupon);
+        product.setProductSale(productSale);
 
         return productRepository.save(product);
     }
@@ -143,7 +144,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             Category category = categoryRepository.findByCategoryId(categoryId);
             categories.add(category);
         }
-
+        double productSale = solveProductSale(params.getProductPrice(), coupon);
         Product product = optionalProduct.get();
         product.setProductName(params.getProductName());
         product.setProductPrice(params.getProductPrice());
@@ -152,6 +153,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         product.setCoupon(coupon);
         product.setPost(post);
         product.setCategories(categories);
+        product.setProductSale(productSale);
 
         return productRepository.save(product);
     }
@@ -215,7 +217,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
         // Lọc theo khoảng giá
         if (params.getMinPrice() != null && params.getMaxPrice() != null) {
-            if (this.validatePriceRange(params.getMinPrice(), params.getMaxPrice()) == true) {
+            if (this.validatePriceRange(params.getMinPrice(), params.getMaxPrice())) {
                 spec = spec.and(ProductSpecifications.priceBetween(params.getMinPrice(), params.getMaxPrice()));
             }
         }
@@ -437,15 +439,14 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         return formatPrice(price);
     }
 
-    public double solveProductSale(Product product) {
+    public double solveProductSale(double productPrice, Coupon coupon) {
         double productSale = 0;
-        if (product.getCoupon() != null) {
-            Coupon coupon = product.getCoupon();
+        if (coupon != null) {
             if (coupon.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
                 productSale = coupon.getCouponPerHundred();
             } else if (coupon.getCouponType() == COUPON_PRICE_TYPE) {
-                double total = product.getProductPrice() - coupon.getCouponPrice();
-                productSale = (SOLVE_SALE - (total/product.getProductPrice())) * MAX_PER;
+                double total = productPrice - coupon.getCouponPrice();
+                productSale = (SOLVE_SALE - (total / productPrice)) * MAX_PER;
             }
         }
         return productSale;

@@ -12,7 +12,6 @@ import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -36,7 +35,7 @@ public class CouponCreateRequestDTO implements IDto<Coupon> {
     @JsonProperty("couponPerHundred")
     private float couponPerHundred;
     @JsonProperty("couponPrice")
-    private String couponPrice;
+    private double couponPrice;
     @JsonProperty("couponType")
     private int couponType;
 

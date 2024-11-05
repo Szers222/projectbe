@@ -33,7 +33,7 @@ public class CouponUpdateRequestDTO implements IDto<Coupon> {
     @JsonProperty("couponPerHundred")
     private float couponPerHundred;
     @JsonProperty("couponPrice")
-    private String couponPrice;
+    private double couponPrice;
     @NotBlank(message = "Loại mã giảm giá không được để trống")
     @JsonProperty("couponType")
     private int couponType;

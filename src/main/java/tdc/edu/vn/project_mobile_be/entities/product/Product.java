@@ -1,9 +1,9 @@
 package tdc.edu.vn.project_mobile_be.entities.product;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.*;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
@@ -13,8 +13,6 @@ import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
 import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
@@ -44,7 +42,7 @@ public class Product {
 
     @Column(name = "product_quantity", nullable = false, columnDefinition = "int default 0")
     private int productQuantity;
-    @Column(name = "product_sale", nullable = true, columnDefinition = "double default 0")
+    @Column(name = "product_sale", columnDefinition = "double default 0")
     private double productSale;
     @Column(name = "product_views", columnDefinition = "int default 0")
     private int productViews;
@@ -67,6 +65,9 @@ public class Product {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "coupon_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
     private Coupon coupon;
 
     @OneToOne(cascade = CascadeType.ALL)
