@@ -39,9 +39,8 @@ import java.util.stream.Collectors;
 @Service
 public class ProductServiceImpl extends AbService<Product, UUID> implements ProductService {
 
-    public final int PRODUCT_CLOTHES = 0;
-    public final int PRODUCT_SHOES = 1;
-    public final int PRODUCT_ACCESSORIES = 2;
+    private final int COUPON_PER_HUNDRED_TYPE = 0;
+    private final int COUPON_PRICE_TYPE = 1;
     private final int PRODUCT_DEFAULT_SIZE = 0;
     private final int PRODUCT_RELATE_SIZE = 6;
     private final int PRODUCT_MIN_PRICE = 0;
@@ -186,8 +185,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
             ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
             PostResponseDTO postResponseDTO = getPostResponseDTO(product);
-            String productPriceSaleString = productPriceSale(product);
-            String productPriceString = productPrice(product);
+            String productPriceSaleString = formatProductPriceSale(product);
+            String productPriceString = formatProductPrice(product);
 
 
             ProductResponseDTO dto = new ProductResponseDTO();
@@ -252,8 +251,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
             ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
             PostResponseDTO postResponseDTO = getPostResponseDTO(product);
-            String productPriceSaleString = productPriceSale(product);
-            String productPriceString = productPrice(product);
+            String productPriceSaleString = formatProductPriceSale(product);
+            String productPriceString = formatProductPrice(product);
 
             ProductResponseDTO dto = new ProductResponseDTO();
             dto.toDto(product);
@@ -295,8 +294,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
             ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
             PostResponseDTO postResponseDTO = getPostResponseDTO(product);
-            String productPriceSaleString = productPriceSale(product);
-            String productPriceString = productPrice(product);
+            String productPriceSaleString = formatProductPriceSale(product);
+            String productPriceString = formatProductPrice(product);
 
             ProductResponseDTO dto = new ProductResponseDTO();
             dto.toDto(product);
@@ -323,8 +322,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
         ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
         PostResponseDTO postResponseDTO = getPostResponseDTO(product);
-        String productPriceSaleString = productPriceSale(product);
-        String productPriceString = productPrice(product);
+        String productPriceSaleString = formatProductPriceSale(product);
+        String productPriceString = formatProductPrice(product);
 
         ProductResponseDTO productDTO = new ProductResponseDTO();
         productDTO.toDto(product);
@@ -420,7 +419,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         return postResponseDTO;
     }
 
-    public String productPriceSale(Product product) {
+    public String formatProductPriceSale(Product product) {
         double priceSale = product.getProductPriceSale();
         if (priceSale < PRODUCT_MIN_PRICE) {
             throw new NumberErrorException("Price must be greater than 0");
@@ -428,12 +427,25 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         return formatPrice(priceSale);
     }
 
-    public String productPrice(Product product) {
+    public String formatProductPrice(Product product) {
         double price = product.getProductPrice();
         if (price < PRODUCT_MIN_PRICE) {
             throw new NumberErrorException("Price must be greater than 0");
         }
         return formatPrice(price);
+    }
+
+    public double solveProductSale(Product product) {
+        double productSale = 0;
+        if (product.getCoupon() != null) {
+            Coupon coupon = product.getCoupon();
+            if (coupon.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
+                productSale = coupon.getCouponPerHundred();
+            } else if (coupon.getCouponType() == COUPON_PRICE_TYPE) {
+                productSale = coupon.getCouponPrice();
+            }
+        }
+        return productSale;
     }
 
 }
