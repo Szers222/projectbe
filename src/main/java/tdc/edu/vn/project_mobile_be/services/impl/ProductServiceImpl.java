@@ -446,7 +446,13 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
                 productSale = coupon.getCouponPerHundred();
             } else if (coupon.getCouponType() == COUPON_PRICE_TYPE) {
                 double total = productPrice - coupon.getCouponPrice();
+                if (total <= 0) {
+                    return MAX_PER;
+                }
                 productSale = (SOLVE_SALE - (total / productPrice)) * MAX_PER;
+                if (productSale > MAX_PER) {
+                    return MAX_PER;
+                }
             }
         }
         return productSale;
