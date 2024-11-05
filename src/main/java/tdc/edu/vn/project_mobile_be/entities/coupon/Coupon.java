@@ -9,7 +9,6 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
-import tdc.edu.vn.project_mobile_be.entities.type.CouponType;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
