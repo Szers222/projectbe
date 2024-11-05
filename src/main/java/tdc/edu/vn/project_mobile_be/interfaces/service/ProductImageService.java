@@ -2,7 +2,7 @@ package tdc.edu.vn.project_mobile_be.interfaces.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductImageResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductImageResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
 import tdc.edu.vn.project_mobile_be.interfaces.IService;
 

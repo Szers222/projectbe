@@ -24,9 +24,9 @@ import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductRequestParamsDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
-import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.BreadcrumbService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
@@ -55,7 +55,7 @@ public class ProductController {
 
     @GetMapping(value = {"/products/filters", "/products"})
     public ResponseEntity<ResponseData<PagedModel<EntityModel<ProductResponseDTO>>>> getProductsByFilters(
-            @ModelAttribute ProductRequestParamsDTO params,
+            @RequestParam ProductRequestParamsDTO params,
             PagedResourcesAssembler<ProductResponseDTO> assembler) {
 
         if (params.getSort() == null || params.getSort().isEmpty()) {
@@ -145,6 +145,28 @@ public class ProductController {
     public ResponseEntity<ResponseData<ProductResponseDTO>> getProductById(@PathVariable UUID productId) {
         ProductResponseDTO product = productService.getProductById(productId);
         ResponseData<ProductResponseDTO> responseData = new ResponseData<>(HttpStatus.OK, "Success", product);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PutMapping({"/product/{productId}", "/product/{productId}/"})
+    public ResponseEntity<ResponseData<?>> updateProduct(
+            @Valid @RequestBody ProductUpdateRequestDTO params,
+            @PathVariable("productId") UUID productId,
+            BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            List<String> errorMessages = bindingResult.getFieldErrors().stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
+            throw new MultipleFieldsNullOrEmptyException(errorMessages);
+        }
+        Product product = productService.updateProduct(params,productId);
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Cập nhật sản phẩm thành công", product);
+        return ResponseEntity.ok(responseData);
+    }
+    @DeleteMapping("/product/{productId}")
+    public ResponseEntity<ResponseData<?>> deleteProduct(@PathVariable UUID productId) {
+        productService.deleteProduct(productId);
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Xóa sản phẩm thành công", null);
         return ResponseEntity.ok(responseData);
     }
 

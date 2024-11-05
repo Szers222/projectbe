@@ -52,6 +52,9 @@ public class Coupon {
     @Column(name = "coupon_price")
     private String couponPrice;
 
+    @Column(name = "coupon_type")
+    private int couponType;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
@@ -63,11 +66,8 @@ public class Coupon {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @ManyToOne
-    @JoinColumn(name = "coupon_type_id")
-    private CouponType couponType;
 
     @ManyToMany(mappedBy = "coupons")
     @ToString.Exclude
-    private Set<Order> products = new HashSet<>();
+    private Set<Order> order = new HashSet<>();
 }

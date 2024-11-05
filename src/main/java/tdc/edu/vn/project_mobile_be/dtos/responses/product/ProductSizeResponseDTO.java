@@ -1,4 +1,4 @@
-package tdc.edu.vn.project_mobile_be.dtos.responses;
+package tdc.edu.vn.project_mobile_be.dtos.responses.product;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -6,12 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
-import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 
 @Data

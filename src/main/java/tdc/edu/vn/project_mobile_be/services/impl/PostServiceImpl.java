@@ -10,8 +10,10 @@ import tdc.edu.vn.project_mobile_be.dtos.requests.post.PostUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.post.PostResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
+import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.PostRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.PostStatusRepository;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.PostService;
 
 import java.sql.Timestamp;
@@ -28,6 +30,8 @@ public class PostServiceImpl extends AbService<Post, UUID> implements PostServic
     private PostRepository postRepository;
     @Autowired
     private PostStatusRepository postStatusRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     private final int POST_STATUS_INACTIVE = 0;
     private final int POST_STATUS_ACTIVE = 1;
@@ -51,12 +55,18 @@ public class PostServiceImpl extends AbService<Post, UUID> implements PostServic
         if (postStatus == null) {
             throw new EntityNotFoundException("Post thực thể không tồn tại");
         }
+        Optional<User> optionalUser = userRepository.findById(requestDTO.getUserId());
+        if (optionalUser.isEmpty()) {
+            throw new EntityNotFoundException("User không tồn tại !");
+        }
+        User user = optionalUser.get();
 
 
         Post post = requestDTO.toEntity();
         post.setPostId(UUID.randomUUID());
         post.setPostRelease(releaseTimestamp);
         post.setPostStatus(postStatus);
+        post.setUser(user);
 
         return postRepository.save(post);
     }
@@ -89,6 +99,7 @@ public class PostServiceImpl extends AbService<Post, UUID> implements PostServic
             throw new EntityNotFoundException("Post thực thể không tồn tại");
         }
 
+
         post.setPostName(requestDTO.getPostName());
         post.setPostContent(requestDTO.getPostContent());
         post.setPostImagePath(requestDTO.getPostImagePath());
@@ -98,6 +109,45 @@ public class PostServiceImpl extends AbService<Post, UUID> implements PostServic
 
         return postRepository.save(post);
     }
+
+    @Override
+    public Post updatePostByProductId(PostUpdateRequestDTO postDTO, UUID productId) {
+        Optional<Post> postOptional = postRepository.findPostByProductId(productId);
+        if (postOptional.isEmpty()) {
+            throw new EntityNotFoundException("Post thực thể không tồn tại");
+        }
+        Post post = postOptional.get();
+        if (post == null) {
+            throw new EntityNotFoundException("Post thực thể không tồn tại");
+        }
+
+        LocalDateTime releaseDateTime;
+        if (postDTO.getPostRelease() == null) {
+            releaseDateTime = LocalDateTime.now();
+
+        } else if (postDTO.getPostRelease().isAfter(LocalDate.now())
+                || postDTO.getPostRelease().isEqual(LocalDate.now())) {
+            releaseDateTime = postDTO.getPostRelease().atStartOfDay();
+        } else {
+            throw new ReleaseException("Ngày phát hành không hợp lệ");
+        }
+        Timestamp releaseTimestamp = Timestamp.valueOf(releaseDateTime);
+
+        PostStatus postStatus = getStatus(postDTO.getPostStatusId());
+        if (postStatus == null) {
+            throw new EntityNotFoundException("Post thực thể không tồn tại");
+        }
+
+        post.setPostName(postDTO.getPostName());
+        post.setPostContent(postDTO.getPostContent());
+        post.setPostImagePath(postDTO.getPostImagePath());
+        post.setPostRelease(releaseTimestamp);
+        post.setPostStatus(postStatus);
+        post.setPostType(postDTO.getPostType());
+
+        return postRepository.save(post);
+    }
+
 
     @Override
     public Post findPostById(UUID postId) {
@@ -145,7 +195,6 @@ public class PostServiceImpl extends AbService<Post, UUID> implements PostServic
 
         return result;
     }
-
 
 
 

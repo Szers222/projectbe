@@ -6,7 +6,6 @@ import tdc.edu.vn.project_mobile_be.dtos.requests.post.PostUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.post.PostResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,4 +22,6 @@ public interface PostService {
     List<Post> findAllPost();
 
     List<PostResponseDTO> findAllNewPost();
+
+    Post updatePostByProductId(PostUpdateRequestDTO postDTO, UUID productId);
 }
