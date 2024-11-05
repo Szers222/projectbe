@@ -31,8 +31,10 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
 
     private final int COUPON_PER_HUNDRED_TYPE = 0;
     private final int COUPON_PRICE_TYPE = 1;
+    private final int COUPON_SHIP_TYPE = 2;
     private final int ROLE_ADMIN = 0;
     private final int ROLE_USER = 1;
+
 
     @Override
     public Coupon createCoupon(CouponCreateRequestDTO params) {
@@ -113,8 +115,21 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
     }
 
     @Override
-    public boolean deleteCoupon(CouponRemoveRequestDTO params) {
-        Optional<Coupon> couponOptional = couponRepository.findCouponByCouponId(params.getId());
+    public List<CouponResponseDTO> getCouponByType(int type) {
+        List<CouponResponseDTO> responseDTOS = new ArrayList<>();
+        couponRepository.findCouponByType(type).forEach(coupon -> {
+            if (coupon.getCouponExpire().after(Timestamp.valueOf(LocalDate.now().atStartOfDay()))) {
+                CouponResponseDTO dto = new CouponResponseDTO();
+                dto.toDto(coupon);
+                responseDTOS.add(dto);
+            }
+        });
+        return responseDTOS;
+    }
+
+    @Override
+    public boolean deleteCoupon(UUID couponId) {
+        Optional<Coupon> couponOptional = couponRepository.findCouponByCouponId(couponId);
         if (couponOptional.isEmpty()) {
             throw new EntityNotFoundException("Category không tồn tại !");
         }
@@ -144,7 +159,6 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
 
         return result;
     }
-
 
 
     public boolean validateCoupon(CouponCreateRequestDTO params) {
