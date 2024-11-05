@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.ListNotFoundException;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSupplierResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductSupplierResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductSupplierRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductSupplierService;

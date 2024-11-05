@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.dtos.requests.ProductSizeRequestParamsDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSizeResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductSizeResponseDTO;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductSizeService;
 
 import java.util.List;

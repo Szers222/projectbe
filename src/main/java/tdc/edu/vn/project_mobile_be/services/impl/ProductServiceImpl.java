@@ -13,19 +13,18 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.NumberErrorException
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductUpdateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductImageResponseDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSizeResponseDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSupplierResponseDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.SizeProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.category.CategoryResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.post.PostResponseDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.product.*;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
+import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
+import tdc.edu.vn.project_mobile_be.interfaces.service.CouponService;
+import tdc.edu.vn.project_mobile_be.interfaces.service.PostService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
 import java.math.BigDecimal;
@@ -40,13 +39,15 @@ import java.util.stream.Collectors;
 @Service
 public class ProductServiceImpl extends AbService<Product, UUID> implements ProductService {
 
-    public final int PRODUCT_CLOTHES = 0;
-    public final int PRODUCT_SHOES = 1;
-    public final int PRODUCT_ACCESSORIES = 2;
+    private final int COUPON_PER_HUNDRED_TYPE = 0;
+    private final int COUPON_PRICE_TYPE = 1;
     private final int PRODUCT_DEFAULT_SIZE = 0;
     private final int PRODUCT_RELATE_SIZE = 6;
     private final int PRODUCT_MIN_PRICE = 0;
     private final int PRODUCT_MIN_SIZE = 0;
+    private final double SOLVE_SALE = 1;
+    private final double MAX_PER = 100;
+
     @Autowired
     private ProductRepository productRepository;
     @Autowired
@@ -54,39 +55,38 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Autowired
     private ProductSupplierRepository productSupplierRepository;
     @Autowired
-    private PostRepository postRepository;
+    private PostService postService;
     @Autowired
     private PostStatusRepository postStatusRepository;
     @Autowired
     private SizeProductRepository sizeProductRepository;
+    @Autowired
+    private CouponService couponService;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public Product createProduct(ProductCreateRequestDTO params) {
         LocalDateTime releaseDateTime;
 
         // Kiểm tra nếu postRelease là null, dùng thời gian hiện tại
-        if (params.getPostDTO().getPostRelease() == null) {
+        if (params.getPost().getPostRelease() == null) {
             releaseDateTime = LocalDateTime.now();
         } else {
             // Nếu có, dùng ngày phát hành được cung cấp, đặt vào đầu ngày
-            releaseDateTime = params.getPostDTO().getPostRelease().atStartOfDay();
+            releaseDateTime = params.getPost().getPostRelease().atStartOfDay();
         }
 
         // Chuyển đổi sang Timestamp
         Timestamp releaseTimestamp = Timestamp.valueOf(releaseDateTime);
 
-        PostStatus status = postStatusRepository.findByPostStatusId(params.getPostDTO().getPostStatusId());
+        PostStatus status = postStatusRepository.findByPostStatusId(params.getPost().getPostStatusId());
 
 
         // Tạo đối tượng Post mới
-        Post post = new Post();
-        post.setPostId(UUID.randomUUID());
-        post.setPostRelease(releaseTimestamp);
-        post.setPostName(params.getPostDTO().getPostName());
-        post.setPostContent(params.getPostDTO().getPostContent());
-        post.setPostStatus(status);
-        // Lưu post vào cơ sở dữ liệu
-        Post savedPost = postRepository.save(post);
+        Post post = postService.createPost(params.getPost());
+
+        Coupon coupon = couponService.createCoupon(params.getCoupon());
 
         Set<Category> categories = new HashSet<>();
 
@@ -94,34 +94,118 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             Category category = categoryRepository.findByCategoryId(categoryId);
             categories.add(category);
         }
+        double productSale = solveProductSale(params.getProductPrice(), coupon);
+
 
         // Tạo đối tượng Product mới
-        Product product = new Product();
-        product.setProductId(UUID.randomUUID()); // Tạo UUID cho product
-        product.setProductName(params.getProductName()); // Đặt tên product
-        product.setProductPrice(params.getProductPrice()); // Đặt giá
-        product.setProductQuantity(params.getProductQuantity()); // Đặt số lượng
-        product.setProductYearOfManufacture(params.getProductYearOfManufacture());
-        product.setCategories(categories);// Đặt năm sản xuất
+        Product product = params.toEntity();
+        product.setProductId(UUID.randomUUID());
+        product.setCategories(categories);
+        product.setPost(post);
+        product.setCoupon(coupon);
+        product.setProductSale(productSale);
 
-        // Liên kết product với post vừa tạo
-        product.setPost(savedPost);
-
-        // Lưu product vào cơ sở dữ liệu
-        Product savedProduct = productRepository.save(product);
-        // Trả về product đã lưu
-//        String productJson = convertProductToJson(savedProduct);
-        return savedProduct;
+        return productRepository.save(product);
     }
 
-//    private String convertProductToJson(Product product) {
-//        try {
-//            return new ObjectMapper().writeValueAsString(product);
-//        } catch (JsonProcessingException e) {
-//            // Xử lý exception
-//            return null;
-//        }
-//    }
+    @Override
+    public Product updateProduct(ProductUpdateRequestDTO params, UUID productId) {
+        LocalDateTime releaseDateTime;
+
+        // Kiểm tra nếu postRelease là null, dùng thời gian hiện tại
+        if (params.getPost().getPostRelease() == null) {
+            releaseDateTime = LocalDateTime.now();
+        } else {
+            // Nếu có, dùng ngày phát hành được cung cấp, đặt vào đầu ngày
+            releaseDateTime = params.getPost().getPostRelease().atStartOfDay();
+        }
+
+        // Chuyển đổi sang Timestamp
+        Timestamp releaseTimestamp = Timestamp.valueOf(releaseDateTime);
+
+        PostStatus status = postStatusRepository.findByPostStatusId(params.getPost().getPostStatusId());
+
+
+        Post post = postService.updatePostByProductId(params.getPost(), productId);
+        if (post == null) {
+            throw new jakarta.persistence.EntityNotFoundException("Post không tồn tại !");
+        }
+        Coupon coupon = couponService.updateCouponByProductId(params.getCoupon(), productId);
+        if (coupon == null) {
+            throw new jakarta.persistence.EntityNotFoundException("Coupon không tồn tại !");
+        }
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+        if (optionalProduct.isEmpty()) {
+            throw new EntityNotFoundException("Product không tồn tại !");
+        }
+        Set<Category> categories = new HashSet<>();
+
+        for (UUID categoryId : params.getCategoryId()) {
+            Category category = categoryRepository.findByCategoryId(categoryId);
+            categories.add(category);
+        }
+        double productSale = solveProductSale(params.getProductPrice(), coupon);
+        Product product = optionalProduct.get();
+        product.setProductName(params.getProductName());
+        product.setProductPrice(params.getProductPrice());
+        product.setProductQuantity(params.getProductQuantity());
+        product.setProductYearOfManufacture(params.getProductYearOfManufacture());
+        product.setCoupon(coupon);
+        product.setPost(post);
+        product.setCategories(categories);
+        product.setProductSale(productSale);
+
+        return productRepository.save(product);
+    }
+
+    @Override
+    public Page<ProductResponseDTO> findProductRelate(UUID categoryId, Pageable pageable) {
+        Page<Product> productPage = productRepository.findByIdWithCategories(categoryId, pageable);
+
+        if (productPage.getContent().size() < PRODUCT_RELATE_SIZE || (productPage.isEmpty())) {
+            List<Product> products = new ArrayList<>(productPage.getContent());
+            List<Product> allProducts = productRepository.findAll();
+            for (int i = 0; i < allProducts.size(); i++) {
+                if (products.size() == PRODUCT_RELATE_SIZE) {
+                    break;
+                }
+                int addRandomProduct = new Random().nextInt(allProducts.size());
+                Product product = allProducts.get(addRandomProduct);
+                System.console().printf("IntproductAdd: %s", addRandomProduct);
+                if (!products.contains(product)) {
+                    products.add(product);
+                }
+                productPage = new PageImpl<>(products, pageable, products.size());
+            }
+        }
+        List<Product> sortProducts = new ArrayList<>(productPage.getContent());
+        sortProducts.sort(Comparator.comparing(Product::getProductPriceSale));
+
+        Page<Product> productPageRandom = new PageImpl<>(sortProducts.subList(PRODUCT_DEFAULT_SIZE, PRODUCT_RELATE_SIZE));
+
+        return productPageRandom.map(product -> {
+            List<CategoryResponseDTO> categoryResponseDTOs = getCategoryResponseDTOs(product);
+            List<ProductImageResponseDTO> productImageResponseDTOS = getProductImageResponseDTOs(product);
+            List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
+            ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
+            PostResponseDTO postResponseDTO = getPostResponseDTO(product);
+            String productPriceSaleString = formatProductPriceSale(product);
+            String productPriceString = formatProductPrice(product);
+
+
+            ProductResponseDTO dto = new ProductResponseDTO();
+            dto.toDto(product);
+            dto.setProductPrice(productPriceString);
+            dto.setProductPriceSale(productPriceSaleString);
+            dto.setCategoryResponseDTO(categoryResponseDTOs);
+            dto.setProductSizeResponseDTOs(productSizeResponseDTOS);
+            dto.setSupplier(productSupplierResponseDTO);
+            dto.setPostResponseDTO(postResponseDTO);
+            dto.setProductImageResponseDTOs(productImageResponseDTOS);
+            return dto;
+        });
+
+    }
 
     @Override
     public Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable) {
@@ -133,7 +217,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
         // Lọc theo khoảng giá
         if (params.getMinPrice() != null && params.getMaxPrice() != null) {
-            if (this.validatePriceRange(params.getMinPrice(), params.getMaxPrice()) == true) {
+            if (this.validatePriceRange(params.getMinPrice(), params.getMaxPrice())) {
                 spec = spec.and(ProductSpecifications.priceBetween(params.getMinPrice(), params.getMaxPrice()));
             }
         }
@@ -171,8 +255,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
             ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
             PostResponseDTO postResponseDTO = getPostResponseDTO(product);
-            String productPriceSaleString = productPriceSale(product);
-            String productPriceString = productPrice(product);
+            String productPriceSaleString = formatProductPriceSale(product);
+            String productPriceString = formatProductPrice(product);
 
             ProductResponseDTO dto = new ProductResponseDTO();
             dto.toDto(product);
@@ -199,100 +283,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         return true;
     }
 
-    @Override
-    public Product updateProduct(ProductUpdateRequestDTO params, UUID productId) {
-        LocalDateTime releaseDateTime;
-
-        // Kiểm tra nếu postRelease là null, dùng thời gian hiện tại
-        if (params.getPostDTO().getPostRelease() == null) {
-            releaseDateTime = LocalDateTime.now();
-        } else {
-            // Nếu có, dùng ngày phát hành được cung cấp, đặt vào đầu ngày
-            releaseDateTime = params.getPostDTO().getPostRelease().atStartOfDay();
-        }
-
-        // Chuyển đổi sang Timestamp
-        Timestamp releaseTimestamp = Timestamp.valueOf(releaseDateTime);
-
-        PostStatus status = postStatusRepository.findByPostStatusId(params.getPostDTO().getPostStatusId());
-
-
-        // Tạo đối tượng Post mới
-        Post post = new Post();
-        post.setPostId(UUID.randomUUID());
-        post.setPostRelease(releaseTimestamp);
-        post.setPostName(params.getPostDTO().getPostName());
-        post.setPostContent(params.getPostDTO().getPostContent());
-        post.setPostStatus(status);
-        // Lưu post vào cơ sở dữ liệu
-        Post savedPost = postRepository.save(post);
-
-        // Tạo đối tượng Product mới
-        Product product = new Product();
-        product.setProductId(UUID.randomUUID()); // Tạo UUID cho product
-        product.setProductName(params.getProductName()); // Đặt tên product
-        product.setProductPrice(params.getProductPrice()); // Đặt giá
-        product.setProductQuantity(params.getProductQuantity()); // Đặt số lượng
-        product.setProductYearOfManufacture(params.getProductYearOfManufacture()); // Đặt năm sản xuất
-
-        // Liên kết product với post vừa tạo
-        product.setPost(savedPost);
-
-        // Lưu product vào cơ sở dữ liệu
-        Product savedProduct = productRepository.save(product);
-        // Trả về product đã lưu
-        return savedProduct;
-    }
 
     @Override
-    public Page<ProductResponseDTO> findProductRelate(UUID categoryId, Pageable pageable) {
-        Page<Product> productPage = productRepository.findByIdWithCategories(categoryId, pageable);
-
-        if (productPage.getContent().size() < PRODUCT_RELATE_SIZE || (productPage.isEmpty())) {
-            List<Product> products = new ArrayList<>(productPage.getContent());
-            List<Product> allProducts = productRepository.findAll();
-            for (int i = 0; i < allProducts.size(); i++) {
-                if (products.size() == PRODUCT_RELATE_SIZE) {
-                    break;
-                }
-                int addRandomProduct = new Random().nextInt(allProducts.size());
-                Product product = allProducts.get(addRandomProduct);
-                System.console().printf("IntproductAdd: %s", addRandomProduct);
-                if (!products.contains(product)) {
-                    products.add(product);
-                }
-                productPage = new PageImpl<>(products, pageable, products.size());
-            }
-        }
-        List<Product> sortProducts = new ArrayList<>(productPage.getContent());
-        sortProducts.sort(Comparator.comparing(Product::getProductPriceSale));
-
-        Page<Product> productPageRandom = new PageImpl<>(sortProducts.subList(PRODUCT_DEFAULT_SIZE, PRODUCT_RELATE_SIZE));
-
-        return productPageRandom.map(product -> {
-            List<CategoryResponseDTO> categoryResponseDTOs = getCategoryResponseDTOs(product);
-            List<ProductImageResponseDTO> productImageResponseDTOS = getProductImageResponseDTOs(product);
-            List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
-            ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
-            PostResponseDTO postResponseDTO = getPostResponseDTO(product);
-            String productPriceSaleString = productPriceSale(product);
-            String productPriceString = productPrice(product);
-
-
-            ProductResponseDTO dto = new ProductResponseDTO();
-            dto.toDto(product);
-            dto.setProductPrice(productPriceString);
-            dto.setProductPriceSale(productPriceSaleString);
-            dto.setCategoryResponseDTO(categoryResponseDTOs);
-            dto.setProductSizeResponseDTOs(productSizeResponseDTOS);
-            dto.setSupplier(productSupplierResponseDTO);
-            dto.setPostResponseDTO(postResponseDTO);
-            dto.setProductImageResponseDTOs(productImageResponseDTOS);
-            return dto;
-        });
-
-    }
-@Override
     public Page<ProductResponseDTO> getProductByCategoryId(UUID categoryId, Pageable pageable) {
 
         Page<Product> products = productRepository.findByCategoryId(categoryId, pageable);
@@ -306,8 +298,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
             ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
             PostResponseDTO postResponseDTO = getPostResponseDTO(product);
-            String productPriceSaleString = productPriceSale(product);
-            String productPriceString = productPrice(product);
+            String productPriceSaleString = formatProductPriceSale(product);
+            String productPriceString = formatProductPrice(product);
 
             ProductResponseDTO dto = new ProductResponseDTO();
             dto.toDto(product);
@@ -334,8 +326,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
         ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
         PostResponseDTO postResponseDTO = getPostResponseDTO(product);
-        String productPriceSaleString = productPriceSale(product);
-        String productPriceString = productPrice(product);
+        String productPriceSaleString = formatProductPriceSale(product);
+        String productPriceString = formatProductPrice(product);
 
         ProductResponseDTO productDTO = new ProductResponseDTO();
         productDTO.toDto(product);
@@ -431,7 +423,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         return postResponseDTO;
     }
 
-    public String productPriceSale(Product product) {
+    public String formatProductPriceSale(Product product) {
         double priceSale = product.getProductPriceSale();
         if (priceSale < PRODUCT_MIN_PRICE) {
             throw new NumberErrorException("Price must be greater than 0");
@@ -439,12 +431,31 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         return formatPrice(priceSale);
     }
 
-    public String productPrice(Product product) {
+    public String formatProductPrice(Product product) {
         double price = product.getProductPrice();
         if (price < PRODUCT_MIN_PRICE) {
             throw new NumberErrorException("Price must be greater than 0");
         }
         return formatPrice(price);
+    }
+
+    public double solveProductSale(double productPrice, Coupon coupon) {
+        double productSale = 0;
+        if (coupon != null) {
+            if (coupon.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
+                productSale = coupon.getCouponPerHundred();
+            } else if (coupon.getCouponType() == COUPON_PRICE_TYPE) {
+                double total = productPrice - coupon.getCouponPrice();
+                if (total <= 0) {
+                    return MAX_PER;
+                }
+                productSale = (SOLVE_SALE - (total / productPrice)) * MAX_PER;
+                if (productSale > MAX_PER) {
+                    return MAX_PER;
+                }
+            }
+        }
+        return productSale;
     }
 
 }

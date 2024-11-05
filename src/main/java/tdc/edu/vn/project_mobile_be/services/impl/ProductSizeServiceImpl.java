@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.ListNotFoundException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.ProductSizeRequestParamsDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSizeResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductSizeResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductSizeRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.SizeProductRepository;

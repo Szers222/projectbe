@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.commond.customexception.UnsupportedOperationException;
-import tdc.edu.vn.project_mobile_be.dtos.responses.CategoryStatusResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 

@@ -8,17 +8,20 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import tdc.edu.vn.project_mobile_be.dtos.requests.coupon.CouponUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.post.PostCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.post.PostUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.category.CategoryResponseDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductImageResponseDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSizeResponseDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSupplierResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductImageResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductSizeResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductSupplierResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 
 @Data
@@ -41,8 +44,8 @@ public class ProductUpdateRequestDTO implements IDto<Product> {
     @JsonProperty("productSale")
     private double productSale;
 
-    @JsonIgnore
-    private List<CategoryResponseDTO> categoryResponseDTO;
+    @JsonProperty("categoryId")
+    private List<UUID> categoryId;
 
     @Min(value = 1900, message = "ProductYearOfManufacture không hợp lệ")
     @JsonProperty("productYearOfManufacture")
@@ -63,8 +66,11 @@ public class ProductUpdateRequestDTO implements IDto<Product> {
     @JsonIgnore
     private List<ProductSizeResponseDTO> productSizeResponseDTOs;
 
-    @JsonProperty("postDTO")
-    private PostCreateRequestDTO postDTO;
+    @JsonProperty("post")
+    private PostUpdateRequestDTO post;
+
+    @JsonProperty("coupon")
+    private CouponUpdateRequestDTO coupon;
 
     @Override
     public Product toEntity() {

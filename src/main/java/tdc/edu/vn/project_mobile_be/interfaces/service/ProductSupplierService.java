@@ -1,6 +1,6 @@
 package tdc.edu.vn.project_mobile_be.interfaces.service;
 
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSupplierResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductSupplierResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
 import tdc.edu.vn.project_mobile_be.interfaces.IService;
 

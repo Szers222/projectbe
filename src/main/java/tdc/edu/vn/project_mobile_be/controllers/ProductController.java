@@ -24,9 +24,9 @@ import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductRequestParamsDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
-import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.BreadcrumbService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
@@ -55,7 +55,7 @@ public class ProductController {
 
     @GetMapping(value = {"/products/filters", "/products"})
     public ResponseEntity<ResponseData<PagedModel<EntityModel<ProductResponseDTO>>>> getProductsByFilters(
-            @ModelAttribute ProductRequestParamsDTO params,
+            @RequestParam ProductRequestParamsDTO params,
             PagedResourcesAssembler<ProductResponseDTO> assembler) {
 
         if (params.getSort() == null || params.getSort().isEmpty()) {
@@ -148,4 +148,29 @@ public class ProductController {
         return ResponseEntity.ok(responseData);
     }
 
+    @PutMapping({"/product/{productId}", "/product/{productId}/"})
+    public ResponseEntity<ResponseData<?>> updateProduct(
+            @Valid @RequestBody ProductUpdateRequestDTO params,
+            @PathVariable("productId") UUID productId,
+            BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            List<String> errorMessages = bindingResult.getFieldErrors().stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
+            throw new MultipleFieldsNullOrEmptyException(errorMessages);
+        }
+        Product product = productService.updateProduct(params,productId);
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Cập nhật sản phẩm thành công", product);
+        return ResponseEntity.ok(responseData);
+    }
+    @DeleteMapping("/product/{productId}")
+    public ResponseEntity<ResponseData<?>> deleteProduct(@PathVariable("productId") UUID productId) {
+         boolean isCheck = productService.deleteProduct(productId);
+         if(isCheck){
+             ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Xóa sản phẩm thành công", null);
+             return ResponseEntity.ok(responseData);
+         }
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.BAD_REQUEST, "Xóa sản phẩm không thành công", null);
+        return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
+    }
 }

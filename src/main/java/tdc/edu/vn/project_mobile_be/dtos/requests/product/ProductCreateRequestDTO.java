@@ -8,12 +8,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import tdc.edu.vn.project_mobile_be.dtos.requests.coupon.CouponCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.post.PostCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
@@ -61,13 +61,18 @@ public class ProductCreateRequestDTO implements IDto<Product> {
     @JsonProperty("categories")
     private List<UUID> categoryId;
 
-    @JsonProperty("postDTO")
-    private PostCreateRequestDTO postDTO;
+
+
+    @JsonProperty("post")
+    private PostCreateRequestDTO post;
+
+    @JsonProperty("coupon")
+    private CouponCreateRequestDTO coupon;
 
     @Override
     public Product toEntity() {
         Product product = new Product();
-        BeanUtils.copyProperties(this, product, "productImageResponseDTOs", "supplier", "productSizeResponseDTOs");
+        BeanUtils.copyProperties(this, product, "productImageResponseDTOs", "supplier", "productSizeResponseDTOs", "categories", "createdAt", "updatedAt");
         // Thiết lập ánh xạ thủ công nếu cần
         return product;
     }
