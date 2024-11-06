@@ -158,7 +158,7 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
             }
             try {
                 ProductImage productImage = productImageOp.get();
-                String imageUrl = googleCloudStorageService.uploadFile(file);
+                String imageUrl = googleCloudStorageService.updateFile(file, productImage.getProductImagePath());
                 Product product = productOptional.get();
                 productImage.setProductImageId(UUID.randomUUID());
                 productImage.setProduct(product);
@@ -211,7 +211,7 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
                 }
 
                 // Upload file và lấy URL từ Google Cloud Storage
-                String imageUrl = googleCloudStorageService.uploadFile(file);
+                String imageUrl = googleCloudStorageService.updateFile(file, productImageList.get(index).getProductImagePath());
 
                 // Cập nhật thông tin ProductImage
                 ProductImage productImage = productImageList.get(index++);
@@ -230,12 +230,14 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
 
 
     @Override
-    public boolean deleteProductImage(UUID id) {
-        Optional<ProductImage> productImage = productImageRepository.findById(id);
-        if (productImage.isEmpty()) {
+    public boolean deleteProductImage(UUID productImageId) {
+        Optional<ProductImage> productImageOp = productImageRepository.findById(productImageId);
+        if (productImageOp.isEmpty()) {
             throw new EntityNotFoundException("Product image not found");
         }
-        productImageRepository.deleteById(id);
+        ProductImage productImage = productImageOp.get();
+        productImageRepository.deleteById(productImageId);
+        googleCloudStorageService.deleteFile(productImage.getProductImagePath());
         return true;
     }
 

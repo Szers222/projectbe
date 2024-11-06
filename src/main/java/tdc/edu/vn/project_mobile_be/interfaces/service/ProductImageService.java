@@ -22,5 +22,6 @@ public interface ProductImageService extends IService<ProductImage, UUID> {
     ProductImage updateProductImage(ProductImageUpdateRequestDTO params, MultipartFile file, UUID productImageId);
 
    Set<ProductImage> updateProductImageForProduct(ProductImageUpdateRequestDTO params, MultipartFile[] files);
-    boolean deleteProductImage(UUID id);
+
+    boolean deleteProductImage(UUID productImageId);
 }
