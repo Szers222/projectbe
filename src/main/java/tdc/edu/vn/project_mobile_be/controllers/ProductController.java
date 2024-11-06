@@ -55,7 +55,7 @@ public class ProductController {
 
     @GetMapping(value = {"/products/filters", "/products"})
     public ResponseEntity<ResponseData<PagedModel<EntityModel<ProductResponseDTO>>>> getProductsByFilters(
-            @RequestParam ProductRequestParamsDTO params,
+            @ModelAttribute ProductRequestParamsDTO params,
             PagedResourcesAssembler<ProductResponseDTO> assembler) {
 
         if (params.getSort() == null || params.getSort().isEmpty()) {
