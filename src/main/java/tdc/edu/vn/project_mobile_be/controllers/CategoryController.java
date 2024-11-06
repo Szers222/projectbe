@@ -52,7 +52,7 @@ public class CategoryController {
 
     @GetMapping("/categories")
     public ResponseEntity<ResponseData<List<CategoryResponseDTO>>> getCategories(
-            @RequestParam CategoryRequestParamsDTO params,
+            @ModelAttribute CategoryRequestParamsDTO params,
             Pageable pageable) {
         List<CategoryResponseDTO> data = categoryService.getCategories(1, pageable);
 
