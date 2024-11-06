@@ -16,17 +16,15 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductImageUpdateRequestDTO implements IDto<ProductImage> {
+public class ProductImageCreateWithProductRequestDTO implements IDto<ProductImage> {
+
     @JsonIgnore
     private String productImagePath;
 
     @NotBlank(message = "product-image-alt không được để trống")
     @JsonProperty("productImageAlt")
-    private String imageAlt;
+    private String productImageAlt;
 
-    @NotBlank(message = "product-id không được để trống")
-    @JsonProperty("productId")
-    private UUID productId;
     @JsonIgnore
     private Timestamp createdAt;
     @JsonIgnore
@@ -43,4 +41,6 @@ public class ProductImageUpdateRequestDTO implements IDto<ProductImage> {
     public void toDto(ProductImage entity) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+
 }
