@@ -48,30 +48,46 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
 
     @Override
     @Transactional
-    public ProductImage createProductImage(ProductImageCreateRequestDTO params, MultipartFile file) {
-        if (params.getProductId() != null) {
-            Optional<Product> productOptional = productRepository.findById(params.getProductId());
-            if (productOptional.isEmpty()) {
-                throw new EntityNotFoundException("Product not found");
+    public List<ProductImage> createProductImage(ProductImageCreateRequestDTO params, MultipartFile[] files) {
+        // Kiểm tra nếu productId không được cung cấp
+        UUID productId = params.getProductId();
+        if (productId == null) {
+            throw new EntityNotFoundException("Product ID is null");
+        }
 
-            }
-            if (file.isEmpty()) {
-                throw new FileEmptyException("File is empty");
-            }
-            try {
+        // Lấy sản phẩm từ productId
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+
+        // Kiểm tra nếu không có file nào
+        if (files == null || files.length == 0) {
+            throw new FileEmptyException("No files provided");
+        }
+
+        List<ProductImage> result = new ArrayList<>();
+
+        try {
+            for (MultipartFile file : files) {
+                if (file.isEmpty()) {
+                    throw new FileEmptyException("One of the files is empty");
+                }
+                // Upload file và lấy URL từ Google Cloud Storage
                 String imageUrl = googleCloudStorageService.uploadFile(file);
-                Product product = productOptional.get();
+
+                // Tạo đối tượng ProductImage
                 ProductImage productImage = params.toEntity();
                 productImage.setProductImageId(UUID.randomUUID());
                 productImage.setProduct(product);
                 productImage.setProductImagePath(imageUrl);
 
-                return productImageRepository.save(productImage);
-            } catch (IOException e) {
-                throw new EntityNotFoundException("Error when save image");
+                // Lưu ProductImage và thêm vào danh sách kết quả
+                result.add(productImageRepository.save(productImage));
             }
+        } catch (IOException e) {
+            throw new FileUploadException("Error when saving image" + e);
         }
-        throw new EntityNotFoundException("Id product is null");
+
+        return result;
     }
 
     @Override
@@ -142,7 +158,7 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
             }
             try {
                 ProductImage productImage = productImageOp.get();
-                String imageUrl = googleCloudStorageService.uploadFile(file);
+                String imageUrl = googleCloudStorageService.updateFile(file, productImage.getProductImagePath());
                 Product product = productOptional.get();
                 productImage.setProductImageId(UUID.randomUUID());
                 productImage.setProduct(product);
@@ -157,8 +173,72 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
     }
 
     @Override
-    public boolean deleteProductImage(UUID id) {
-        return false;
+    @Transactional
+    public Set<ProductImage> updateProductImageForProduct(ProductImageUpdateRequestDTO params, MultipartFile[] files) {
+        // Kiểm tra nếu productId null
+        UUID productId = params.getProductId();
+        if (productId == null) {
+            throw new EntityNotFoundException("Product ID is null");
+        }
+
+        // Lấy danh sách ProductImage từ productId
+        Set<ProductImage> productImages = productImageRepository.findByProductId(productId);
+        if (productImages.isEmpty()) {
+            throw new EntityNotFoundException("No product images found for the given product ID");
+        }
+
+        // Kiểm tra có file được upload không
+        if (files == null || files.length == 0) {
+            throw new FileEmptyException("No files provided for update");
+        }
+
+        // Kiểm tra Product có tồn tại không
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+
+        // Đảm bảo số file khớp với số lượng ProductImage hiện có
+        if (files.length != productImages.size()) {
+            throw new IllegalArgumentException("Mismatch between number of files and existing product images");
+        }
+
+        // Cập nhật từng ProductImage
+        try {
+            int index = 0;
+            List<ProductImage> productImageList = productImages.stream().toList(); // Đảm bảo có thể truy cập bằng chỉ mục
+            for (MultipartFile file : files) {
+                if (file.isEmpty()) {
+                    throw new FileEmptyException("One of the files is empty");
+                }
+
+                // Upload file và lấy URL từ Google Cloud Storage
+                String imageUrl = googleCloudStorageService.updateFile(file, productImageList.get(index).getProductImagePath());
+
+                // Cập nhật thông tin ProductImage
+                ProductImage productImage = productImageList.get(index++);
+                productImage.setProduct(product);
+                productImage.setProductImagePath(imageUrl);
+
+                // Lưu cập nhật vào repository
+                productImageRepository.save(productImage);
+            }
+        } catch (IOException e) {
+            throw new FileUploadException("Error while saving images to Google Cloud Storage" + e);
+        }
+
+        return productImages;
+    }
+
+
+    @Override
+    public boolean deleteProductImage(UUID productImageId) {
+        Optional<ProductImage> productImageOp = productImageRepository.findById(productImageId);
+        if (productImageOp.isEmpty()) {
+            throw new EntityNotFoundException("Product image not found");
+        }
+        ProductImage productImage = productImageOp.get();
+        productImageRepository.deleteById(productImageId);
+        googleCloudStorageService.deleteFile(productImage.getProductImagePath());
+        return true;
     }
 
 

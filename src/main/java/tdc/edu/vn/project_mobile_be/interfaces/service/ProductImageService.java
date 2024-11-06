@@ -15,11 +15,13 @@ import java.util.UUID;
 public interface ProductImageService extends IService<ProductImage, UUID> {
     List<ProductImageResponseDTO> findAllByProductId(UUID productId);
 
-    ProductImage createProductImage(ProductImageCreateRequestDTO params, MultipartFile file);
+    List<ProductImage> createProductImage(ProductImageCreateRequestDTO params, MultipartFile[] file);
 
     Set<ProductImage> createProductImageWithProduct(ProductImageCreateWithProductRequestDTO params, UUID productId, MultipartFile[] files);
 
     ProductImage updateProductImage(ProductImageUpdateRequestDTO params, MultipartFile file, UUID productImageId);
 
-    boolean deleteProductImage(UUID id);
+   Set<ProductImage> updateProductImageForProduct(ProductImageUpdateRequestDTO params, MultipartFile[] files);
+
+    boolean deleteProductImage(UUID productImageId);
 }

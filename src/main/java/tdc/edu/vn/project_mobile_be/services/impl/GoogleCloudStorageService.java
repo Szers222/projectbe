@@ -43,4 +43,19 @@ public class GoogleCloudStorageService {
         // Trả về URL công khai của file
         return String.format("https://storage.cloud.google.com/%s/%s", bucketName, fileName);
     }
+
+    //update file
+    public String updateFile(MultipartFile file, String fileName) throws IOException {
+        BlobId blobId = BlobId.of(bucketName, fileName);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(file.getContentType()).build();
+
+        storage.create(blobInfo, file.getBytes());
+
+        // Trả về URL công khai của file
+        return String.format("https://storage.cloud.google.com/%s/%s", bucketName, fileName);
+    }
+    public void deleteFile(String fileName) {
+        BlobId blobId = BlobId.of(bucketName, fileName);
+        storage.delete(blobId);
+    }
 }
