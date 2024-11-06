@@ -24,16 +24,16 @@ public class ProductImageController {
     @Autowired
     ProductImageService productImageService;
 
-    @PostMapping(value = {"/product-image", "/product-image/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResponseData<?>> createProducImage(@RequestParam("product-id") UUID productId, @RequestParam("image-alt") String imageAlt, @RequestParam("file") MultipartFile file) {
-        ProductImageCreateRequestDTO createProductImageRequestDTO = new ProductImageCreateRequestDTO();
-        createProductImageRequestDTO.setProductId(productId);
-        createProductImageRequestDTO.setImageAlt(imageAlt);
-
-        ProductImage createdProductImage = productImageService.create(createProductImageRequestDTO, file);
-        ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "ProductImage đã được tạo", createdProductImage);
-        return new ResponseEntity<ResponseData<?>>(responseData, HttpStatus.CREATED);
-    }
+//    @PostMapping(value = {"/product-image", "/product-image/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<ResponseData<?>> createProducImage(@RequestParam("product-id") UUID productId, @RequestParam("image-alt") String imageAlt, @RequestParam("file") MultipartFile file) {
+//        ProductImageCreateRequestDTO createProductImageRequestDTO = new ProductImageCreateRequestDTO();
+//        createProductImageRequestDTO.setProductId(productId);
+//        createProductImageRequestDTO.setImageAlt(imageAlt);
+//
+//        ProductImage createdProductImage = productImageService.create(createProductImageRequestDTO, file);
+//        ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "ProductImage đã được tạo", createdProductImage);
+//        return new ResponseEntity<ResponseData<?>>(responseData, HttpStatus.CREATED);
+//    }
 
     @GetMapping(value = {"/product-images", "/product-images/"})
     public ResponseEntity<ResponseData<?>> getAllProductImageByProductId(@RequestParam("product-id") UUID productId) {

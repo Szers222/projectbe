@@ -16,8 +16,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductImageCreateRequestDTO implements IDto<ProductImage> {
-
+public class ProductImageUpdateRequestDTO implements IDto<ProductImage> {
     @NotBlank(message = "product-image-path không được để trống")
     @JsonProperty("productImagePath")
     private String imagePath;
@@ -45,6 +44,4 @@ public class ProductImageCreateRequestDTO implements IDto<ProductImage> {
     public void toDto(ProductImage entity) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
-
 }

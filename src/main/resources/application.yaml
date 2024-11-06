@@ -49,3 +49,10 @@ redis:
     host: 192.168.57.128
     port: 6379
     password: ''
+
+google:
+  cloud:
+    storage:
+      bucket-name: mobileproject
+      credentials:
+        path: src/main/resources/service-account.json
