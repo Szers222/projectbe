@@ -15,6 +15,7 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -78,7 +79,7 @@ public class ProductController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping(value = {"/product", "/product/"})
+    @PostMapping(value = {"/product", "/product/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseData<?>> createProduct(
             @Valid @RequestBody ProductCreateRequestDTO params,
             @RequestParam("file") MultipartFile[] files,

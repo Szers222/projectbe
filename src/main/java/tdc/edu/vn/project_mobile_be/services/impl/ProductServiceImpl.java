@@ -115,19 +115,11 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         product.setProductSale(productSale);
         Product savedProduct = productRepository.save(product);
 
-        Set<ProductImage> productImages = new HashSet<>();
-        for (MultipartFile multipartFile : files) {
-            ProductImage productImage = productImageService.createProductImageWithProduct(
+        Set<ProductImage> productImages = productImageService.createProductImageWithProduct(
                     params.getProductImageResponseDTOs(),
                     savedProduct.getProductId(),
-                    multipartFile);
-            if (productImage == null) {
-                throw new EntityNotFoundException("ProductImage tạo thất bại !");
-            }
-            productImages.add(productImage);
-        }
+                files);
         savedProduct.setImages(productImages);
-
 
         return savedProduct;
     }

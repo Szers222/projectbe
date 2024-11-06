@@ -9,6 +9,7 @@ import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
 import tdc.edu.vn.project_mobile_be.interfaces.IService;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface ProductImageService extends IService<ProductImage, UUID> {
@@ -16,7 +17,7 @@ public interface ProductImageService extends IService<ProductImage, UUID> {
 
     ProductImage createProductImage(ProductImageCreateRequestDTO params, MultipartFile file);
 
-    ProductImage createProductImageWithProduct(ProductImageCreateWithProductRequestDTO params, UUID productId, MultipartFile file);
+    Set<ProductImage> createProductImageWithProduct(ProductImageCreateWithProductRequestDTO params, UUID productId, MultipartFile[] files);
 
     ProductImage updateProductImage(ProductImageUpdateRequestDTO params, MultipartFile file, UUID productImageId);
 
