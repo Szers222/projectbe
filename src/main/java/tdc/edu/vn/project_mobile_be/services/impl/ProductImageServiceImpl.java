@@ -2,9 +2,11 @@ package tdc.edu.vn.project_mobile_be.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.FileEmptyException;
+import tdc.edu.vn.project_mobile_be.commond.customexception.FileUploadException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateWithProductRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageUpdateRequestDTO;
@@ -16,9 +18,7 @@ import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductImageService;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +33,7 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
     private GoogleCloudStorageService googleCloudStorageService;
 
     @Override
+    @Transactional
     public List<ProductImageResponseDTO> findAllByProductId(UUID productId) {
         if (productRepository.findById(productId) == null) {
             throw new EntityNotFoundException("Product not found");
@@ -46,6 +47,7 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
     }
 
     @Override
+    @Transactional
     public ProductImage createProductImage(ProductImageCreateRequestDTO params, MultipartFile file) {
         if (params.getProductId() != null) {
             Optional<Product> productOptional = productRepository.findById(params.getProductId());
@@ -73,30 +75,54 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
     }
 
     @Override
-    public ProductImage createProductImageWithProduct(ProductImageCreateWithProductRequestDTO params, UUID productId, MultipartFile file) {
-        if (productId != null) {
-            Optional<Product> productOptional = productRepository.findById(productId);
-            if (productOptional.isEmpty()) {
-                throw new EntityNotFoundException("Product not found");
-            }
-            if (file.isEmpty()) {
-                throw new FileEmptyException("File is empty");
-            }
-            try {
+    @Transactional
+    public Set<ProductImage> createProductImageWithProduct(
+            ProductImageCreateWithProductRequestDTO params,
+            UUID productId,
+            MultipartFile[] files) {
+
+        // Kiểm tra ID sản phẩm có null không
+        if (productId == null) {
+            throw new EntityNotFoundException("Product ID is null");
+        }
+
+        // Lấy sản phẩm và kiểm tra tồn tại
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+
+        // Kiểm tra có file nào không
+        if (files.length == 0) {
+            throw new FileEmptyException("No files provided");
+        }
+
+        Set<ProductImage> result = new HashSet<>();
+        try {
+            // Duyệt qua từng file để upload
+            for (MultipartFile file : files) {
+                if (file.isEmpty()) {
+                    throw new FileEmptyException("One of the files is empty");
+                }
+                // Upload file và lấy URL từ Google Cloud Storage
                 String imageUrl = googleCloudStorageService.uploadFile(file);
-                Product product = productOptional.get();
+
+                // Tạo ProductImage mới
                 ProductImage productImage = params.toEntity();
                 productImage.setProductImageId(UUID.randomUUID());
                 productImage.setProduct(product);
                 productImage.setProductImagePath(imageUrl);
 
-                return productImageRepository.save(productImage);
-            } catch (IOException e) {
-                throw new EntityNotFoundException("Error when save image");
+                // Lưu ProductImage vào database
+                ProductImage savedProductImage = productImageRepository.save(productImage);
+                result.add(savedProductImage);
             }
+        } catch (IOException e) {
+            // Thông báo lỗi khi upload file thất bại
+            throw new FileUploadException("Xãy ra lỗi khi lưu file vào Google Cloud Storage" + e);
         }
-        throw new EntityNotFoundException("Id product is null");
+
+        return result;
     }
+
 
     @Override
     public ProductImage updateProductImage(ProductImageUpdateRequestDTO params, MultipartFile file, UUID productImageId) {

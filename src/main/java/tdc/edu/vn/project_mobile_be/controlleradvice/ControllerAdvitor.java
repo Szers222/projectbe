@@ -151,4 +151,17 @@ public class ControllerAdvitor extends ResponseEntityExceptionHandler {
         errorResponseDTO.setStatus(HttpStatus.valueOf("BAD_REQUEST"));
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(FileUploadException.class)
+    public ResponseEntity<Object> handleFileUploadException(
+            FileUploadException ex, WebRequest request) {
+        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO();
+        List<String> erros = new ArrayList<>();
+        erros.add(ex.getMessage());
+        errorResponseDTO.setError(erros);
+        List<String> details = new ArrayList<>();
+        details.add("Coupon không hợp lệ !");
+        errorResponseDTO.setMessage(details);
+        errorResponseDTO.setStatus(HttpStatus.valueOf("BAD_REQUEST"));
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+    }
 }
