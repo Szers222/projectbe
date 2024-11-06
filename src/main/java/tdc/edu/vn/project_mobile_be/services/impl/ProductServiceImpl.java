@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.commond.ProductSpecifications;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
@@ -24,7 +25,10 @@ import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
-import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.CategoryRepository;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.PostStatusRepository;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.SizeProductRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CouponService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.PostService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductImageService;
@@ -56,8 +60,6 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Autowired
     private CategoryRepository categoryRepository;
     @Autowired
-    private ProductSupplierRepository productSupplierRepository;
-    @Autowired
     private PostService postService;
     @Autowired
     private PostStatusRepository postStatusRepository;
@@ -66,12 +68,11 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Autowired
     private CouponService couponService;
     @Autowired
-    private UserRepository userRepository;
-    @Autowired
     private ProductImageService productImageService;
 
     @Override
-    public Product createProduct(ProductCreateRequestDTO params, MultipartFile[] file) {
+    @Transactional
+    public Product createProduct(ProductCreateRequestDTO params, MultipartFile[] files) {
         LocalDateTime releaseDateTime;
 
         // Kiểm tra nếu postRelease là null, dùng thời gian hiện tại
@@ -97,32 +98,42 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
         for (UUID categoryId : params.getCategoryId()) {
             Category category = categoryRepository.findByCategoryId(categoryId);
+            if (category == null) {
+                throw new EntityNotFoundException("Category not found for ID: " + categoryId);
+            }
             categories.add(category);
         }
         double productSale = solveProductSale(params.getProductPrice(), coupon);
 
-        Set<ProductImage> productImages = new HashSet<>();
-        for (MultipartFile multipartFile : file) {
-            ProductImage productImage = productImageService.createProductImage(
-                    params.getProductImageResponseDTOs(),
-                    multipartFile);
-            productImages.add(productImage);
-        }
 
         // Tạo đối tượng Product mới
         Product product = params.toEntity();
-        UUID productId = UUID.randomUUID();
-        product.setProductId(productId);
+        product.setProductId(UUID.randomUUID());
         product.setCategories(categories);
         product.setPost(post);
         product.setCoupon(coupon);
         product.setProductSale(productSale);
-        product.setImages(productImages);
+        Product savedProduct = productRepository.save(product);
 
-        return productRepository.save(product);
+        Set<ProductImage> productImages = new HashSet<>();
+        for (MultipartFile multipartFile : files) {
+            ProductImage productImage = productImageService.createProductImageWithProduct(
+                    params.getProductImageResponseDTOs(),
+                    savedProduct.getProductId(),
+                    multipartFile);
+            if (productImage == null) {
+                throw new EntityNotFoundException("ProductImage tạo thất bại !");
+            }
+            productImages.add(productImage);
+        }
+        savedProduct.setImages(productImages);
+
+
+        return savedProduct;
     }
 
     @Override
+    @Transactional
     public Product updateProduct(ProductUpdateRequestDTO params, UUID productId) {
         LocalDateTime releaseDateTime;
 

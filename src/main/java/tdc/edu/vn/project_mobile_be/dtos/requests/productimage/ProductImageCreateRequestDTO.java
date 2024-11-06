@@ -19,7 +19,7 @@ import java.util.UUID;
 public class ProductImageCreateRequestDTO implements IDto<ProductImage> {
 
     @JsonIgnore
-    private String imagePath;
+    private String productImagePath;
 
     @NotBlank(message = "product-image-alt không được để trống")
     @JsonProperty("productImageAlt")

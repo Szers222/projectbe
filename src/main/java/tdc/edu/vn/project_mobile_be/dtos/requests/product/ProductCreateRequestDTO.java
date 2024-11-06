@@ -11,6 +11,7 @@ import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.dtos.requests.coupon.CouponCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.post.PostCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateWithProductRequestDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
@@ -50,7 +51,7 @@ public class ProductCreateRequestDTO implements IDto<Product> {
     private Timestamp updatedAt;
 
     @JsonProperty("productImage")
-    private ProductImageCreateRequestDTO productImageResponseDTOs;
+    private ProductImageCreateWithProductRequestDTO productImageResponseDTOs;
 
     @JsonProperty("productSizes")
     private List<UUID> sizeIds;

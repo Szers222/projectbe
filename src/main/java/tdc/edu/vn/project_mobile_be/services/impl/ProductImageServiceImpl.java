@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.FileEmptyException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateWithProductRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductImageResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
@@ -51,6 +52,32 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
             if (productOptional.isEmpty()) {
                 throw new EntityNotFoundException("Product not found");
 
+            }
+            if (file.isEmpty()) {
+                throw new FileEmptyException("File is empty");
+            }
+            try {
+                String imageUrl = googleCloudStorageService.uploadFile(file);
+                Product product = productOptional.get();
+                ProductImage productImage = params.toEntity();
+                productImage.setProductImageId(UUID.randomUUID());
+                productImage.setProduct(product);
+                productImage.setProductImagePath(imageUrl);
+
+                return productImageRepository.save(productImage);
+            } catch (IOException e) {
+                throw new EntityNotFoundException("Error when save image");
+            }
+        }
+        throw new EntityNotFoundException("Id product is null");
+    }
+
+    @Override
+    public ProductImage createProductImageWithProduct(ProductImageCreateWithProductRequestDTO params, UUID productId, MultipartFile file) {
+        if (productId != null) {
+            Optional<Product> productOptional = productRepository.findById(productId);
+            if (productOptional.isEmpty()) {
+                throw new EntityNotFoundException("Product not found");
             }
             if (file.isEmpty()) {
                 throw new FileEmptyException("File is empty");
