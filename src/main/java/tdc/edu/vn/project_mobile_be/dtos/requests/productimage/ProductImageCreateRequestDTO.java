@@ -18,13 +18,12 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ProductImageCreateRequestDTO implements IDto<ProductImage> {
 
-    @NotBlank(message = "product-image-path không được để trống")
-    @JsonProperty("productImagePath")
+    @JsonIgnore
     private String imagePath;
 
     @NotBlank(message = "product-image-alt không được để trống")
     @JsonProperty("productImageAlt")
-    private String imageAlt;
+    private String productImageAlt;
 
     @NotBlank(message = "product-id không được để trống")
     @JsonProperty("productId")

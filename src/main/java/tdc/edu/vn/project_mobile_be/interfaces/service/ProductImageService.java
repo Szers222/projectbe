@@ -13,9 +13,9 @@ import java.util.UUID;
 public interface ProductImageService extends IService<ProductImage, UUID> {
     List<ProductImageResponseDTO> findAllByProductId(UUID productId);
 
-//    ProductImage createProductImage(ProductImageCreateRequestDTO createProductImageRequestDTO, MultipartFile file);
+    ProductImage createProductImage(ProductImageCreateRequestDTO params, MultipartFile file);
 
-//    List<ProductImage> createProductImage(ProductImageUpdateRequestDTO createProductImageRequestDTO);
+    ProductImage updateProductImage(ProductImageUpdateRequestDTO params, MultipartFile file, UUID productImageId);
 
-//    boolean deleteProductImage(UUID id);
+    boolean deleteProductImage(UUID id);
 }

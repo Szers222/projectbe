@@ -15,9 +15,6 @@ import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductImageService;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,10 +22,14 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProductImageServiceImpl extends AbService<ProductImage, UUID> implements ProductImageService {
+
+
     @Autowired
     private ProductImageRepository productImageRepository;
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    private GoogleCloudStorageService googleCloudStorageService;
 
     @Override
     public List<ProductImageResponseDTO> findAllByProductId(UUID productId) {
@@ -43,31 +44,69 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
         }).collect(Collectors.toList());
     }
 
-//    @Override
-//    public List<ProductImage> createProductImage(ProductImageCreateRequestDTO createProductImageRequestDTO, MultipartFile file) {
-//        if (createProductImageRequestDTO.getProductId() != null) {
-//            Optional<Product> productOptional = productRepository.findById(createProductImageRequestDTO.getProductId());
-//            if (productOptional.isEmpty()) {
-//                throw new EntityNotFoundException("Product not found");
-//
-//            }
-////            if (file.isEmpty()) {
-////                throw new FileEmptyException("File is empty");
-////            }
-//            try {
-////                String imagePath = saveImage(file);
-//                Product product = productOptional.get();
-//                ProductImage productImage = createProductImageRequestDTO.toEntity();
-//                productImage.setProductImageId(UUID.randomUUID());
-//                productImage.setProduct(product);
-//                return productImageRepository.save(productImage);
-//            } catch (IOException e) {
-//                throw new EntityNotFoundException("Error when save image");
-//            }
-//        }
-//        throw new EntityNotFoundException("Id product is null");
-//    }
+    @Override
+    public ProductImage createProductImage(ProductImageCreateRequestDTO params, MultipartFile file) {
+        if (params.getProductId() != null) {
+            Optional<Product> productOptional = productRepository.findById(params.getProductId());
+            if (productOptional.isEmpty()) {
+                throw new EntityNotFoundException("Product not found");
 
+            }
+            if (file.isEmpty()) {
+                throw new FileEmptyException("File is empty");
+            }
+            try {
+                String imageUrl = googleCloudStorageService.uploadFile(file);
+                Product product = productOptional.get();
+                ProductImage productImage = params.toEntity();
+                productImage.setProductImageId(UUID.randomUUID());
+                productImage.setProduct(product);
+                productImage.setProductImagePath(imageUrl);
+
+                return productImageRepository.save(productImage);
+            } catch (IOException e) {
+                throw new EntityNotFoundException("Error when save image");
+            }
+        }
+        throw new EntityNotFoundException("Id product is null");
+    }
+
+    @Override
+    public ProductImage updateProductImage(ProductImageUpdateRequestDTO params, MultipartFile file, UUID productImageId) {
+        Optional<ProductImage> productImageOp = productImageRepository.findById(productImageId);
+        if (productImageOp.isEmpty()) {
+            throw new EntityNotFoundException("Product image not found");
+        }
+        if (file.isEmpty()) {
+            throw new FileEmptyException("File is empty");
+        }
+
+        if (params.getProductId() != null) {
+            Optional<Product> productOptional = productRepository.findById(params.getProductId());
+            if (productOptional.isEmpty()) {
+                throw new EntityNotFoundException("Product not found");
+
+            }
+            try {
+                ProductImage productImage = productImageOp.get();
+                String imageUrl = googleCloudStorageService.uploadFile(file);
+                Product product = productOptional.get();
+                productImage.setProductImageId(UUID.randomUUID());
+                productImage.setProduct(product);
+                productImage.setProductImagePath(imageUrl);
+
+                return productImageRepository.save(productImage);
+            } catch (IOException e) {
+                throw new EntityNotFoundException("Error when save image");
+            }
+        }
+        throw new EntityNotFoundException("Id product is null");
+    }
+
+    @Override
+    public boolean deleteProductImage(UUID id) {
+        return false;
+    }
 
 
 //    private String saveImage(MultipartFile file) throws IOException {

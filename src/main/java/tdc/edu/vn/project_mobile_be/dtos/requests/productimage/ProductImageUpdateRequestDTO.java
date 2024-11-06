@@ -17,8 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductImageUpdateRequestDTO implements IDto<ProductImage> {
-    @NotBlank(message = "product-image-path không được để trống")
-    @JsonProperty("productImagePath")
+    @JsonIgnore
     private String imagePath;
 
     @NotBlank(message = "product-image-alt không được để trống")
