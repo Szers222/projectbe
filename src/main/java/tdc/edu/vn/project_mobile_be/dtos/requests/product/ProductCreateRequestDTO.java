@@ -49,8 +49,8 @@ public class ProductCreateRequestDTO implements IDto<Product> {
     @JsonIgnore
     private Timestamp updatedAt;
 
-    @JsonProperty("productImages")
-    private List<ProductImageCreateRequestDTO> productImageResponseDTOs;
+    @JsonProperty("productImage")
+    private ProductImageCreateRequestDTO productImageResponseDTOs;
 
     @JsonProperty("productSizes")
     private List<UUID> sizeIds;
@@ -61,13 +61,12 @@ public class ProductCreateRequestDTO implements IDto<Product> {
     @JsonProperty("categories")
     private List<UUID> categoryId;
 
-
-
     @JsonProperty("post")
     private PostCreateRequestDTO post;
 
     @JsonProperty("coupon")
     private CouponCreateRequestDTO coupon;
+
 
     @Override
     public Product toEntity() {

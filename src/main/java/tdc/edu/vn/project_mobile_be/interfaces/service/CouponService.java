@@ -9,6 +9,7 @@ import tdc.edu.vn.project_mobile_be.dtos.responses.coupon.CouponResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.interfaces.IService;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface CouponService extends IService<Coupon, UUID> {
@@ -16,9 +17,11 @@ public interface CouponService extends IService<Coupon, UUID> {
 
     Coupon updateCoupon(CouponUpdateRequestDTO params, UUID id);
 
-    boolean deleteCoupon(CouponRemoveRequestDTO params);
+    boolean deleteCoupon(UUID couponId);
 
     Page<CouponResponseDTO> getCoupons(int role, Pageable pageable);
 
     Coupon updateCouponByProductId(CouponUpdateRequestDTO couponDTO, UUID productId);
+
+    List<CouponResponseDTO> getCouponByType (int type);
 }

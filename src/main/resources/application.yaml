@@ -24,10 +24,10 @@ spring:
                 fetch_size: 100
                 batch_size: 30
 
-    servlet:
-      multipart:
-        max-file-size: 20MB
-        max-request-size: 50MB
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 50MB
     server:
       port: 8080
       file:
@@ -49,3 +49,10 @@ redis:
     host: 192.168.57.128
     port: 6379
     password: ''
+
+google:
+  cloud:
+    storage:
+      bucket-name: mobileproject
+    credentials:
+      path: src/main/resources/service-account.json

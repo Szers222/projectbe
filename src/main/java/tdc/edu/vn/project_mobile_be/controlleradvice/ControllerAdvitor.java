@@ -151,5 +151,4 @@ public class ControllerAdvitor extends ResponseEntityExceptionHandler {
         errorResponseDTO.setStatus(HttpStatus.valueOf("BAD_REQUEST"));
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
     }
-
 }

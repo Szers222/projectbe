@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.commond.ProductSpecifications;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.ListNotFoundException;
@@ -20,11 +21,13 @@ import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CouponService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.PostService;
+import tdc.edu.vn.project_mobile_be.interfaces.service.ProductImageService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
 import java.math.BigDecimal;
@@ -64,9 +67,11 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private CouponService couponService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ProductImageService productImageService;
 
     @Override
-    public Product createProduct(ProductCreateRequestDTO params) {
+    public Product createProduct(ProductCreateRequestDTO params, MultipartFile[] file) {
         LocalDateTime releaseDateTime;
 
         // Kiểm tra nếu postRelease là null, dùng thời gian hiện tại
@@ -96,14 +101,23 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         }
         double productSale = solveProductSale(params.getProductPrice(), coupon);
 
+        Set<ProductImage> productImages = new HashSet<>();
+        for (MultipartFile multipartFile : file) {
+            ProductImage productImage = productImageService.createProductImage(
+                    params.getProductImageResponseDTOs(),
+                    multipartFile);
+            productImages.add(productImage);
+        }
 
         // Tạo đối tượng Product mới
         Product product = params.toEntity();
-        product.setProductId(UUID.randomUUID());
+        UUID productId = UUID.randomUUID();
+        product.setProductId(productId);
         product.setCategories(categories);
         product.setPost(post);
         product.setCoupon(coupon);
         product.setProductSale(productSale);
+        product.setImages(productImages);
 
         return productRepository.save(product);
     }

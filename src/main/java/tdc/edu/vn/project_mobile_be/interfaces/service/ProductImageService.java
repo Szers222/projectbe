@@ -2,6 +2,7 @@ package tdc.edu.vn.project_mobile_be.interfaces.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductImageResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
 import tdc.edu.vn.project_mobile_be.interfaces.IService;
@@ -12,6 +13,9 @@ import java.util.UUID;
 public interface ProductImageService extends IService<ProductImage, UUID> {
     List<ProductImageResponseDTO> findAllByProductId(UUID productId);
 
-    ProductImage create(ProductImageCreateRequestDTO createProductImageRequestDTO, MultipartFile file);
+    ProductImage createProductImage(ProductImageCreateRequestDTO params, MultipartFile file);
 
+    ProductImage updateProductImage(ProductImageUpdateRequestDTO params, MultipartFile file, UUID productImageId);
+
+    boolean deleteProductImage(UUID id);
 }

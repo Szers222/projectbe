@@ -20,4 +20,7 @@ public interface CouponRepository extends JpaRepository<Coupon, UUID> {
 
     @Query("select c from Coupon c left join fetch c.product cp where cp.productId = :productId")
     Optional<Coupon> findCouponByProductId(@Param("productId") UUID productId);
+
+    @Query("SELECT c FROM Coupon c WHERE c.couponType = :type")
+    List<Coupon> findCouponByType(@Param("type") int type);
 }
