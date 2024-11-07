@@ -162,6 +162,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             categories.add(category);
         }
 
+
         Set<ProductImage> productImages = productImageService.updateProductImageForProduct(
                 params.getProductImageResponseDTOs(),
                 files);
