@@ -55,7 +55,7 @@ public class ProductController {
 
     @GetMapping(value = {"/products/filters", "/products"})
     public ResponseEntity<ResponseData<PagedModel<EntityModel<ProductResponseDTO>>>> getProductsByFilters(
-            @RequestParam ProductRequestParamsDTO params,
+            @ModelAttribute ProductRequestParamsDTO params,
             PagedResourcesAssembler<ProductResponseDTO> assembler) {
 
         if (params.getSort() == null || params.getSort().isEmpty()) {
@@ -164,10 +164,13 @@ public class ProductController {
         return ResponseEntity.ok(responseData);
     }
     @DeleteMapping("/product/{productId}")
-    public ResponseEntity<ResponseData<?>> deleteProduct(@PathVariable UUID productId) {
-        productService.deleteProduct(productId);
-        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Xóa sản phẩm thành công", null);
-        return ResponseEntity.ok(responseData);
+    public ResponseEntity<ResponseData<?>> deleteProduct(@PathVariable("productId") UUID productId) {
+         boolean isCheck = productService.deleteProduct(productId);
+         if(isCheck){
+             ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Xóa sản phẩm thành công", null);
+             return ResponseEntity.ok(responseData);
+         }
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.BAD_REQUEST, "Xóa sản phẩm không thành công", null);
+        return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
     }
-
 }

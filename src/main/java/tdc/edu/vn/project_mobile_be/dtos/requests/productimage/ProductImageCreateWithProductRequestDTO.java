@@ -16,7 +16,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductImageCreateRequestDTO implements IDto<ProductImage> {
+public class ProductImageCreateWithProductRequestDTO implements IDto<ProductImage> {
 
     @JsonIgnore
     private String productImagePath;
@@ -25,9 +25,6 @@ public class ProductImageCreateRequestDTO implements IDto<ProductImage> {
     @JsonProperty("productImageAlt")
     private String productImageAlt;
 
-    @NotBlank(message = "product-id không được để trống")
-    @JsonProperty("productId")
-    private UUID productId;
     @JsonIgnore
     private Timestamp createdAt;
     @JsonIgnore

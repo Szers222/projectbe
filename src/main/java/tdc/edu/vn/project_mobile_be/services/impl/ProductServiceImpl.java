@@ -22,7 +22,6 @@ import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
-import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CouponService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.PostService;
@@ -40,13 +39,14 @@ import java.util.stream.Collectors;
 @Service
 public class ProductServiceImpl extends AbService<Product, UUID> implements ProductService {
 
-    public final int PRODUCT_CLOTHES = 0;
-    public final int PRODUCT_SHOES = 1;
-    public final int PRODUCT_ACCESSORIES = 2;
+    private final int COUPON_PER_HUNDRED_TYPE = 0;
+    private final int COUPON_PRICE_TYPE = 1;
     private final int PRODUCT_DEFAULT_SIZE = 0;
     private final int PRODUCT_RELATE_SIZE = 6;
     private final int PRODUCT_MIN_PRICE = 0;
     private final int PRODUCT_MIN_SIZE = 0;
+    private final double SOLVE_SALE = 1;
+    private final double MAX_PER = 100;
 
     @Autowired
     private ProductRepository productRepository;
@@ -94,7 +94,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             Category category = categoryRepository.findByCategoryId(categoryId);
             categories.add(category);
         }
-
+        double productSale = solveProductSale(params.getProductPrice(), coupon);
 
 
         // Tạo đối tượng Product mới
@@ -103,6 +103,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         product.setCategories(categories);
         product.setPost(post);
         product.setCoupon(coupon);
+        product.setProductSale(productSale);
 
         return productRepository.save(product);
     }
@@ -143,7 +144,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             Category category = categoryRepository.findByCategoryId(categoryId);
             categories.add(category);
         }
-
+        double productSale = solveProductSale(params.getProductPrice(), coupon);
         Product product = optionalProduct.get();
         product.setProductName(params.getProductName());
         product.setProductPrice(params.getProductPrice());
@@ -152,6 +153,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         product.setCoupon(coupon);
         product.setPost(post);
         product.setCategories(categories);
+        product.setProductSale(productSale);
 
         return productRepository.save(product);
     }
@@ -187,8 +189,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
             ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
             PostResponseDTO postResponseDTO = getPostResponseDTO(product);
-            String productPriceSaleString = productPriceSale(product);
-            String productPriceString = productPrice(product);
+            String productPriceSaleString = formatProductPriceSale(product);
+            String productPriceString = formatProductPrice(product);
 
 
             ProductResponseDTO dto = new ProductResponseDTO();
@@ -215,7 +217,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
         // Lọc theo khoảng giá
         if (params.getMinPrice() != null && params.getMaxPrice() != null) {
-            if (this.validatePriceRange(params.getMinPrice(), params.getMaxPrice()) == true) {
+            if (this.validatePriceRange(params.getMinPrice(), params.getMaxPrice())) {
                 spec = spec.and(ProductSpecifications.priceBetween(params.getMinPrice(), params.getMaxPrice()));
             }
         }
@@ -253,8 +255,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
             ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
             PostResponseDTO postResponseDTO = getPostResponseDTO(product);
-            String productPriceSaleString = productPriceSale(product);
-            String productPriceString = productPrice(product);
+            String productPriceSaleString = formatProductPriceSale(product);
+            String productPriceString = formatProductPrice(product);
 
             ProductResponseDTO dto = new ProductResponseDTO();
             dto.toDto(product);
@@ -296,8 +298,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
             ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
             PostResponseDTO postResponseDTO = getPostResponseDTO(product);
-            String productPriceSaleString = productPriceSale(product);
-            String productPriceString = productPrice(product);
+            String productPriceSaleString = formatProductPriceSale(product);
+            String productPriceString = formatProductPrice(product);
 
             ProductResponseDTO dto = new ProductResponseDTO();
             dto.toDto(product);
@@ -324,8 +326,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
         ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
         PostResponseDTO postResponseDTO = getPostResponseDTO(product);
-        String productPriceSaleString = productPriceSale(product);
-        String productPriceString = productPrice(product);
+        String productPriceSaleString = formatProductPriceSale(product);
+        String productPriceString = formatProductPrice(product);
 
         ProductResponseDTO productDTO = new ProductResponseDTO();
         productDTO.toDto(product);
@@ -421,7 +423,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         return postResponseDTO;
     }
 
-    public String productPriceSale(Product product) {
+    public String formatProductPriceSale(Product product) {
         double priceSale = product.getProductPriceSale();
         if (priceSale < PRODUCT_MIN_PRICE) {
             throw new NumberErrorException("Price must be greater than 0");
@@ -429,12 +431,31 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         return formatPrice(priceSale);
     }
 
-    public String productPrice(Product product) {
+    public String formatProductPrice(Product product) {
         double price = product.getProductPrice();
         if (price < PRODUCT_MIN_PRICE) {
             throw new NumberErrorException("Price must be greater than 0");
         }
         return formatPrice(price);
+    }
+
+    public double solveProductSale(double productPrice, Coupon coupon) {
+        double productSale = 0;
+        if (coupon != null) {
+            if (coupon.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
+                productSale = coupon.getCouponPerHundred();
+            } else if (coupon.getCouponType() == COUPON_PRICE_TYPE) {
+                double total = productPrice - coupon.getCouponPrice();
+                if (total <= 0) {
+                    return MAX_PER;
+                }
+                productSale = (SOLVE_SALE - (total / productPrice)) * MAX_PER;
+                if (productSale > MAX_PER) {
+                    return MAX_PER;
+                }
+            }
+        }
+        return productSale;
     }
 
 }

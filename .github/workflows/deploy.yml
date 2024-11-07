@@ -1,0 +1,24 @@
+name: Deploy to Google Cloud
+
+on: [push]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: your-gcp-project-id
+          service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          export_default_credentials: true
+
+      - name: Deploy to Google Cloud Storage
+        run: |
+          echo "Deploying to Google Cloud Storage"
+          # Add your deployment commands here, for example:
+          # gsutil cp -r ./your-folder-to-upload gs://your-bucket-name/
