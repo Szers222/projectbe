@@ -20,7 +20,7 @@ public interface ProductService extends IService<Product, UUID> {
 
     boolean deleteProduct(UUID productId);
 
-    Product updateProduct(ProductUpdateRequestDTO params, UUID productId);
+    Product updateProduct(ProductUpdateRequestDTO params, UUID productId, MultipartFile[] file);
 
 
     Page<ProductResponseDTO> getProductByCategoryId(UUID categoryId, Pageable pageable);

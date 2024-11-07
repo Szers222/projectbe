@@ -241,6 +241,19 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
         return true;
     }
 
+    @Override
+    public boolean deleteProductImageByProductId(UUID productId) {
+        Set<ProductImage> productImageOp = productImageRepository.findByProductId(productId);
+        if (productImageOp.isEmpty()) {
+            throw new EntityNotFoundException("Product image not found");
+        }
+        for(ProductImage productImage : productImageOp){
+            googleCloudStorageService.deleteFile(productImage.getProductImagePath());
+        }
+        productImageRepository.deleteByProductId(productId);
+        return true;
+    }
+
 
 //    private String saveImage(MultipartFile file) throws IOException {
 //        String uploadDir = "src/main/resources/static/images";

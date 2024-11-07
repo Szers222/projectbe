@@ -25,10 +25,7 @@ import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
-import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.CategoryRepository;
-import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.PostStatusRepository;
-import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
-import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.SizeProductRepository;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CouponService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.PostService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductImageService;
@@ -69,6 +66,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private CouponService couponService;
     @Autowired
     private ProductImageService productImageService;
+    @Autowired
+    private ProductImageRepository productImageRepository;
 
     @Override
     @Transactional
@@ -126,7 +125,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
     @Override
     @Transactional
-    public Product updateProduct(ProductUpdateRequestDTO params, UUID productId) {
+    public Product updateProduct(ProductUpdateRequestDTO params, UUID productId, MultipartFile[] files) {
         LocalDateTime releaseDateTime;
 
         // Kiểm tra nếu postRelease là null, dùng thời gian hiện tại
@@ -155,6 +154,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         if (optionalProduct.isEmpty()) {
             throw new EntityNotFoundException("Product không tồn tại !");
         }
+        Product product = optionalProduct.get();
         Set<Category> categories = new HashSet<>();
 
         for (UUID categoryId : params.getCategoryId()) {
@@ -162,8 +162,12 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             categories.add(category);
         }
 
+        Set<ProductImage> productImages = productImageService.updateProductImageForProduct(
+                params.getProductImageResponseDTOs(),
+                files);
+
         double productSale = solveProductSale(params.getProductPrice(), coupon);
-        Product product = optionalProduct.get();
+
         product.setProductName(params.getProductName());
         product.setProductPrice(params.getProductPrice());
         product.setProductQuantity(params.getProductQuantity());
@@ -172,11 +176,12 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         product.setPost(post);
         product.setCategories(categories);
         product.setProductSale(productSale);
-
+        product.setImages(productImages);
         return productRepository.save(product);
     }
 
     @Override
+    @Transactional
     public Page<ProductResponseDTO> findProductRelate(UUID categoryId, Pageable pageable) {
         Page<Product> productPage = productRepository.findByIdWithCategories(categoryId, pageable);
 
@@ -226,6 +231,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     }
 
     @Override
+    @Transactional
     public Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable) {
         Specification<Product> spec = Specification.where(null);  // Khởi tạo Specification rỗng
         // Lọc theo danh mục (category)
@@ -291,11 +297,13 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     }
 
     @Override
+    @Transactional
     public boolean deleteProduct(UUID productId) {
         Optional<Product> productOptional = productRepository.findById(productId);
         if (productOptional.isEmpty()) {
             throw new EntityNotFoundException("Product không tồn tại !");
         }
+        productImageRepository.deleteByProductId(productId);
         Product product = productOptional.get();
         productRepository.delete(product);
         return true;

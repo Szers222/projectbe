@@ -11,6 +11,8 @@ import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.dtos.requests.coupon.CouponUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.post.PostCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.post.PostUpdateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateWithProductRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.category.CategoryResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductImageResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductSizeResponseDTO;
@@ -57,8 +59,8 @@ public class ProductUpdateRequestDTO implements IDto<Product> {
     @JsonIgnore
     private Timestamp updatedAt;
 
-    @JsonIgnore
-    private Set<ProductImageResponseDTO> productImageResponseDTOs;
+    @JsonProperty("productImage")
+    private ProductImageUpdateRequestDTO productImageResponseDTOs;
 
     @JsonIgnore
     private ProductSupplierResponseDTO supplier;
