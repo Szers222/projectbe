@@ -161,6 +161,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             Category category = categoryRepository.findByCategoryId(categoryId);
             categories.add(category);
         }
+
         double productSale = solveProductSale(params.getProductPrice(), coupon);
         Product product = optionalProduct.get();
         product.setProductName(params.getProductName());
