@@ -13,6 +13,7 @@ import tdc.edu.vn.project_mobile_be.commond.ApiResponse;
 import tdc.edu.vn.project_mobile_be.dtos.requests.AuthenticationRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.IntrospectRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.LogoutRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.RefreshRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.AuthenticationResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.IntrospectResponseDTO;
 import tdc.edu.vn.project_mobile_be.services.impl.AuthenticationServiceImp;
@@ -27,7 +28,7 @@ import java.text.ParseException;
 public class AuthenticationController {
     AuthenticationServiceImp authenticationServiceImp;
 
-    @PostMapping("/auth/token")
+    @PostMapping("/auth/login")
     ApiResponse<AuthenticationResponseDTO> authentication(@RequestBody AuthenticationRequestDTO request) {
         var result = authenticationServiceImp.authenticate(request);
         return ApiResponse.<AuthenticationResponseDTO>builder()
@@ -45,5 +46,13 @@ public class AuthenticationController {
     ApiResponse<Void> logout(@RequestBody LogoutRequestDTO request) throws ParseException, JOSEException {
         authenticationServiceImp.logout(request);
         return ApiResponse.<Void>builder().build();
+    }
+    @PostMapping("/auth/refresh")
+    ApiResponse<AuthenticationResponseDTO> refresh(@RequestBody RefreshRequestDTO request)
+            throws ParseException, JOSEException{
+        var result = authenticationServiceImp.refreshToken(request);
+        return ApiResponse.<AuthenticationResponseDTO>builder()
+                .result(result)
+                .build();
     }
 }

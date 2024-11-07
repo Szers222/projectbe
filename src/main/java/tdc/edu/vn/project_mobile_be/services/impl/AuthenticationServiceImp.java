@@ -23,6 +23,7 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundExcept
 import tdc.edu.vn.project_mobile_be.dtos.requests.AuthenticationRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.IntrospectRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.LogoutRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.RefreshRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.AuthenticationResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.IntrospectResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
@@ -53,6 +54,15 @@ public class AuthenticationServiceImp {
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
 
+    @NonFinal
+    @Value("${jwt.valid-duration}")
+    protected long VALID_DURATION;
+
+    @NonFinal
+    @Value("${jwt.refreshable-duration}")
+    protected long REFRESHABLE_DURATION;
+
+    //Xac thực user
     @Transactional
     public AuthenticationResponseDTO authenticate(AuthenticationRequestDTO request) {
         Optional<User> optionalUser = userRepository.findByUserEmail(request.getUserEmail());
@@ -63,17 +73,13 @@ public class AuthenticationServiceImp {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(request.getUserPassword(), user.getUserPassword());
 
-        if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
+        if (!authenticated) throw new EntityNotFoundException("Unauthentication");
 
         var token = generateToken(user);
-
-        // Lấy các đối tượng Role
-        //List<Role> roles = new ArrayList<>(user.getRoles());
 
         return AuthenticationResponseDTO.builder()
                 .token(token)
                 .authenticated(true)
-                //.roles(roles)
                 .build();
     }
     //Kiem tra token
@@ -82,7 +88,7 @@ public class AuthenticationServiceImp {
         var token = request.getToken();
         boolean isValid = true;
         try {
-            verifyToken(token);
+            verifyToken(token, false);
         } catch (Exception e) {
             isValid = false;
         }
@@ -93,24 +99,31 @@ public class AuthenticationServiceImp {
     }
 
     public void logout(LogoutRequestDTO request) throws ParseException, JOSEException {
-        var signToken = verifyToken(request.getToken());
+        try {
+            var signToken = verifyToken(request.getToken(),true);
 
-        String jit = signToken.getJWTClaimsSet().getJWTID();
-        Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+            String jit = signToken.getJWTClaimsSet().getJWTID();
+            Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
 
-        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                .id(jit)
-                .expires(expiryTime)
-                .build();
-        invalidatedTokenRepository.save(invalidatedToken);
-
-
+            InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                    .id(jit)
+                    .expires(expiryTime)
+                    .build();
+            invalidatedTokenRepository.save(invalidatedToken);
+        } catch (AppException e) {
+            log.info("Token da het han");
+        }
     }
 
-    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+    // Xacs minh token va kiem tra token
+    private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
-        Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        Date expirationTime = (isRefresh)
+                ? new Date(signedJWT.getJWTClaimsSet().getIssueTime()
+                        .toInstant().plus(REFRESHABLE_DURATION,ChronoUnit.DAYS).toEpochMilli())
+                : signedJWT.getJWTClaimsSet().getExpirationTime();
+
 
         var verified = signedJWT.verify(verifier);
         if(!(verified && expirationTime.after(new Date())))
@@ -123,7 +136,35 @@ public class AuthenticationServiceImp {
 
         return signedJWT;
     }
+    public AuthenticationResponseDTO refreshToken(RefreshRequestDTO request) throws ParseException, JOSEException {
+        //Kiem tra hieu luc token
+        var signedJWT = verifyToken(request.getToken(),true);
+        //Thuc hien Refresh
+        //Lay ID token va tg hieu luc
+        var jit = signedJWT.getJWTClaimsSet().getJWTID();
+        var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        //logout token
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jit)
+                .expires(expiryTime)
+                .build();
+        invalidatedTokenRepository.save(invalidatedToken);
+        //Lay User
+        var userName = signedJWT.getJWTClaimsSet().getSubject();
 
+        var user = userRepository.findByUserEmail(userName).orElseThrow(
+                () -> new RuntimeException("Khong tim thay USER")
+        );
+        var token = generateToken(user);
+
+        return AuthenticationResponseDTO.builder()
+                .token(token)
+                .authenticated(true)
+                .build();
+
+    }
+
+    // Tao JWT token User
     @Transactional
     public String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
@@ -133,7 +174,7 @@ public class AuthenticationServiceImp {
                 .issuer("22211tt4420.mail.tdc.edu.vn")
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
+                        Instant.now().plus(VALID_DURATION, ChronoUnit.MINUTES).toEpochMilli()
                 ))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user))
@@ -150,6 +191,7 @@ public class AuthenticationServiceImp {
         }
     }
 
+    //ROLE
     private String buildScope(User user) {
         StringJoiner stringJoiner = new StringJoiner(" ");
         if (user != null) {
