@@ -1,17 +1,14 @@
 package tdc.edu.vn.project_mobile_be.entities.coupon;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
-import tdc.edu.vn.project_mobile_be.entities.type.CouponType;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
@@ -50,7 +47,10 @@ public class Coupon {
     private float couponPerHundred;
 
     @Column(name = "coupon_price")
-    private String couponPrice;
+    private double couponPrice;
+
+    @Column(name = "coupon_type")
+    private int couponType;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
@@ -61,13 +61,15 @@ public class Coupon {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "product_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
     private Product product;
 
-    @ManyToOne
-    @JoinColumn(name = "coupon_type_id")
-    private CouponType couponType;
 
     @ManyToMany(mappedBy = "coupons")
     @ToString.Exclude
-    private Set<Order> products = new HashSet<>();
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
+    private Set<Order> order = new HashSet<>();
 }

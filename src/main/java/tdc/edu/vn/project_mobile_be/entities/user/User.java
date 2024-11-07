@@ -78,14 +78,19 @@ public class User {
     private int userWrongPassword;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+
     @JoinColumn(name = "card_id", nullable = false)
     @JsonBackReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+
     private IdCard iCard;
 
-    @OneToOne(mappedBy = "user")
-    private Post post;
+    @OneToMany(mappedBy = "user")
+    @JsonBackReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Post> post;
 
     @ManyToOne
     @JoinColumn(name = "user_status_id", nullable = false)

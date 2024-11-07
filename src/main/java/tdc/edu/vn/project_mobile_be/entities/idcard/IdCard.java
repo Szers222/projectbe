@@ -1,9 +1,8 @@
 package tdc.edu.vn.project_mobile_be.entities.idcard;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -47,5 +46,8 @@ public class IdCard {
     private Timestamp updatedAt;
 
     @OneToOne(mappedBy = "iCard")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
     private User user;
 }
