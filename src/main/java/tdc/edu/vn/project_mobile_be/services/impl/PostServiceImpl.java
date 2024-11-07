@@ -1,6 +1,8 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.ListNotFoundException;
@@ -36,6 +38,9 @@ public class PostServiceImpl extends AbService<Post, UUID> implements PostServic
     private final int POST_STATUS_INACTIVE = 0;
     private final int POST_STATUS_ACTIVE = 1;
     private final int POST_STATUS_DELETED = 2;
+    private final int ROLE_ADMIN = 0;
+    private final int ROLE_USER = 1;
+
     @Override
     public Post createPost(PostCreateRequestDTO requestDTO) {
 
@@ -111,6 +116,24 @@ public class PostServiceImpl extends AbService<Post, UUID> implements PostServic
     }
 
     @Override
+    public List<PostResponseDTO> findPostByName(String postName) {
+        List<Post> listPost = postRepository.findPostByName(postName);
+        if (listPost.isEmpty()) {
+            throw new ListNotFoundException("Không có bài viết nào");
+        }
+        List<PostResponseDTO> result = new ArrayList<>();
+
+        listPost.forEach(post -> {
+            PostResponseDTO postResponseDTO = new PostResponseDTO();
+            postResponseDTO.toDto(post);
+            result.add(postResponseDTO);
+        });
+
+        return result;
+
+    }
+
+    @Override
     public Post updatePostByProductId(PostUpdateRequestDTO postDTO, UUID productId) {
         Optional<Post> postOptional = postRepository.findPostByProductId(productId);
         if (postOptional.isEmpty()) {
@@ -148,11 +171,25 @@ public class PostServiceImpl extends AbService<Post, UUID> implements PostServic
         return postRepository.save(post);
     }
 
-
     @Override
-    public Post findPostById(UUID postId) {
-        return null;
+    public List<PostResponseDTO> findAllPostByUserId(UUID userId) {
+        List<Post> listPost = postRepository.findAllByUserId(userId);
+        if (listPost.isEmpty()) {
+            throw new ListNotFoundException("Không có bài viết nào");
+        }
+        List<PostResponseDTO> result = new ArrayList<>();
+
+        listPost.forEach(post -> {
+            PostResponseDTO postResponseDTO = new PostResponseDTO();
+            postResponseDTO.toDto(post);
+            result.add(postResponseDTO);
+        });
+
+        return result;
     }
+
+
+
 
     @Override
     public boolean deletePost(UUID postId) {
@@ -173,16 +210,40 @@ public class PostServiceImpl extends AbService<Post, UUID> implements PostServic
     }
 
     @Override
-    public List<Post> findAllPost() {
-        return List.of();
+    public Page<PostResponseDTO> findAllPost(int role, Pageable pageable) {
+        Page<PostResponseDTO> postPage;
+
+        if (role == ROLE_ADMIN) {
+            postPage = postRepository.findAll(pageable).map(post -> {
+                PostResponseDTO postResponseDTO = new PostResponseDTO();
+                postResponseDTO.toDto(post);
+                return postResponseDTO;
+            });
+        } else if (role == ROLE_USER) {
+            postPage = postRepository.findAllByPostStatusType(POST_STATUS_ACTIVE, pageable).map(post -> {
+                PostResponseDTO postResponseDTO = new PostResponseDTO();
+                postResponseDTO.toDto(post);
+                return postResponseDTO;
+            });
+        } else {
+            throw new IllegalArgumentException("Vai trò không hợp lệ");
+        }
+
+        if (postPage.isEmpty()) {
+            throw new ListNotFoundException("Không có bài viết nào");
+        }
+
+        return postPage;
     }
+
 
     @Override
     public List<PostResponseDTO> findAllNewPost() {
         List<Post> listPost = postRepository.findAllByOrderByCreatedAtDesc();
         listPost.removeIf(post -> post.getPostStatus().getPostStatusType() == POST_STATUS_DELETED
                 || post.getPostStatus().getPostStatusType() == POST_STATUS_INACTIVE);
-        if (listPost.size() <= 0) {
+        listPost.subList(0, 5);
+        if (listPost.isEmpty()) {
             throw new ListNotFoundException("Không có bài viết nào");
         }
         List<PostResponseDTO> result = new ArrayList<>();
@@ -197,16 +258,9 @@ public class PostServiceImpl extends AbService<Post, UUID> implements PostServic
     }
 
 
-
     private PostStatus getStatus(UUID statusId) {
         return postStatusRepository.findByPostStatusId((statusId)) != null ? postStatusRepository.findByPostStatusId((statusId)) : null;
     }
 
-    private void toDTO(List<Post> postList) {
-        postList.forEach(post -> {
-            PostResponseDTO postResponseDTO = new PostResponseDTO();
-            postResponseDTO.toDto(post);
-        });
-    }
 
 }

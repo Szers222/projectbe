@@ -74,7 +74,7 @@ public class ProductResponseDTO implements IDto<Product> {
 //            return productSizeResponseDTO;
 //        }).toList();
 //
-//        ProductSupplierResponseDTO productSupplierResponse = new ProductSupplierResponseDTO();
+//        ProductSupplierCreateRequestDTO productSupplierResponse = new ProductSupplierCreateRequestDTO();
 //        productSupplierResponse.toDto(entity.getSupplier());
 //        this.supplier = productSupplierResponse;
 //
