@@ -55,7 +55,7 @@ public class CouponController {
     // Endpoint to get a paginated list of coupons
     @GetMapping({"/coupons", "/coupons/"})
     public ResponseEntity<ResponseData<PagedModel<EntityModel<CouponResponseDTO>>>> getCoupons(
-            @RequestParam CouponRequestParamsDTO params,
+            @ModelAttribute CouponRequestParamsDTO params,
             PagedResourcesAssembler<CouponResponseDTO> assembler) {
         // Determine sort direction
         Sort.Direction sortDirection = params.getDirection().equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
