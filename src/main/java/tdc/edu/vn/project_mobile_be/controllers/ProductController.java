@@ -151,10 +151,11 @@ public class ProductController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PutMapping({"/product/{productId}", "/product/{productId}/"})
+    @PutMapping(value = {"/product/{productId}", "/product/{productId}/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseData<?>> updateProduct(
             @Valid @RequestBody ProductUpdateRequestDTO params,
             @PathVariable("productId") UUID productId,
+            @RequestParam("file") MultipartFile[] files,
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<String> errorMessages = bindingResult.getFieldErrors().stream()
@@ -162,7 +163,7 @@ public class ProductController {
                     .collect(Collectors.toList());
             throw new MultipleFieldsNullOrEmptyException(errorMessages);
         }
-        Product product = productService.updateProduct(params,productId);
+        Product product = productService.updateProduct(params,productId,files);
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Cập nhật sản phẩm thành công", product);
         return ResponseEntity.ok(responseData);
     }
