@@ -15,10 +15,12 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.commond.Breadcrumb;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
@@ -77,9 +79,10 @@ public class ProductController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping(value = {"/product", "/product/"})
+    @PostMapping(value = {"/product", "/product/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseData<?>> createProduct(
             @Valid @RequestBody ProductCreateRequestDTO params,
+            @RequestParam("file") MultipartFile[] files,
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<String> errorMessages = bindingResult.getFieldErrors().stream()
@@ -87,7 +90,7 @@ public class ProductController {
                     .collect(Collectors.toList());
             throw new MultipleFieldsNullOrEmptyException(errorMessages);
         }
-        Product product = productService.createProduct(params);
+        Product product = productService.createProduct(params, files);
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Tạo Sản Phẩm Thành Công", product);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseData);
     }
@@ -148,10 +151,11 @@ public class ProductController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PutMapping({"/product/{productId}", "/product/{productId}/"})
+    @PutMapping(value = {"/product/{productId}", "/product/{productId}/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseData<?>> updateProduct(
             @Valid @RequestBody ProductUpdateRequestDTO params,
             @PathVariable("productId") UUID productId,
+            @RequestParam("file") MultipartFile[] files,
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<String> errorMessages = bindingResult.getFieldErrors().stream()
@@ -159,7 +163,7 @@ public class ProductController {
                     .collect(Collectors.toList());
             throw new MultipleFieldsNullOrEmptyException(errorMessages);
         }
-        Product product = productService.updateProduct(params,productId);
+        Product product = productService.updateProduct(params,productId,files);
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Cập nhật sản phẩm thành công", product);
         return ResponseEntity.ok(responseData);
     }

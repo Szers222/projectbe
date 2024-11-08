@@ -64,14 +64,17 @@ public class Product {
     private Timestamp updatedAt;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "coupon_id")
+    @JoinColumn(name = "coupon_id", referencedColumnName = "coupon_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonBackReference
     private Coupon coupon;
     //
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "post_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
+    @JoinColumn(name = "post_id", referencedColumnName = "post_id")
     private Post post;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)

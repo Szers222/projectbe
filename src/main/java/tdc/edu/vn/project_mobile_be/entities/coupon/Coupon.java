@@ -59,8 +59,7 @@ public class Coupon {
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "product_id")
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "coupon")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonBackReference

@@ -1,6 +1,7 @@
 package tdc.edu.vn.project_mobile_be.interfaces.reponsitory;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -17,4 +18,9 @@ public interface ProductImageRepository extends JpaRepository<ProductImage, UUID
 
     @Query("SELECT p FROM ProductImage p WHERE p.product.productId = :productId")
     Set<ProductImage> findByProductId(@Param("productId") UUID productId);
+
+    @Modifying
+    @Query("delete from ProductImage p where p.product.productId = :productId")
+    void deleteByProductId(@Param("productId") UUID productId);
+
 }
