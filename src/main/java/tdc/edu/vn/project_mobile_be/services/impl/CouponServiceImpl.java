@@ -9,7 +9,6 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.CouponPricePerHundre
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.NumberErrorException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.coupon.CouponCreateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.coupon.CouponRemoveRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.coupon.CouponUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.coupon.CouponResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
@@ -88,28 +87,31 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
     }
     @Override
     public Coupon updateCouponByProductId(CouponUpdateRequestDTO couponDTO, UUID productId) {
-        boolean check = false;
-        Timestamp expireDateTime = coverToTimestampExpire(couponDTO.getCouponExpire());
-        Timestamp releaseDateTime = coverToTimestampRelease(couponDTO.getCouponRelease());
         Optional<Coupon> couponOptional = couponRepository.findCouponByProductId(productId);
         if (couponOptional.isEmpty()) {
             throw new EntityNotFoundException("Coupon không tồn tại");
         }
         Coupon coupon = couponOptional.get();
-
-        if (validateCoupon(couponDTO) != check) {
-            coupon = couponDTO.toEntity();
-            coupon.setCouponId(UUID.randomUUID());
-            coupon.setCouponRelease(releaseDateTime);
-            coupon.setCouponExpire(expireDateTime);
-            if (couponDTO.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
-                coupon.setCouponPrice(0);
-                coupon.setCouponPerHundred(couponDTO.getCouponPerHundred());
+        if (couponDTO != null) {
+            boolean check = false;
+            Timestamp expireDateTime = coverToTimestampExpire(couponDTO.getCouponExpire());
+            Timestamp releaseDateTime = coverToTimestampRelease(couponDTO.getCouponRelease());
+            if (validateCoupon(couponDTO) != check) {
+                coupon = couponDTO.toEntity();
+                coupon.setCouponId(UUID.randomUUID());
+                coupon.setCouponRelease(releaseDateTime);
+                coupon.setCouponExpire(expireDateTime);
+                if (couponDTO.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
+                    coupon.setCouponPrice(0);
+                    coupon.setCouponPerHundred(couponDTO.getCouponPerHundred());
+                }
+                if (couponDTO.getCouponType() == COUPON_PRICE_TYPE) {
+                    coupon.setCouponPerHundred(0);
+                    coupon.setCouponPrice(couponDTO.getCouponPrice());
+                }
             }
-            if (couponDTO.getCouponType() == COUPON_PRICE_TYPE) {
-                coupon.setCouponPerHundred(0);
-                coupon.setCouponPrice(couponDTO.getCouponPrice());
-            }
+        } else {
+            return null;
         }
         return couponRepository.save(coupon);
     }

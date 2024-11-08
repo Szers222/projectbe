@@ -4,15 +4,17 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.dtos.requests.coupon.CouponCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.post.PostCreateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateWithProductRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.sizeproduct.SizeProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
 import java.sql.Timestamp;
@@ -33,8 +35,7 @@ public class ProductCreateRequestDTO implements IDto<Product> {
     @JsonProperty("productPrice")
     private double productPrice;
 
-    @Min(value = 0, message = "ProductQuantity phải lớn hơn hoặc bằng 0")
-    @JsonProperty("productQuantity")
+    @JsonIgnore
     private int productQuantity;
 
     @JsonProperty("productSale")
@@ -53,15 +54,23 @@ public class ProductCreateRequestDTO implements IDto<Product> {
     @JsonProperty("productImage")
     private ProductImageCreateWithProductRequestDTO productImageResponseDTOs;
 
-    @JsonProperty("productSizes")
-    private List<UUID> sizeIds;
-
+    @NotBlank(message = "ProductSupplier không được để trống")
+    @NotNull(message = "ProductSupplier không được để null")
     @JsonProperty("productSupplier")
-    private UUID supplierId;
+    private UUID productSupplier;
 
+    @NotBlank(message = "SizeProduct không được để trống")
+    @NotNull(message = "SizeProduct không được để null")
+    @JsonProperty("sizesProduct")
+    private SizeProductRequestParamsDTO sizesProduct;
+
+    @NotBlank(message = "Category không được để trống")
+    @NotNull(message = "Category không được để null")
     @JsonProperty("categories")
     private List<UUID> categoryId;
 
+    @NotBlank(message = "ProductDescription không được để trống")
+    @NotNull(message = "ProductDescription không được để null")
     @JsonProperty("post")
     private PostCreateRequestDTO post;
 
