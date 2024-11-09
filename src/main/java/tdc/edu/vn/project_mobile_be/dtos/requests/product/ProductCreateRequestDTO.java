@@ -4,14 +4,18 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.dtos.requests.coupon.CouponCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.post.PostCreateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateWithProductRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.sizeproduct.SizeProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
 import java.sql.Timestamp;
@@ -32,11 +36,10 @@ public class ProductCreateRequestDTO implements IDto<Product> {
     @JsonProperty("productPrice")
     private double productPrice;
 
-    @Min(value = 0, message = "ProductQuantity phải lớn hơn hoặc bằng 0")
-    @JsonProperty("productQuantity")
+    @JsonIgnore
     private int productQuantity;
 
-    @JsonProperty("productSale")
+    @JsonIgnore
     private double productSale;
 
     @Min(value = 1900, message = "ProductYearOfManufacture không hợp lệ")
@@ -49,25 +52,28 @@ public class ProductCreateRequestDTO implements IDto<Product> {
     @JsonIgnore
     private Timestamp updatedAt;
 
-    @JsonProperty("productImages")
-    private List<ProductImageCreateRequestDTO> productImageResponseDTOs;
+    @JsonProperty("productImage")
+    private ProductImageCreateWithProductRequestDTO productImageResponseDTOs;
 
-    @JsonProperty("productSizes")
-    private List<UUID> sizeIds;
-
+    @NotNull(message = "ProductSupplier không được để trống")
     @JsonProperty("productSupplier")
-    private UUID supplierId;
+    private UUID productSupplier;
 
+    @NotNull(message = "Size không được để null")
+    @JsonProperty("sizesProduct")
+    private List<SizeProductRequestParamsDTO> sizesProduct;
+
+    @NotNull(message = "Category không được để null")
     @JsonProperty("categories")
     private List<UUID> categoryId;
 
-
-
+    @NotNull(message = "Post không được để trống")
     @JsonProperty("post")
     private PostCreateRequestDTO post;
 
     @JsonProperty("coupon")
     private CouponCreateRequestDTO coupon;
+
 
     @Override
     public Product toEntity() {

@@ -86,7 +86,7 @@ public class User {
 
     private IdCard iCard;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonBackReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
