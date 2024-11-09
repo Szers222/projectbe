@@ -22,7 +22,7 @@ public class SizeProductRequestParamsDTO implements IDto<SizeProduct> {
     @JsonProperty("productSizeQuantity")
     private int productSizeQuantity;
     @JsonProperty("productSizeId")
-    private List<UUID> productSizeId;
+    private UUID productSizeId;
 
     @JsonIgnore
     private Product product;

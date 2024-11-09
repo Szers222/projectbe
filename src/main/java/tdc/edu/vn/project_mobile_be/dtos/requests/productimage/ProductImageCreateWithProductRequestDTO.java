@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 

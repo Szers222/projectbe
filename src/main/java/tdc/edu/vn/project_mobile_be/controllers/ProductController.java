@@ -21,6 +21,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import tdc.edu.vn.project_mobile_be.commond.Breadcrumb;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
@@ -79,11 +80,12 @@ public class ProductController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping(value = {"/product", "/product/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = {"/product", "/product/"}, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE,MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_OCTET_STREAM_VALUE})
     public ResponseEntity<ResponseData<?>> createProduct(
-            @Valid @RequestBody ProductCreateRequestDTO params,
-            @RequestParam("file") MultipartFile[] files,
+            @RequestPart("file") MultipartFile[] files,
+            @Valid @RequestPart ProductCreateRequestDTO params,
             BindingResult bindingResult) {
+
         if (bindingResult.hasErrors()) {
             List<String> errorMessages = bindingResult.getFieldErrors().stream()
                     .map(FieldError::getDefaultMessage)
@@ -153,9 +155,9 @@ public class ProductController {
 
     @PutMapping(value = {"/product/{productId}", "/product/{productId}/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseData<?>> updateProduct(
-            @Valid @RequestBody ProductUpdateRequestDTO params,
+            @Valid @RequestPart ProductUpdateRequestDTO params,
             @PathVariable("productId") UUID productId,
-            @RequestParam("file") MultipartFile[] files,
+            @RequestPart("file") MultipartFile[] files,
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<String> errorMessages = bindingResult.getFieldErrors().stream()

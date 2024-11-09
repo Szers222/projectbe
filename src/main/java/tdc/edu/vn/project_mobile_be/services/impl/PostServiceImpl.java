@@ -58,7 +58,7 @@ public class PostServiceImpl extends AbService<Post, UUID> implements PostServic
 
         PostStatus postStatus = getStatus(requestDTO.getPostStatusId());
         if (postStatus == null) {
-            throw new EntityNotFoundException("Post thực thể không tồn tại");
+            throw new EntityNotFoundException("Post Status thực thể không tồn tại");
         }
         Optional<User> optionalUser = userRepository.findById(requestDTO.getUserId());
         if (optionalUser.isEmpty()) {

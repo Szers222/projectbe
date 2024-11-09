@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -41,6 +42,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ProductServiceImpl extends AbService<Product, UUID> implements ProductService {
 
     private final int COUPON_PER_HUNDRED_TYPE = 0;
@@ -79,9 +81,11 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         if (post == null) {
             throw new EntityNotFoundException("Post tao moi khong thanh cong");
         }
-        Coupon coupon = couponService.createCoupon(params.getCoupon());
-        if (coupon == null) {
-            throw new EntityNotFoundException("Coupon tao moi khong thanh cong");
+        Coupon coupon;
+        if (params.getCoupon() == null) {
+            coupon = null;
+        } else {
+            coupon = couponService.createCoupon(params.getCoupon());
         }
 
         Set<Category> categories = retrieveCategories(params.getCategoryId());
@@ -94,18 +98,24 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         // Tạo đối tượng Product mới
         Product product = params.toEntity();
         product.setProductId(UUID.randomUUID());
+        log.info("Product ID: " + product.getProductId());
         product.setCategories(categories);
         product.setPost(post);
         product.setCoupon(coupon);
         product.setProductSale(productSale);
         product.setSupplier(productSupplier);
         Product savedProduct = productRepository.save(product);
-
-        Set<ProductImage> productImages = productImageService.createProductImageWithProduct(
+        if (files.length != 0) {
+            if(params.getProductImageResponseDTOs() == null){
+                throw new EntityNotFoundException("Params khong co request image");
+            }
+            Set<ProductImage> productImages = productImageService.createProductImageWithProduct(
                     params.getProductImageResponseDTOs(),
                     savedProduct.getProductId(),
-                files);
-        savedProduct.setImages(productImages);
+                    files);
+            savedProduct.setImages(productImages);
+        }
+
         Set<SizeProduct> sizeProducts = createSizeProducts(params.getSizesProduct(), savedProduct);
         int quantity = setQuantityProduct(sizeProducts);
         savedProduct.setProductQuantity(quantity);
@@ -473,17 +483,17 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         return categories;
     }
 
-    private Set<SizeProduct> createSizeProducts(SizeProductRequestParamsDTO sizeProductCreateRequestDTO, Product product) {
+    private Set<SizeProduct> createSizeProducts(List<SizeProductRequestParamsDTO> paramsDTOS, Product product) {
         Set<SizeProduct> sizeProducts = new HashSet<>();
-        for (UUID sizeId : sizeProductCreateRequestDTO.getProductSizeId()) {
-            ProductSize productSize = productSizeRepository.findByProductSizeId(sizeId);
+        for (SizeProductRequestParamsDTO size : paramsDTOS) {
+            ProductSize productSize = productSizeRepository.findByProductSizeId(size.getProductSizeId());
             if (productSize == null) {
-                throw new EntityNotFoundException("Size not found for ID: " + sizeId);
+                throw new EntityNotFoundException("Size not found for ID: " + size.getProductSizeId());
             }
             SizeProduct sizeProduct = new SizeProduct();
             sizeProduct.setProduct(product);
             sizeProduct.setSize(productSize);
-            sizeProduct.setQuantity(sizeProductCreateRequestDTO.getProductSizeQuantity());
+            sizeProduct.setQuantity(size.getProductSizeQuantity());
             sizeProducts.add(sizeProduct);
         }
         if (sizeProducts.isEmpty()) {

@@ -65,7 +65,7 @@ public class Post {
     @JsonBackReference
     private Product product;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

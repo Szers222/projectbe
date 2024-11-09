@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class CouponServiceImpl extends AbService<Coupon, UUID> implements CouponService {
 
@@ -38,7 +40,14 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
     @Override
     public Coupon createCoupon(CouponCreateRequestDTO params) {
         boolean check = false;
-        Timestamp expireDateTime = coverToTimestampExpire(params.getCouponExpire());
+        Timestamp expireDateTime;
+
+        if (params.getCouponExpire() == null) {
+            expireDateTime = null;
+        } else {
+            expireDateTime = coverToTimestampExpire(params.getCouponExpire());
+        }
+
         Timestamp releaseDateTime = coverToTimestampRelease(params.getCouponRelease());
         Coupon coupon = new Coupon();
         if (validateCoupon(params) != check) {

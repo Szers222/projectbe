@@ -111,6 +111,4 @@ public class Product {
     @JsonBackReference
     private Set<SizeProduct> sizeProducts = new HashSet<>();
 
-
-
 }

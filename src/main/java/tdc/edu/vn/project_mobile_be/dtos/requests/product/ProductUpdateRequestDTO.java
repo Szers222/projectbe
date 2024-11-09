@@ -55,7 +55,7 @@ public class ProductUpdateRequestDTO implements IDto<Product> {
     @NotBlank(message = "SizeProduct không được để trống")
     @NotNull(message = "SizeProduct không được để null")
     @JsonProperty("sizesProduct")
-    private SizeProductRequestParamsDTO sizesProduct;
+    private List<SizeProductRequestParamsDTO> sizesProduct;
 
     @Min(value = 1900, message = "ProductYearOfManufacture không hợp lệ")
     @JsonProperty("productYearOfManufacture")
