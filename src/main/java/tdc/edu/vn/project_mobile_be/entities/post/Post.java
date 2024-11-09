@@ -1,20 +1,18 @@
 package tdc.edu.vn.project_mobile_be.entities.post;
 
-import jakarta.jws.soap.SOAPBinding;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
-import tdc.edu.vn.project_mobile_be.entities.type.PostType;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -33,19 +31,19 @@ public class Post {
     @Column(name = "post_name", columnDefinition = "VARCHAR(255)")
     private String postName;
 
-    @Column(name = "post_slug", columnDefinition = "VARCHAR(255)")
-    private String postSlug;
-
     @Column(name = "post_release", columnDefinition = "TIMESTAMP", nullable = false)
     private Timestamp postRelease;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
+
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
 
+    @Column(name = "post_type", columnDefinition = "INT")
+    private int postType;
 
     @Lob
     @Column(name = "post_content", columnDefinition = "TEXT")
@@ -58,15 +56,17 @@ public class Post {
     @JoinColumn(name = "post_status_id", nullable = false)
     private PostStatus postStatus;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "post_type_id", nullable = false)
-    private PostType postType;
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<PostComment> postComments;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "post_id")
     private Product product;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
     private User user;
 }
