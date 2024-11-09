@@ -7,6 +7,7 @@ spring:
     username: "root"
     password: ''
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     database: mysql
     show-sql: true
@@ -38,6 +39,13 @@ spring:
           api-docs:
             enabled: true
 
+
+jwt:
+  signerKey: "CHpSZnAya03fnmgaxVnU9u4gdxZvnx+UFcrrC5i9+ZwI4+f5CNP0BlQEDCjNeyHh"
+  valid-duration: 60
+  refreshable-duration: 7
+
+
 spring.devtools:
   restart:
     enabled: true  # Kích hoạt tự động tải lại
@@ -49,6 +57,7 @@ redis:
     host: 192.168.57.128
     port: 6379
     password: ''
+
 
 google:
   cloud:

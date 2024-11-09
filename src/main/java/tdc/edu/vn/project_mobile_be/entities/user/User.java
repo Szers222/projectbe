@@ -15,7 +15,6 @@ import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 import tdc.edu.vn.project_mobile_be.entities.status.UserStatus;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -79,9 +78,12 @@ public class User {
     private int userWrongPassword;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+
+    @JoinColumn(name = "card_id", nullable = false)
+    @JsonBackReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JoinColumn(name = "icard_id", nullable = false)
+
     private IdCard iCard;
 
     @OneToMany(mappedBy = "user")
@@ -96,13 +98,18 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private Set<OneTimePassword> oneTimePasswords = new HashSet<>();
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
     @JoinTable(
             name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
+
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Order> orders = new HashSet<>();
 }

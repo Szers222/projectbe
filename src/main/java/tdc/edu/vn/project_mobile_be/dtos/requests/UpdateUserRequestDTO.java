@@ -1,16 +1,15 @@
 package tdc.edu.vn.project_mobile_be.dtos.requests;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.BeanUtils;
-import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
-import tdc.edu.vn.project_mobile_be.entities.user.User;
+import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 
 import java.sql.Timestamp;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -18,15 +17,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CreateUserRequestDTO {
-
-    @NotEmpty(message = "Email không được để trống")
-    @Email(message = "1321")
-    @JsonProperty("userEmail")
-    String userEmail;
-
+public class UpdateUserRequestDTO {
     @NotEmpty(message = "Mật khẩu không được để trống")
-    @Size(min = 8, message = "1321")
+    @Size(min = 8, message = "PASSWORD_EXISTED")
     @JsonProperty("userPassword")
     String userPassword;
 
@@ -71,13 +64,6 @@ public class CreateUserRequestDTO {
     @JsonProperty("icardId")
     UUID iCardId;
 
-    @JsonProperty("statusId")
-    UUID statusId;
+    Set<Role> roles;
 
-    // Method to convert DTO to Entity
-    public User toEntity() {
-        User user = new User();
-        BeanUtils.copyProperties(this, user);
-        return user;
-    }
 }
