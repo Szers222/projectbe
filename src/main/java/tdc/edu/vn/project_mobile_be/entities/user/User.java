@@ -12,7 +12,6 @@ import tdc.edu.vn.project_mobile_be.entities.one_time_password.OneTimePassword;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
-import tdc.edu.vn.project_mobile_be.entities.status.UserStatus;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
@@ -77,8 +76,11 @@ public class User {
     @Column(name = "user_wrong_password", columnDefinition = "int default 0")
     private int userWrongPassword;
 
+    @Column(name = "user_status", columnDefinition = "int default 0")
+    private int userStatus;
+
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "card_id", nullable = false)
+    @JoinColumn(name = "card_id", nullable = true)
     @JsonBackReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
@@ -86,10 +88,6 @@ public class User {
 
     @OneToOne(mappedBy = "user")
     private Post post;
-
-    @ManyToOne
-    @JoinColumn(name = "user_status_id", nullable = false)
-    private UserStatus userStatus;
 
     @OneToMany(mappedBy = "user")
     private Set<OneTimePassword> oneTimePasswords = new HashSet<>();
@@ -107,4 +105,8 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Order> orders = new HashSet<>();
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserOtp userOtp;
+
 }
