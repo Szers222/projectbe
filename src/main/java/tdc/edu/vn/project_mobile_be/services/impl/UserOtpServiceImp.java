@@ -10,25 +10,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tdc.edu.vn.project_mobile_be.dtos.requests.EmailRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.RegisterRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.RegisterResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.ResetPasswordRequestDTO;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.entities.user.UserOtp;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ForgotPasswordRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.RegisterRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.RoleRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserOtpRepository;
-import tdc.edu.vn.project_mobile_be.interfaces.service.RegisterUserService;
+import tdc.edu.vn.project_mobile_be.interfaces.service.UserOtpService;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Random;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class RegisterUserServiceImp implements RegisterUserService {
+public class UserOtpServiceImp implements UserOtpService {
 
     @Autowired
     @Qualifier("registerRepository")
@@ -41,6 +39,8 @@ public class RegisterUserServiceImp implements RegisterUserService {
 
     @Autowired
     private final EmailService emailService;
+    @Autowired
+    private final ForgotPasswordRepository forgotPasswordRepository;
 
     private static final Duration OTP_EXPIRATION_DURATION = Duration.ofSeconds(120); // OTP expires after 30 seconds
 
@@ -117,6 +117,35 @@ public class RegisterUserServiceImp implements RegisterUserService {
     }
 
     @Override
+    public void forgotPassword(String email) {
+        User user = forgotPasswordRepository.findByUserEmail(email);
+        if (user != null && user.getUserStatus() == 1) {
+            user.setUserStatus(0);
+            forgotPasswordRepository.save(user);
+            UserOtp userOtp = insertOtp(user);
+            sendVerificationEmail(user.getUserEmail(),userOtp.getOtp());
+        }
+        else {
+            throw new RuntimeException("Tài khoản không hợp lệ");
+        }
+    }
+
+    @Override
+    public User resetPassword(String email, ResetPasswordRequestDTO request) {
+        User user = forgotPasswordRepository.findByUserEmail(email);
+        if (user == null && user.getUserStatus() != 0) {
+            throw new RuntimeException("Tai khoan khong hop le");
+        }
+        if (user.getUserStatus() == 1) {
+            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+            String encodePassword = passwordEncoder.encode(request.getUserPassword());
+            user.setUserPassword(encodePassword);
+            registerRepository.save(user);
+        }
+        return user;
+    }
+
+    @Override
     @Transactional
     public User register(String userEmail, RegisterRequestDTO request) {
         User existingUser = registerRepository.findByUserEmail(userEmail);
@@ -153,15 +182,18 @@ public class RegisterUserServiceImp implements RegisterUserService {
         }
         UserOtp userOtp = userOtpRepository.findByUser(user);
         if (userOtp == null) {
-            throw new RuntimeException("OTP het han");
+            throw new RuntimeException("OTP khong ton tai");
         }
         if (otp.equals(userOtp.getOtp())) {
             if (Duration.between(userOtp.getOtpTime(), LocalDateTime.now()).compareTo(OTP_EXPIRATION_DURATION) <= 0) {
                 user.setUserStatus(1);
                 registerRepository.save(user);
             } else {
-                throw new RuntimeException("OTP Khong dung ");
+                throw new RuntimeException("OTP het han ");
             }
+        }
+        else {
+            throw new RuntimeException("OTP khong dung");
         }
     }
     // Cleanup expired OTPs every 60 seconds
