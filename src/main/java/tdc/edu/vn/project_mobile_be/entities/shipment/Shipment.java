@@ -44,6 +44,6 @@ public class Shipment {
     private Timestamp updatedAt;
 
 
-    @OneToMany(mappedBy = "shipment",cascade = CascadeType.ALL,orphanRemoval = false)
+    @OneToMany(mappedBy = "shipment",cascade = CascadeType.ALL)
     private Set<ShipmentProduct> shipmentProducts = new HashSet<>();
 }

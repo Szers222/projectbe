@@ -53,6 +53,7 @@ public class ProductCreateRequestDTO implements IDto<Product> {
     @JsonProperty("productImage")
     private ProductImageCreateWithProductRequestDTO productImageResponseDTOs;
 
+
     @JsonProperty("productSizes")
     private List<UUID> sizeIds;
 

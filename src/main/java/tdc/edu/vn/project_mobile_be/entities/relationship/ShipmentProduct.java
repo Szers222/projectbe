@@ -28,4 +28,5 @@ public class ShipmentProduct {
     private int quantity;
     @Column(name = "shipments_products_price", nullable = false, columnDefinition = "double default 0")
     private double price;
+
 }
