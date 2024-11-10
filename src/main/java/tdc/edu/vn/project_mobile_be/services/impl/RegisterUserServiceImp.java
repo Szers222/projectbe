@@ -11,9 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 import tdc.edu.vn.project_mobile_be.dtos.requests.EmailRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.RegisterRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.RegisterResponseDTO;
+import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.entities.user.UserOtp;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.RegisterRepository;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.RoleRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserOtpRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.RegisterUserService;
 
@@ -21,6 +23,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,11 +36,13 @@ public class RegisterUserServiceImp implements RegisterUserService {
 
     @Autowired
     private final UserOtpRepository userOtpRepository;
+    @Autowired
+    private final RoleRepository roleRepository;
 
     @Autowired
     private final EmailService emailService;
 
-    private static final Duration OTP_EXPIRATION_DURATION = Duration.ofSeconds(60); // OTP expires after 30 seconds
+    private static final Duration OTP_EXPIRATION_DURATION = Duration.ofSeconds(120); // OTP expires after 30 seconds
 
     private String generateOTP() {
         Random random = new Random();
@@ -57,6 +62,15 @@ public class RegisterUserServiceImp implements RegisterUserService {
     }
 
     private UserOtp insertOtp(User user) {
+        UserOtp existingUserOtp = userOtpRepository.findByUser(user);
+        if (existingUserOtp != null) {
+            if (Duration.between(existingUserOtp.getOtpTime(), LocalDateTime.now()).compareTo(OTP_EXPIRATION_DURATION) > 0) {
+                userOtpRepository.delete(existingUserOtp);
+                userOtpRepository.flush();
+            } else {
+                throw new RuntimeException("OTP còn hiệu lực, vui lòng đợi.");
+            }
+        }
         String otp = generateOTP();
         UserOtp userOtp = UserOtp.builder()
                 .user(user)
@@ -103,6 +117,7 @@ public class RegisterUserServiceImp implements RegisterUserService {
     }
 
     @Override
+    @Transactional
     public User register(String userEmail, RegisterRequestDTO request) {
         User existingUser = registerRepository.findByUserEmail(userEmail);
         if (existingUser.getUserStatus() == 0) {
@@ -117,8 +132,15 @@ public class RegisterUserServiceImp implements RegisterUserService {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
             String encodedPassword = passwordEncoder.encode(request.getUserPassword());
             existingUser.setUserPassword(encodedPassword);
+            Role role = roleRepository.findByRoleName("USER")
+                    .orElseThrow(()-> new RuntimeException("Khoong tim thay role"));
+            if (!existingUser.getRoles().contains(role)) {
+                existingUser.getRoles().add(role);
+            }
+            return registerRepository.save(existingUser);
         }
-        return registerRepository.save(existingUser);
+        return existingUser;
+
     }
 
     @Override
@@ -142,8 +164,8 @@ public class RegisterUserServiceImp implements RegisterUserService {
             }
         }
     }
-    // Cleanup expired OTPs every 10 seconds
-    @Scheduled(fixedRate = 10000)
+    // Cleanup expired OTPs every 60 seconds
+    @Scheduled(fixedRate = 60000)
     @Transactional
     public void otpExpirationCleanup() {
         LocalDateTime expirationTime = LocalDateTime.now().minus(OTP_EXPIRATION_DURATION);

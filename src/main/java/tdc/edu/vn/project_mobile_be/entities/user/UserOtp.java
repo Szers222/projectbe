@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.entities.user;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,6 +21,7 @@ public class UserOtp {
     private UUID otpId;
     @OneToOne
     @JoinColumn(name = "user_id")
+    @JsonBackReference
     private User user;
     @Column(name = "otp" ,nullable = false, columnDefinition = "VARCHAR(15)")
     private String otp;
