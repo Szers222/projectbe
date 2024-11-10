@@ -1,6 +1,7 @@
 package tdc.edu.vn.project_mobile_be.entities.shipment;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
 import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
 
 import java.sql.Timestamp;
@@ -34,8 +36,8 @@ public class Shipment {
     private float shipmentDiscount;
     @Column(name = "shipment_ship_cost", columnDefinition = "FLOAT DEFAULT 0")
     private float shipmentShipCost;
-    @Column(name = "shipment_supplier", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String shipmentSupplier;
+
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
@@ -43,7 +45,12 @@ public class Shipment {
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "supplier_id")
+    @JsonBackReference
+    private ProductSupplier supplier;
 
     @OneToMany(mappedBy = "shipment",cascade = CascadeType.ALL)
+    @JsonBackReference
     private Set<ShipmentProduct> shipmentProducts = new HashSet<>();
 }

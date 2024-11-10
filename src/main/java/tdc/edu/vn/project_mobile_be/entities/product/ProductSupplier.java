@@ -3,11 +3,14 @@ package tdc.edu.vn.project_mobile_be.entities.product;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
+import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
@@ -37,7 +40,11 @@ public class ProductSupplier {
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
 
-    @OneToMany(mappedBy = "supplier",cascade = CascadeType.ALL,orphanRemoval = false )
+    @OneToMany(mappedBy = "supplier",cascade = CascadeType.ALL,orphanRemoval = true )
     @JsonBackReference
     private Set<Product> products = new HashSet<>();
+
+    @OneToMany(mappedBy = "supplier",cascade = CascadeType.ALL,orphanRemoval = true )
+    @JsonBackReference
+    private Set<Shipment> shipment = new HashSet<>();
 }
