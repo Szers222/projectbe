@@ -26,9 +26,10 @@ public class CouponCreateRequestDTO implements IDto<Coupon> {
     @NotBlank(message = "Ngày phát hành không được để trống")
     @JsonProperty("couponRelease")
     private LocalDate couponRelease;
-    @NotBlank(message = "Ngày hết hạn không được để trống")
+
     @JsonProperty("couponExpire")
     private LocalDate couponExpire;
+
     @JsonProperty("couponQuantity")
     @Min(value = 1, message = "Số lượng mã giảm giá phải lớn hơn 0")
     private int couponQuantity;

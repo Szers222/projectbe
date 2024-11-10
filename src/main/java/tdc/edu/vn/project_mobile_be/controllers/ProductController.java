@@ -79,11 +79,12 @@ public class ProductController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping(value = {"/product", "/product/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = {"/product", "/product/"}, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE,MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_OCTET_STREAM_VALUE})
     public ResponseEntity<ResponseData<?>> createProduct(
-            @Valid @RequestBody ProductCreateRequestDTO params,
-            @RequestParam("file") MultipartFile[] files,
+            @RequestPart("file") MultipartFile[] files,
+            @Valid @RequestPart ProductCreateRequestDTO params,
             BindingResult bindingResult) {
+
         if (bindingResult.hasErrors()) {
             List<String> errorMessages = bindingResult.getFieldErrors().stream()
                     .map(FieldError::getDefaultMessage)
@@ -151,11 +152,11 @@ public class ProductController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PutMapping(value = {"/product/{productId}", "/product/{productId}/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = {"/product/{productId}", "/product/{productId}/"}, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE})
     public ResponseEntity<ResponseData<?>> updateProduct(
-            @Valid @RequestBody ProductUpdateRequestDTO params,
+            @Valid @RequestPart ProductUpdateRequestDTO params,
             @PathVariable("productId") UUID productId,
-            @RequestParam("file") MultipartFile[] files,
+            @RequestPart("file") MultipartFile[] files,
             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<String> errorMessages = bindingResult.getFieldErrors().stream()

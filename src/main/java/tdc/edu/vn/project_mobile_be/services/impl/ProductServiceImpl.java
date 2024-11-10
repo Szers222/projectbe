@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -15,6 +16,7 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.NumberErrorException
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductUpdateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.sizeproduct.SizeProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.category.CategoryResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.post.PostResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.*;
@@ -23,8 +25,9 @@ import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
-import tdc.edu.vn.project_mobile_be.entities.status.PostStatus;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CouponService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.PostService;
@@ -33,14 +36,13 @@ import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.Timestamp;
 import java.text.NumberFormat;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ProductServiceImpl extends AbService<Product, UUID> implements ProductService {
 
     private final int COUPON_PER_HUNDRED_TYPE = 0;
@@ -59,7 +61,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Autowired
     private PostService postService;
     @Autowired
-    private PostStatusRepository postStatusRepository;
+    private ProductSupplierRepository productSupplierRepository;
     @Autowired
     private SizeProductRepository sizeProductRepository;
     @Autowired
@@ -68,107 +70,86 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private ProductImageService productImageService;
     @Autowired
     private ProductImageRepository productImageRepository;
+    @Autowired
+    private ProductSizeRepository productSizeRepository;
 
     @Override
     @Transactional
     public Product createProduct(ProductCreateRequestDTO params, MultipartFile[] files) {
-        LocalDateTime releaseDateTime;
 
-        // Kiểm tra nếu postRelease là null, dùng thời gian hiện tại
-        if (params.getPost().getPostRelease() == null) {
-            releaseDateTime = LocalDateTime.now();
+        Post post = postService.createPost(params.getPost());
+        if (post == null) {
+            throw new EntityNotFoundException("Post tao moi khong thanh cong");
+        }
+        Coupon coupon;
+        if (params.getCoupon() == null) {
+            coupon = null;
         } else {
-            // Nếu có, dùng ngày phát hành được cung cấp, đặt vào đầu ngày
-            releaseDateTime = params.getPost().getPostRelease().atStartOfDay();
+            coupon = couponService.createCoupon(params.getCoupon());
         }
 
-        // Chuyển đổi sang Timestamp
-        Timestamp releaseTimestamp = Timestamp.valueOf(releaseDateTime);
+        Set<Category> categories = retrieveCategories(params.getCategoryId());
 
-        PostStatus status = postStatusRepository.findByPostStatusId(params.getPost().getPostStatusId());
-
-
-        // Tạo đối tượng Post mới
-        Post post = postService.createPost(params.getPost());
-
-        Coupon coupon = couponService.createCoupon(params.getCoupon());
-
-        Set<Category> categories = new HashSet<>();
-
-        for (UUID categoryId : params.getCategoryId()) {
-            Category category = categoryRepository.findByCategoryId(categoryId);
-            if (category == null) {
-                throw new EntityNotFoundException("Category not found for ID: " + categoryId);
-            }
-            categories.add(category);
+        ProductSupplier productSupplier = productSupplierRepository.findProductSupplierById(params.getProductSupplier());
+        if (productSupplier == null) {
+            throw new EntityNotFoundException("ProductSupplier not found !");
         }
         double productSale = solveProductSale(params.getProductPrice(), coupon);
-
-
         // Tạo đối tượng Product mới
         Product product = params.toEntity();
         product.setProductId(UUID.randomUUID());
+        log.info("Product ID: " + product.getProductId());
         product.setCategories(categories);
         product.setPost(post);
         product.setCoupon(coupon);
         product.setProductSale(productSale);
+        product.setSupplier(productSupplier);
         Product savedProduct = productRepository.save(product);
-
-        Set<ProductImage> productImages = productImageService.createProductImageWithProduct(
+        if (files.length != 0) {
+            if(params.getProductImageResponseDTOs() == null){
+                throw new EntityNotFoundException("Params khong co request image");
+            }
+            Set<ProductImage> productImages = productImageService.createProductImageWithProduct(
                     params.getProductImageResponseDTOs(),
                     savedProduct.getProductId(),
-                files);
-        savedProduct.setImages(productImages);
+                    files);
+            savedProduct.setImages(productImages);
+        }
 
+        Set<SizeProduct> sizeProducts = createSizeProducts(params.getSizesProduct(), savedProduct);
+        int quantity = setQuantityProduct(sizeProducts);
+        savedProduct.setProductQuantity(quantity);
+        savedProduct.setSizeProducts(sizeProducts);
         return savedProduct;
     }
 
     @Override
     @Transactional
     public Product updateProduct(ProductUpdateRequestDTO params, UUID productId, MultipartFile[] files) {
-        LocalDateTime releaseDateTime;
-
-        // Kiểm tra nếu postRelease là null, dùng thời gian hiện tại
-        if (params.getPost().getPostRelease() == null) {
-            releaseDateTime = LocalDateTime.now();
-        } else {
-            // Nếu có, dùng ngày phát hành được cung cấp, đặt vào đầu ngày
-            releaseDateTime = params.getPost().getPostRelease().atStartOfDay();
-        }
-
-        // Chuyển đổi sang Timestamp
-        Timestamp releaseTimestamp = Timestamp.valueOf(releaseDateTime);
-
-        PostStatus status = postStatusRepository.findByPostStatusId(params.getPost().getPostStatusId());
-
 
         Post post = postService.updatePostByProductId(params.getPost(), productId);
         if (post == null) {
-            throw new jakarta.persistence.EntityNotFoundException("Post không tồn tại !");
+            throw new EntityNotFoundException("Post không tồn tại !");
         }
+
         Coupon coupon = couponService.updateCouponByProductId(params.getCoupon(), productId);
         if (coupon == null) {
-            throw new jakarta.persistence.EntityNotFoundException("Coupon không tồn tại !");
+            throw new EntityNotFoundException("Coupon không tồn tại !");
         }
         Optional<Product> optionalProduct = productRepository.findById(productId);
         if (optionalProduct.isEmpty()) {
             throw new EntityNotFoundException("Product không tồn tại !");
         }
         Product product = optionalProduct.get();
-        Set<Category> categories = new HashSet<>();
-
-        for (UUID categoryId : params.getCategoryId()) {
-            Category category = categoryRepository.findByCategoryId(categoryId);
-            categories.add(category);
-        }
-
-
+        Set<Category> categories = retrieveCategories(params.getCategoryId());
+        Set<SizeProduct> sizeProducts = createSizeProducts(params.getSizesProduct(), product);
         Set<ProductImage> productImages = productImageService.updateProductImageForProduct(
                 params.getProductImageResponseDTOs(),
                 files);
 
         double productSale = solveProductSale(params.getProductPrice(), coupon);
-
+        int quantity = setQuantityProduct(sizeProducts);
+        product.setProductQuantity(quantity);
         product.setProductName(params.getProductName());
         product.setProductPrice(params.getProductPrice());
         product.setProductQuantity(params.getProductQuantity());
@@ -178,6 +159,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         product.setCategories(categories);
         product.setProductSale(productSale);
         product.setImages(productImages);
+        product.setSizeProducts(sizeProducts);
+
         return productRepository.save(product);
     }
 
@@ -483,6 +466,48 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             }
         }
         return productSale;
+    }
+
+    private Set<Category> retrieveCategories(List<UUID> categoryIds) {
+        Set<Category> categories = new HashSet<>();
+        for (UUID categoryId : categoryIds) {
+            Category category = categoryRepository.findByCategoryId(categoryId);
+            if (category == null) {
+                throw new EntityNotFoundException("Category not found for ID: " + categoryId);
+            }
+            categories.add(category);
+        }
+        if (categories.isEmpty()) {
+            throw new EntityNotFoundException("Category not found !");
+        }
+        return categories;
+    }
+
+    private Set<SizeProduct> createSizeProducts(List<SizeProductRequestParamsDTO> paramsDTOS, Product product) {
+        Set<SizeProduct> sizeProducts = new HashSet<>();
+        for (SizeProductRequestParamsDTO size : paramsDTOS) {
+            ProductSize productSize = productSizeRepository.findByProductSizeId(size.getProductSizeId());
+            if (productSize == null) {
+                throw new EntityNotFoundException("Size not found for ID: " + size.getProductSizeId());
+            }
+            SizeProduct sizeProduct = new SizeProduct();
+            sizeProduct.setProduct(product);
+            sizeProduct.setSize(productSize);
+            sizeProduct.setQuantity(size.getProductSizeQuantity());
+            sizeProducts.add(sizeProduct);
+        }
+        if (sizeProducts.isEmpty()) {
+            throw new EntityNotFoundException("SizeProduct not found !");
+        }
+        return sizeProducts;
+    }
+
+    public int setQuantityProduct(Set<SizeProduct> sizeProducts) {
+        int quantity = 0;
+        for (SizeProduct sizeProduct : sizeProducts) {
+            quantity += sizeProduct.getQuantity();
+        }
+        return quantity;
     }
 
 }

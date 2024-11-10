@@ -13,6 +13,6 @@ public interface ProductSupplierRepository extends JpaRepository<ProductSupplier
 
     @Query("SELECT DISTINCT p.supplier FROM Product p JOIN p.categories c WHERE c.categoryId = :categoryId")
     List<ProductSupplier> findProductSupplierByCategory(@Param("categoryId") UUID categoryId);
-
-
+    @Query("SELECT psl from ProductSupplier psl where psl.productSupplierId = :productSupplierId")
+    ProductSupplier findProductSupplierById(@Param("productSupplierId") UUID productSupplierId);
 }
