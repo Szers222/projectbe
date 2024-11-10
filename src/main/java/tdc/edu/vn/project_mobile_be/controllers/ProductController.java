@@ -21,7 +21,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import tdc.edu.vn.project_mobile_be.commond.Breadcrumb;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
@@ -153,7 +152,7 @@ public class ProductController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PutMapping(value = {"/product/{productId}", "/product/{productId}/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = {"/product/{productId}", "/product/{productId}/"}, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE})
     public ResponseEntity<ResponseData<?>> updateProduct(
             @Valid @RequestPart ProductUpdateRequestDTO params,
             @PathVariable("productId") UUID productId,
