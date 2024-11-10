@@ -4,7 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import tdc.edu.vn.project_mobile_be.dtos.requests.EmailRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.RegisterRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.RegisterResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
@@ -17,31 +21,39 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class RegisterUserServiceImp implements RegisterUserService {
+
     @Autowired
     @Qualifier("registerRepository")
     private final RegisterRepository registerRepository;
+
     @Autowired
     private final UserOtpRepository userOtpRepository;
+
     @Autowired
     private final EmailService emailService;
 
-    private static final Duration OTP_EXPIRATION_DURATION = Duration.ofSeconds(30);
-    private static final Duration OTP_DELETION_DURATION = Duration.ofHours(2); // OTP deletion after 2 hours
+    private static final Duration OTP_EXPIRATION_DURATION = Duration.ofSeconds(60); // OTP expires after 30 seconds
 
     private String generateOTP() {
         Random random = new Random();
-        int otpValue = 100000 + random.nextInt(900000);
+        int otpValue = 100000 + random.nextInt(900000); // Generates a 6-digit OTP
         return String.valueOf(otpValue);
     }
 
     private void sendVerificationEmail(String email, String otp) {
         String subject = "Email Verification";
         String body = "Your verification OTP is: " + otp;
-        emailService.sendEmail(email, subject, body);
+        try {
+            emailService.sendEmail(email, subject, body);
+        } catch (Exception e) {
+            // Log email sending failure or handle accordingly
+            throw new RuntimeException("Failed to send verification email");
+        }
     }
 
     private UserOtp insertOtp(User user) {
@@ -50,94 +62,95 @@ public class RegisterUserServiceImp implements RegisterUserService {
                 .user(user)
                 .otp(otp)
                 .otpTime(LocalDateTime.now())
-                .isVerified(true)
                 .build();
-
         return userOtpRepository.save(userOtp);
     }
 
     @Override
-    public RegisterResponseDTO register(RegisterRequestDTO request) {
+    public User createEmail(EmailRequestDTO request) {
         User existingUser = registerRepository.findByUserEmail(request.getUserEmail());
         if (existingUser != null && existingUser.getUserStatus() == 1) {
-            throw new RuntimeException("User already verified");
+            throw new RuntimeException("Tài khoản đã tồn tại");
         }
 
-        if (existingUser != null) {
+        if (existingUser == null) {
+            User user = new User();
+            user.setUserEmail(request.getUserEmail());
+            user.setUserStatus(0); // Status: not verified
+            registerRepository.save(user);
+            UserOtp userOtp = insertOtp(user);
+            sendVerificationEmail(user.getUserEmail(), userOtp.getOtp());
+        } else {
             UserOtp existingUserOtp = userOtpRepository.findByUser(existingUser);
+
             if (existingUserOtp != null) {
+                // Check if OTP has expired
                 if (Duration.between(existingUserOtp.getOtpTime(), LocalDateTime.now()).compareTo(OTP_EXPIRATION_DURATION) > 0) {
+                    // Delete expired OTP and send a new one
                     userOtpRepository.delete(existingUserOtp);
+                    // Optionally call flush to ensure changes are committed immediately
+                    userOtpRepository.flush();
                 }
             }
+
+            UserOtp userOtp = insertOtp(existingUser);
+            sendVerificationEmail(existingUser.getUserEmail(), userOtp.getOtp());
         }
 
-        User user = new User();
-        user.setUserEmail(request.getUserEmail());
-        user.setUserPassword(request.getUserPassword());
-        user.setUserPhone(request.getUserPhone());
-        user.setUserBirthday(request.getUserBirthday());
-        user.setUserAddress(request.getUserAddress());
-        user.setUserLastName(request.getUserLastName());
-        user.setUserFirstName(request.getUserFirstName());
-        user.setUserStatus(0);
-        registerRepository.save(user);
-
-        UserOtp userOtp = insertOtp(user);
-        sendVerificationEmail(user.getUserEmail(), userOtp.getOtp());
-        return RegisterResponseDTO.builder()
-                .userEmail(user.getUserEmail())
+        return User.builder()
+                .userEmail(request.getUserEmail())
                 .build();
+    }
+
+    @Override
+    public User register(String userEmail, RegisterRequestDTO request) {
+        User existingUser = registerRepository.findByUserEmail(userEmail);
+        if (existingUser.getUserStatus() == 0) {
+            throw new RuntimeException("Tài khoản chưa xác thực");
+        }
+        if (existingUser.getUserStatus() == 1) {
+            existingUser.setUserPhone(request.getUserPhone());
+            existingUser.setUserBirthday(request.getUserBirthday());
+            existingUser.setUserAddress(request.getUserAddress());
+            existingUser.setUserLastName(request.getUserLastName());
+            existingUser.setUserFirstName(request.getUserFirstName());
+            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+            String encodedPassword = passwordEncoder.encode(request.getUserPassword());
+            existingUser.setUserPassword(encodedPassword);
+        }
+        return registerRepository.save(existingUser);
     }
 
     @Override
     public void verify(String email, String otp) {
         User user = registerRepository.findByUserEmail(email);
         if (user == null) {
-            throw new RuntimeException("User not found");
+            throw new RuntimeException("Tài khoản không tồn tại");
         } else if (user.getUserStatus() == 1) {
-            throw new RuntimeException("User is already verified");
+            throw new RuntimeException("Tài khoản da duọc kích hoat");
         }
-
         UserOtp userOtp = userOtpRepository.findByUser(user);
         if (userOtp == null) {
-            throw new RuntimeException("OTP not found");
+            throw new RuntimeException("OTP het han");
         }
-
         if (otp.equals(userOtp.getOtp())) {
-            user.setUserStatus(1);
-            registerRepository.save(user);
-            userOtp.setVerified(true);
-            userOtpRepository.save(userOtp);
-        } else {
-            throw new RuntimeException("Invalid OTP");
-        }
-    }
-
-    @Scheduled(fixedRate = 10000)
-    public void otpVerifi() {
-        LocalDateTime now = LocalDateTime.now();
-        List<UserOtp> userOtps = userOtpRepository.findAll();
-        for (UserOtp userOtp : userOtps) {
-            if (userOtp.isVerified() && Duration.between(userOtp.getOtpTime(), now).compareTo(OTP_EXPIRATION_DURATION) > 0) {
-                userOtp.setVerified(false); // Reset to false after expiration time
-                userOtpRepository.save(userOtp);
+            if (Duration.between(userOtp.getOtpTime(), LocalDateTime.now()).compareTo(OTP_EXPIRATION_DURATION) <= 0) {
+                user.setUserStatus(1);
+                registerRepository.save(user);
+            } else {
+                throw new RuntimeException("OTP Khong dung ");
             }
         }
     }
-
+    // Cleanup expired OTPs every 10 seconds
     @Scheduled(fixedRate = 10000)
-    public void deleteExpiredOtpAndUser() {
-        LocalDateTime now = LocalDateTime.now();
-        List<UserOtp> userOtps = userOtpRepository.findAll();
-        for (UserOtp userOtp : userOtps) {
-            if (!userOtp.isVerified() &&
-                    Duration.between(userOtp.getOtpTime(), now).compareTo(OTP_DELETION_DURATION) > 0) {
-                userOtpRepository.delete(userOtp);
-                User user = userOtp.getUser();
-                registerRepository.delete(user);
-            }
-        }
+    @Transactional
+    public void otpExpirationCleanup() {
+        LocalDateTime expirationTime = LocalDateTime.now().minus(OTP_EXPIRATION_DURATION);
+        userOtpRepository.deleteExpiredOtps(expirationTime);
     }
 }
+
+
+
 

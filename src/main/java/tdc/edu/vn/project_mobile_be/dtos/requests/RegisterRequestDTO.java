@@ -16,11 +16,6 @@ import java.sql.Timestamp;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RegisterRequestDTO {
-    @NotNull(message = "Email không được để trống")
-    @Email(message = "không đúng định danng email")
-    @JsonProperty("userEmail")
-    String userEmail;
-
     @NotNull(message = "Mật khẩu không được để trống")
     @Size(min = 8, message = "mật khẩu không được nhỏ hơn 8 ky tu")
     @JsonProperty("userPassword")

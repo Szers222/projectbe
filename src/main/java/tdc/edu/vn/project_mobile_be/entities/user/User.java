@@ -25,6 +25,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
+@Builder
 public class User {
 
     @Id
@@ -36,11 +37,11 @@ public class User {
     private String userEmail;
 
     @Column(name = "user_password", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String userPassword;
+    private String userPassword = "";
 
 
     @Column(name = "user_phone", nullable = false, columnDefinition = "VARCHAR(15)")
-    private String userPhone;
+    private String userPhone = "";
 
     @Column(name = "user_birthday", columnDefinition = "TIMESTAMP")
     private Timestamp userBirthday;
@@ -62,10 +63,10 @@ public class User {
     private String userPasswordLevel2;
 
     @Column(name = "user_last_name", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String userLastName;
+    private String userLastName = "";
 
     @Column(name = "user_first_name", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String userFirstName;
+    private String userFirstName = "";
 
     @Column(name = "user_money", nullable = false, columnDefinition = "DOUBLE default 0")
     private Double userMoney;

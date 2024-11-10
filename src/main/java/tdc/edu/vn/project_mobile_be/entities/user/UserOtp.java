@@ -25,8 +25,4 @@ public class UserOtp {
     private String otp;
     @Column(name = "otp_time",nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime otpTime;
-    @Column(name = "is_verified", nullable = false)
-    private boolean isVerified = false;
-
-
 }
