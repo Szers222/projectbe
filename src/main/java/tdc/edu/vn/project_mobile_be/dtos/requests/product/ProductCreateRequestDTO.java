@@ -29,10 +29,6 @@ public class ProductCreateRequestDTO implements IDto<Product> {
     @JsonProperty("productName")
     private String productName;
 
-    @Min(value = 0, message = "ProductPrice phải lớn hơn hoặc bằng 0")
-    @JsonProperty("productPrice")
-    private double productPrice;
-
     @Min(value = 0, message = "ProductQuantity phải lớn hơn hoặc bằng 0")
     @JsonProperty("productQuantity")
     private int productQuantity;

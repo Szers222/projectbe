@@ -44,7 +44,4 @@ public class ProductSupplier {
     @JsonBackReference
     private Set<Product> products = new HashSet<>();
 
-    @OneToMany(mappedBy = "supplier",cascade = CascadeType.ALL,orphanRemoval = true )
-    @JsonBackReference
-    private Set<Shipment> shipment = new HashSet<>();
 }

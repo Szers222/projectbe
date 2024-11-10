@@ -45,11 +45,6 @@ public class Shipment {
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "supplier_id")
-    @JsonBackReference
-    private ProductSupplier supplier;
-
     @OneToMany(mappedBy = "shipment",cascade = CascadeType.ALL)
     @JsonBackReference
     private Set<ShipmentProduct> shipmentProducts = new HashSet<>();
