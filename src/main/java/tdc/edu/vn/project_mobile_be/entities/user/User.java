@@ -1,6 +1,7 @@
 package tdc.edu.vn.project_mobile_be.entities.user;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,7 +13,6 @@ import tdc.edu.vn.project_mobile_be.entities.one_time_password.OneTimePassword;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
-import tdc.edu.vn.project_mobile_be.entities.status.UserStatus;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
@@ -26,6 +26,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
+@Builder
 public class User {
 
     @Id
@@ -37,11 +38,11 @@ public class User {
     private String userEmail;
 
     @Column(name = "user_password", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String userPassword;
+    private String userPassword = "";
 
 
     @Column(name = "user_phone", nullable = false, columnDefinition = "VARCHAR(15)")
-    private String userPhone;
+    private String userPhone = "";
 
     @Column(name = "user_birthday", columnDefinition = "TIMESTAMP")
     private Timestamp userBirthday;
@@ -63,10 +64,10 @@ public class User {
     private String userPasswordLevel2;
 
     @Column(name = "user_last_name", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String userLastName;
+    private String userLastName = "";
 
     @Column(name = "user_first_name", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String userFirstName;
+    private String userFirstName = "";
 
     @Column(name = "user_money", nullable = false, columnDefinition = "DOUBLE default 0")
     private Double userMoney;
@@ -77,9 +78,11 @@ public class User {
     @Column(name = "user_wrong_password", columnDefinition = "int default 0")
     private int userWrongPassword;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name = "user_status", columnDefinition = "int default 0")
+    private int userStatus;
 
-    @JoinColumn(name = "card_id", nullable = false)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "card_id", nullable = true)
     @JsonBackReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
@@ -92,16 +95,12 @@ public class User {
     @EqualsAndHashCode.Exclude
     private Set<Post> post;
 
-    @ManyToOne
-    @JoinColumn(name = "user_status_id", nullable = false)
-    private UserStatus userStatus;
-
     @OneToMany(mappedBy = "user")
     private Set<OneTimePassword> oneTimePasswords = new HashSet<>();
     @ManyToMany(fetch = FetchType.EAGER)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference
+    @JsonManagedReference
     @JoinTable(
             name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -112,4 +111,9 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Order> orders = new HashSet<>();
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private UserOtp userOtp;
+
 }
