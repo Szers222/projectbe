@@ -120,7 +120,6 @@ public class UserOtpServiceImp implements UserOtpService {
     public void forgotPassword(String email) {
         User user = forgotPasswordRepository.findByUserEmail(email);
         if (user != null && user.getUserStatus() == 1) {
-            user.setUserStatus(0);
             forgotPasswordRepository.save(user);
             UserOtp userOtp = insertOtp(user);
             sendVerificationEmail(user.getUserEmail(),userOtp.getOtp());
@@ -131,16 +130,31 @@ public class UserOtpServiceImp implements UserOtpService {
     }
 
     @Override
-    public User resetPassword(String email, ResetPasswordRequestDTO request) {
+    public User resetPassword(String email, String otp, ResetPasswordRequestDTO request) {
         User user = forgotPasswordRepository.findByUserEmail(email);
-        if (user == null && user.getUserStatus() != 0) {
+        if (user == null && user.getUserStatus() != 1) {
             throw new RuntimeException("Tai khoan khong hop le");
         }
         if (user.getUserStatus() == 1) {
-            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-            String encodePassword = passwordEncoder.encode(request.getUserPassword());
-            user.setUserPassword(encodePassword);
-            registerRepository.save(user);
+            UserOtp userOtp = userOtpRepository.findByUser(user);
+            if (userOtp == null){
+                throw new RuntimeException("OTP khong ton tai");
+            }
+            if (otp.equals(userOtp.getOtp())) {
+                if (Duration.between(userOtp.getOtpTime(), LocalDateTime.now()).compareTo(OTP_EXPIRATION_DURATION) <= 0)
+                {
+                    if (!request.getUserPassword().equals(request.getConfirmPassword())){
+                        throw new RuntimeException("Mật khẩu và xác nhận mật khẩu không khớp");
+                    }
+                    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+                    String encodePassword = passwordEncoder.encode(request.getUserPassword());
+                    user.setUserPassword(encodePassword);
+                    forgotPasswordRepository.save(user);
+                } else {
+                    throw new RuntimeException("OTP khong ton tai");
+                }
+            }
+
         }
         return user;
     }

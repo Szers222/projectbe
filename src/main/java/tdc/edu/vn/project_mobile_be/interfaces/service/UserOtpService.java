@@ -10,5 +10,5 @@ public interface UserOtpService {
     void verify(String email, String otp);
     User createEmail(EmailRequestDTO request);
     void forgotPassword(String email);
-    User resetPassword(String email,ResetPasswordRequestDTO request);
+    User resetPassword(String email,String otp,ResetPasswordRequestDTO request);
 }

@@ -1,9 +1,11 @@
 package tdc.edu.vn.project_mobile_be.controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.dtos.requests.EmailRequestDTO;
@@ -20,7 +22,7 @@ public class UserOtpController {
     private final UserOtpService userOtpService;
 
     @PostMapping("/create-email")
-    public ResponseEntity<ResponseData<?>> createEmail(@RequestBody EmailRequestDTO emailRequest) {
+    public ResponseEntity<ResponseData<?>> createEmail(@RequestBody @Valid EmailRequestDTO emailRequest) {
         User user = userOtpService.createEmail(emailRequest);
         ResponseData<?> responseData = new ResponseData<>(
                 HttpStatus.CREATED
@@ -40,7 +42,7 @@ public class UserOtpController {
     @PostMapping("/register")
     public ResponseEntity<ResponseData<?>> registerUser(
             @RequestParam("userEmail") String userEmail,
-            @RequestBody RegisterRequestDTO registerRequest) {
+            @RequestBody @Valid RegisterRequestDTO registerRequest) {
         User user = userOtpService.register(userEmail, registerRequest);
         ResponseData<?> responseData = new ResponseData<>(
                 HttpStatus.CREATED
@@ -60,8 +62,9 @@ public class UserOtpController {
     @PostMapping("/reset")
     public ResponseEntity<ResponseData<?>> resetPassword(
             @RequestParam("email") String email,
-            @RequestBody ResetPasswordRequestDTO resetPasswordRequest){
-        User user = userOtpService.resetPassword(email,resetPasswordRequest);
+            @RequestParam("otp") String otp,
+            @RequestBody @Valid ResetPasswordRequestDTO resetPasswordRequest){
+        User user = userOtpService.resetPassword(email,otp,resetPasswordRequest);
         ResponseData<?> responseData = new ResponseData<>(
                 HttpStatus.CREATED
                 ,"Tao password moi thanh cong"

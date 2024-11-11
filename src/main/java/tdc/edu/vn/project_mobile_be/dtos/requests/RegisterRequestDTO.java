@@ -17,20 +17,24 @@ import java.sql.Timestamp;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RegisterRequestDTO {
     @NotNull(message = "Mật khẩu không được để trống")
+    @NotEmpty(message = "Mật khẩu không được để trống")
     @Size(min = 8, message = "mật khẩu không được nhỏ hơn 8 ky tu")
     @JsonProperty("userPassword")
     String userPassword;
 
+    @NotNull(message = "So dien thoai khong duoc de trong")
     @NotEmpty(message = "Số điện thoại không được để trống")
     @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Số điện thoại không hợp lệ")
     @JsonProperty("userPhone")
     String userPhone;
 
+    @NotEmpty(message = "Khong duoc de trong ngay sinh")
     @JsonProperty("userBirthday")
     @Min(value = 1990, message = "")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     Timestamp userBirthday;
 
+    @NotEmpty(message = "Khong de trong dia chi")
     @JsonProperty("userAddress")
     String userAddress;
 
