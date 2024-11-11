@@ -1,21 +1,27 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
-import tdc.edu.vn.project_mobile_be.commond.customexception.ExistsSlugException;
-import tdc.edu.vn.project_mobile_be.dtos.requests.CreateCategoryRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.CategoryResponseDTO;
+import tdc.edu.vn.project_mobile_be.commond.customexception.InvalidRoleException;
+import tdc.edu.vn.project_mobile_be.dtos.requests.category.CategoryCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.category.CategoryUpdateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.category.CategoryResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
+import tdc.edu.vn.project_mobile_be.entities.status.CategoryStatus;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.CategoryRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.CategoryStatusRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CategoryService;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -24,6 +30,10 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
 
     public final int USER_ROLE_ADMIN = 0;
     public final int USER_ROLE_USER = 1;
+    public final int CATEGORY_STATUS_ACTIVE = 1;
+    public final int CATEGORY_STATUS_DELETE = 2;
+    public final int CATEGORY_STATUS_INACTIVE = 0;
+    public final int CATEGORY_DELETE_AFTER_DAYS = 5;
     /**
      * Inject CategoryRepository
      */
@@ -38,67 +48,142 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
     /**
      * Create category
      *
-     * @param categoryRequestDTO
+     * @param params
      * @return Optional<Category>
      */
     @Override
-    public Category createCategory(CreateCategoryRequestDTO categoryRequestDTO) {
+    public Category createCategory(CategoryCreateRequestDTO params) {
 
-        if (categoryRepository.existsByCategorySlug(categoryRequestDTO.getCategorySlug())) {
-            throw new ExistsSlugException("Slug đã tồn tại !");
-        }
+        LocalDateTime releaseDateTime;
 
+        if (params.getCategoryRelease() == null) {
+            releaseDateTime = LocalDateTime.now();
 
-        ZonedDateTime releaseZonedDateTime = getReleaseZonedDateTime(categoryRequestDTO.getCategoryRelease());
-
-
-        Category parent = getParentCategoryById(categoryRequestDTO.getParentId());
-
-        Category category = new Category();
-        category.setCategoryId(UUID.randomUUID());
-        category.setCategoryName(categoryRequestDTO.getCategoryName());
-        category.setCategorySlug(categoryRequestDTO.getCategorySlug());
-        category.setParent(parent);
-        category.setCategoryRelease(releaseZonedDateTime);
-
-        if (category.getCategoryRelease().isAfter(ZonedDateTime.now())) {
-            category.setCategoryStatus(categoryStatusRepository.findByCategoryStatusType(0).orElseThrow(() -> new EntityNotFoundException("Status không tồn tại !")));
         } else {
-            category.setCategoryStatus(categoryStatusRepository.findByCategoryStatusType(1).orElseThrow(() -> new EntityNotFoundException("Status không tồn tại !")));
+            releaseDateTime = params.getCategoryRelease().atStartOfDay();
         }
+
+        Timestamp releaseTimestamp = Timestamp.valueOf(releaseDateTime);
+
+        CategoryStatus status = getStatus(params.getStatusId());
+
+        if (status == null) {
+            throw new EntityNotFoundException("Trạng thái không tồn tại !");
+        }
+
+        Category parent;
+        if (params.getParentId() != null) {
+            parent = getParentCategoryById(params.getParentId());
+            if (parent == null) {
+                throw new EntityNotFoundException("Parent không tồn tại !");
+            }
+        } else {
+            parent = null;
+        }
+
+
+        Category category = params.toEntity();
+        category.setCategoryId(UUID.randomUUID());
+        category.setParent(parent);
+        category.setCategoryStatus(status);
+        category.setCategoryRelease(releaseTimestamp);
 
         return categoryRepository.save(category);
     }
+    @Transactional
+    @Override
+    public Category updateCategory(CategoryUpdateRequestDTO params, UUID categoryId) {
+
+        LocalDateTime releaseDateTime;
+
+        if (params.getCategoryRelease() == null) {
+            releaseDateTime = LocalDateTime.now();
+
+        } else {
+            releaseDateTime = params.getCategoryRelease().atStartOfDay();
+        }
+
+        Timestamp releaseTimestamp = Timestamp.valueOf(releaseDateTime);
+
+        CategoryStatus status = getStatus(params.getStatusId());
+
+        if (status == null) {
+            throw new EntityNotFoundException("Trạng thái không tồn tại !");
+        }
+
+
+
+        Category parent;
+        if (params.getParentId() != null) {
+            parent = getParentCategoryById(params.getParentId());
+            if (parent == null) {
+                throw new EntityNotFoundException("Parent không tồn tại !");
+            }
+        } else {
+            parent = null;
+        }
+
+        Category category = categoryRepository.findById(categoryId).orElseThrow(()
+                -> new EntityNotFoundException("Category không tồn tại !"));
+        category.setCategoryName(params.getCategoryName());
+        category.setParent(parent);
+        category.setCategoryStatus(status);
+        category.setCategoryRelease(releaseTimestamp);
+        category.setDeletionDate(null);
+        return categoryRepository.save(category);
+    }
+
 
     @Override
-    public List<CategoryResponseDTO> getCategoryTree(int role) {
-        // Lấy danh sách tất cả các danh mục gốc cùng với danh mục con
-        List<Category> categoryList = categoryRepository.findAllRootCategoriesWithChildren();
+    public List<CategoryResponseDTO> getCategories(int role, Pageable pageable) {
 
-        // Kiểm tra nếu danh sách rỗng, ném ngoại lệ
-        if (categoryList.isEmpty()) {
-            throw new EntityNotFoundException("Không có dữ liệu !");
-        }
-
-        // Xử lý tùy thuộc vào vai trò người dùng
         if (role == this.USER_ROLE_USER) {
-            // Lọc cây danh mục cho người dùng thông thường
+            List<Category> categoryList = new ArrayList<>();
+            categoryList = categoryRepository.findAllRootCategoriesWithChildren();
+            if (categoryList.isEmpty()) {
+                throw new EntityNotFoundException("Không có dữ liệu !");
+            }
             categoryList.forEach(this::filterCategoryTree);
-
+            return categoryList.stream().map(category -> {
+                CategoryResponseDTO dto = new CategoryResponseDTO();
+                dto.toDto(category);
+                return dto;
+            }).collect(Collectors.toList());
         } else if (role == this.USER_ROLE_ADMIN) {
-            // Có thể thêm logic xử lý riêng cho admin, nếu cần
-            // Ví dụ: Admin có thể thấy tất cả mà không lọc danh mục con
-        }
+            Page<Category> categoryPage = categoryRepository.findAllCategories(pageable);
 
-        // Chuyển đổi danh sách Category sang CategoryResponseDTO
-        return categoryList.stream()
-                .map(category -> {
-                    CategoryResponseDTO dto = new CategoryResponseDTO();
-                    dto.toDto(category); // Giới hạn độ sâu trong phương thức toDto nếu cần
-                    return dto;
-                })
-                .collect(Collectors.toList());
+            if (categoryPage.isEmpty()) {
+                throw new EntityNotFoundException("Không có dữ liệu !");
+            }
+            return categoryPage.stream().map(category -> {
+                CategoryResponseDTO dto = new CategoryResponseDTO();
+                dto.toDto(category, role);
+                return dto;
+            }).collect(Collectors.toList());
+        } else {
+            throw new InvalidRoleException("Bạn không có quyền truy cập !");
+        }
     }
+
+
+    @Override
+    public boolean deleteCategory(UUID categoryId) {
+        Optional<Category> categoryOptional = categoryRepository.findById(categoryId);
+        if (categoryOptional.isEmpty()) {
+            throw new EntityNotFoundException("Category không tồn tại !");
+        }
+        Category category = categoryOptional.get();
+        CategoryStatus status = categoryStatusRepository.findByCategoryStatusType(this.CATEGORY_STATUS_DELETE);
+        if (status == null) {
+            throw new EntityNotFoundException("Trạng thái không tồn tại !");
+        }
+        category.setCategoryStatus(status);
+        category.setDeletionDate(LocalDate.now().plusDays(this.CATEGORY_DELETE_AFTER_DAYS));
+        categoryRepository.save(category);
+        return true;
+    }
+
+
 
     /**
      * Filter category tree
@@ -106,30 +191,10 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
      * @return void
      */
     public void filterCategoryTree(Category category) {
-        category.setChildren(category.getChildren()
-                .stream()
-                .filter(child -> child.getCategoryStatus() != null && child.getCategoryStatus().getCategoryStatusType() == 1
-                        && child.getCategoryRelease() != null
-                        && child.getCategoryRelease()
-                        .isBefore(ZonedDateTime.now()))
-                .collect(Collectors.toList()));
+        category.setChildren(category.getChildren().stream().filter(child -> child.getCategoryStatus() != null && child.getCategoryStatus().getCategoryStatusType() == 1 && child.getCategoryRelease().before(Timestamp.valueOf(LocalDateTime.now())) || child.getCategoryRelease().equals(Timestamp.valueOf(LocalDateTime.now()))).collect(Collectors.toList()));
         category.getChildren().forEach(this::filterCategoryTree);
     }
 
-    /**
-     * Get release date time
-     *
-     * @param releaseTimestamp
-     * @return ZonedDateTime
-     */
-    private ZonedDateTime getReleaseZonedDateTime(Timestamp releaseTimestamp) {
-        if (releaseTimestamp != null) {
-            LocalDateTime localDateTime = releaseTimestamp.toLocalDateTime();
-            return localDateTime.atZone(ZoneId.of("Asia/Ho_Chi_Minh"));
-        } else {
-            return ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
-        }
-    }
 
     /**
      * Get parent category by id
@@ -138,7 +203,16 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
      * @return Category
      */
     private Category getParentCategoryById(UUID parentId) {
-        return parentId != null ? categoryRepository.findById(parentId).orElseThrow(() -> new EntityNotFoundException("Parent không tồn tại!")) : null;
+        return parentId != null ? categoryRepository.findById(parentId).
+                orElseThrow(() -> new EntityNotFoundException("Parent không tồn tại!")) : null;
     }
+
+    private CategoryStatus getStatus(UUID statusId) {
+        return categoryStatusRepository.findByCategoryStatusId((statusId)) != null ? categoryStatusRepository.findByCategoryStatusId((statusId)) : null;
+    }
+
+
+
+
 
 }

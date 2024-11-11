@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
+
 public class ProjectMobileBeApplication {
 
 	public static void main(String[] args) {
