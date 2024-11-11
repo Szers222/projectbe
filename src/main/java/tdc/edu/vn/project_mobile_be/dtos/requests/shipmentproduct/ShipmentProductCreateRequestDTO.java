@@ -11,6 +11,8 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.UnsupportedOperation
 import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
+import java.util.UUID;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,6 +21,10 @@ public class ShipmentProductCreateRequestDTO implements IDto<ShipmentProduct> {
     @Min(value = 0, message = "ProductPrice phải lớn hơn hoặc bằng 0")
     @JsonProperty("productPrice")
     private double productPrice;
+    @JsonProperty("productId")
+    private UUID productId;
+    @JsonProperty("productQuantity")
+    private int productQuantity;
 
     @Override
     public ShipmentProduct toEntity() {

@@ -40,6 +40,10 @@ public class ProductSupplier {
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
 
+    @OneToMany(mappedBy = "productSupplier", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
+    private Set<Shipment> shipments = new HashSet<>();
+
     @OneToMany(mappedBy = "supplier",cascade = CascadeType.ALL,orphanRemoval = true )
     @JsonBackReference
     private Set<Product> products = new HashSet<>();

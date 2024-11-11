@@ -72,24 +72,35 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private ProductImageRepository productImageRepository;
     @Autowired
     private ProductSizeRepository productSizeRepository;
-
+    @Autowired
+    private GoogleCloudStorageService googleCloudStorageService;
     @Override
     @Transactional
     public Product createProduct(ProductCreateRequestDTO params, MultipartFile[] files) {
-
-        Post post = postService.createPost(params.getPost());
-        if (post == null) {
-            throw new EntityNotFoundException("Post tao moi khong thanh cong");
+        Post post;
+        if (params.getPost() != null) {
+            post = postService.createPost(params.getPost());
+            if (post == null) {
+                throw new EntityNotFoundException("Post tao moi khong thanh cong");
+            }
+        } else {
+            post = null;
         }
+
         Coupon coupon;
         if (params.getCoupon() == null) {
             coupon = null;
         } else {
             coupon = couponService.createCoupon(params.getCoupon());
+            if (coupon == null) {
+                throw new EntityNotFoundException("Coupon tao moi khong thanh cong");
+            }
         }
 
         Set<Category> categories = retrieveCategories(params.getCategoryId());
-
+        if (categories.isEmpty()) {
+            throw new EntityNotFoundException("Category not found !");
+        }
         ProductSupplier productSupplier = productSupplierRepository.findProductSupplierById(params.getProductSupplier());
         if (productSupplier == null) {
             throw new EntityNotFoundException("ProductSupplier not found !");
@@ -98,7 +109,6 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         // Tạo đối tượng Product mới
         Product product = params.toEntity();
         product.setProductId(UUID.randomUUID());
-        log.info("Product ID: " + product.getProductId());
         product.setCategories(categories);
         product.setPost(post);
         product.setCoupon(coupon);
@@ -115,26 +125,34 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
                     files);
             savedProduct.setImages(productImages);
         }
+        Set<SizeProduct> sizeProducts;
+        if (params.getSizesProduct() != null) {
+            sizeProducts = createSizeProducts(params.getSizesProduct(), savedProduct);
+            int quantity = setQuantityProduct(sizeProducts);
+            savedProduct.setProductQuantity(quantity);
+            savedProduct.setSizeProducts(sizeProducts);
+        }
 
-        Set<SizeProduct> sizeProducts = createSizeProducts(params.getSizesProduct(), savedProduct);
-        int quantity = setQuantityProduct(sizeProducts);
-        savedProduct.setProductQuantity(quantity);
-        savedProduct.setSizeProducts(sizeProducts);
         return savedProduct;
     }
 
     @Override
     @Transactional
     public Product updateProduct(ProductUpdateRequestDTO params, UUID productId, MultipartFile[] files) {
-
-        Post post = postService.updatePostByProductId(params.getPost(), productId);
-        if (post == null) {
-            throw new EntityNotFoundException("Post không tồn tại !");
+        Post post = new Post();
+        if (params.getPost() != null) {
+            post = postService.updatePostByProductId(params.getPost(), productId);
+            if (post == null) {
+                throw new EntityNotFoundException("Post không tồn tại !");
+            }
         }
 
-        Coupon coupon = couponService.updateCouponByProductId(params.getCoupon(), productId);
-        if (coupon == null) {
-            throw new EntityNotFoundException("Coupon không tồn tại !");
+        Coupon coupon = new Coupon();
+        if (params.getCoupon() != null) {
+            coupon = couponService.updateCouponByProductId(params.getCoupon(), productId);
+            if (coupon == null) {
+                throw new EntityNotFoundException("Coupon không tồn tại !");
+            }
         }
         Optional<Product> optionalProduct = productRepository.findById(productId);
         if (optionalProduct.isEmpty()) {
@@ -142,10 +160,19 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         }
         Product product = optionalProduct.get();
         Set<Category> categories = retrieveCategories(params.getCategoryId());
+        if (categories.isEmpty()) {
+            throw new EntityNotFoundException("Category không tồn tại !");
+        }
         Set<SizeProduct> sizeProducts = createSizeProducts(params.getSizesProduct(), product);
+        if (sizeProducts.isEmpty()) {
+            throw new EntityNotFoundException("SizeProduct không tồn tại !");
+        }
         Set<ProductImage> productImages = productImageService.updateProductImageForProduct(
                 params.getProductImageResponseDTOs(),
                 files);
+        if (productImages.isEmpty()) {
+            throw new EntityNotFoundException("ProductImage không tồn tại !");
+        }
 
         double productSale = solveProductSale(params.getProductPrice(), coupon);
         int quantity = setQuantityProduct(sizeProducts);
@@ -287,8 +314,10 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         if (productOptional.isEmpty()) {
             throw new EntityNotFoundException("Product không tồn tại !");
         }
-        productImageRepository.deleteByProductId(productId);
         Product product = productOptional.get();
+        for (ProductImage productImage : product.getImages()) {
+            googleCloudStorageService.deleteFile(productImage.getProductImagePath());
+        }
         productRepository.delete(product);
         return true;
     }

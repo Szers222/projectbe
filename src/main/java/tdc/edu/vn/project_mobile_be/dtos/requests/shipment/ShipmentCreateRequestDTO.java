@@ -3,6 +3,7 @@ package tdc.edu.vn.project_mobile_be.dtos.requests.shipment;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.j2objc.annotations.Property;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,8 @@ import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -28,12 +31,15 @@ public class ShipmentCreateRequestDTO implements IDto<Shipment> {
     @Property("shipmentShipCost")
     private double shipmentShipCost;
 
-    @NotBlank(message = "Nha cung cap khong duoc de trong")
-    @Property("shipmentSupplier")
-    private String shipmentSupplier;
+    @NotNull(message = "Id nha cung cap khong duoc de trong")
+    @JsonProperty("supplierId")
+    private UUID supplierId;
 
+    @NotNull(message = "ShipmentProducts không được để trống")
     @JsonProperty("shipmentProducts")
-    private ShipmentProductCreateRequestDTO shipmentProductCreateRequestDTO;
+    private List<ShipmentProductCreateRequestDTO> shipmentProductCreateRequestDTO;
+
+
 
 
     @Override
@@ -45,6 +51,6 @@ public class ShipmentCreateRequestDTO implements IDto<Shipment> {
 
     @Override
     public void toDto(Shipment entity) {
-
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
