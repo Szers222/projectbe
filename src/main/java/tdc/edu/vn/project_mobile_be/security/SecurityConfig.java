@@ -30,7 +30,8 @@ public class SecurityConfig {
             "/api/v1/auth/refresh",
             "/api/v1/auth/register",
             "/api/v1/auth/create-email",
-            "/api/v1/auth/*"
+            "/api/v1/auth/*",
+            "/api/v1/auth/*/*"
     };
 
 
