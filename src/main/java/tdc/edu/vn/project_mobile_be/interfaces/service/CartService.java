@@ -7,5 +7,5 @@ import tdc.edu.vn.project_mobile_be.interfaces.IService;
 import java.util.UUID;
 
 public interface CartService extends IService<Cart, UUID> {
-    Cart createCart(CartCreateRequestDTO cart);
+    Cart createCartByUser(UUID userId);
 }
