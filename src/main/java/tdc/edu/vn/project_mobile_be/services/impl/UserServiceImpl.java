@@ -17,12 +17,12 @@ import tdc.edu.vn.project_mobile_be.dtos.requests.CreateUserRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.UpdateUserRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.UserResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
+import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.IdCardRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.RoleRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.UserService;
-import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 
 import java.util.List;
 import java.util.UUID;
