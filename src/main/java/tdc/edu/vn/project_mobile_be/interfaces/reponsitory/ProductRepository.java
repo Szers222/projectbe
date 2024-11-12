@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.interfaces.reponsitory;
 
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,21 +22,14 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
 
     Page<Product> findAll(Pageable pageable);
 
-    Product save(Product product);
-
-
     @Query("SELECT p FROM Product p LEFT JOIN FETCH p.images i WHERE p.productId= :productId ORDER BY i.productImageIndex desc")
     Optional<Product> findByIdWithImages(@Param("productId") UUID productId);
-
 
     @Query("SELECT DISTINCT p FROM Product p JOIN FETCH p.categories c WHERE c.categoryId= :categoryId")
     Page<Product> findByCategoryId(@Param("categoryId") UUID categoryId, Pageable pageable);
 
-
-    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.categories c WHERE c.categoryId= :categoryId ORDER BY  p.productSale desc")
+    @Query("SELECT p FROM Product p JOIN p.categories c WHERE c.categoryId = :categoryId")
     Page<Product> findByIdWithCategories(@Param("categoryId") UUID categoryId, Pageable pageable);
-
-
 
 
 

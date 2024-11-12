@@ -7,7 +7,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -21,15 +24,14 @@ import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductRequestParamsDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.ProductResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.BreadcrumbService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
-
-import java.util.*;
-
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -40,8 +42,6 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
-    @Autowired
-    private ProductRepository productRepository;
     @Autowired
     private BreadcrumbService breadcrumbService;
 
@@ -100,23 +100,15 @@ public class ProductController {
             @RequestParam(value = "size", defaultValue = "20") int size,
             PagedResourcesAssembler<ProductResponseDTO> assembler) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("productSale").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("productPriceSale").ascending());
         Page<ProductResponseDTO> productDtoPage = productService.findProductRelate(categoryId, pageable);
+
         if (productDtoPage.isEmpty()) {
             ResponseData<PagedModel<EntityModel<ProductResponseDTO>>> responseData = new ResponseData<>(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm", null);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseData);
         }
-        List<ProductResponseDTO> list = productDtoPage.getContent();
-        if (list.isEmpty()) {
-            ResponseData<PagedModel<EntityModel<ProductResponseDTO>>> responseData = new ResponseData<>(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm", null);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseData);
-        }
-        List<ProductResponseDTO> listRnd = new ArrayList<>(list);
+        PagedModel<EntityModel<ProductResponseDTO>> pagedModel = assembler.toModel(productDtoPage);
 
-        Collections.shuffle(listRnd, new Random());
-        listRnd = listRnd.subList(0, Math.min(listRnd.size(), 6));
-
-        PagedModel<EntityModel<ProductResponseDTO>> pagedModel = assembler.toModel(new PageImpl<>(listRnd, pageable, listRnd.size()));
         ResponseData<PagedModel<EntityModel<ProductResponseDTO>>> responseData = new ResponseData<>(HttpStatus.OK, "Success", pagedModel);
         return ResponseEntity.ok(responseData);
     }
@@ -134,7 +126,7 @@ public class ProductController {
             @ModelAttribute ProductRequestParamsDTO params,
             PagedResourcesAssembler<ProductResponseDTO> assembler) {
         if (params.getSort() == null || params.getSort().isEmpty()) {
-            params.setSort("productPrice");
+            params.setSort("productPriceSale");
         }
         Sort.Direction sortDirection = params.getDirection().equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sortBy = Sort.by(sortDirection, params.getSort());

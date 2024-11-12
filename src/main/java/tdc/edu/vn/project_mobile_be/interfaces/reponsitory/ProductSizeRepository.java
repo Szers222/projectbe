@@ -19,6 +19,7 @@ public interface ProductSizeRepository extends JpaRepository<ProductSize, UUID> 
     @Query("SELECT s FROM ProductSize s LEFT JOIN FETCH s.sizeProducts p WHERE p.product.productId IN :productIds")
     List<ProductSize> findAllByProductId(@Param("productIds") List<UUID> productIds);
 
-    @Query("SELECT DISTINCT p.sizeProducts FROM Product p JOIN p.categories c WHERE c.categoryId = :categoryId")
+    @Query("SELECT DISTINCT ps FROM Product p JOIN p.sizeProducts sp join sp.size ps join p.categories c WHERE c.categoryId = :categoryId")
     List<ProductSize> findProductSizesByCategory(@Param("categoryId") UUID categoryId);
+
 }

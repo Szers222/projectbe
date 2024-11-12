@@ -6,9 +6,7 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundExcept
 import tdc.edu.vn.project_mobile_be.commond.customexception.ListNotFoundException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.ProductSizeRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.ProductSizeResponseDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.SizeProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
-import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductSizeRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.SizeProductRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductSizeService;
@@ -33,9 +31,9 @@ public class ProductSizeServiceImpl extends AbService<ProductSize, UUID> impleme
 
 
     @Override
-    public List<ProductSizeResponseDTO> getAllProductSize(ProductSizeRequestParamsDTO productSizeRequestParamsDTO) {
+    public List<ProductSizeResponseDTO> getAllProductSizeByProductId(ProductSizeRequestParamsDTO productSizeRequestParamsDTO) {
         List<UUID> productIds = productSizeRequestParamsDTO.getProductIds();
-        System.console().printf("productSizes: %s", productIds);
+
         List<ProductSize> productSizes = productSizeRepository.findAllByProductId(productIds);
 
         if (productSizes.isEmpty()) {
@@ -51,23 +49,50 @@ public class ProductSizeServiceImpl extends AbService<ProductSize, UUID> impleme
 
     @Override
     public List<ProductSizeResponseDTO> getAllProductSizeByCategoryID(UUID categoryId) {
-        if (categoryId == null) {
-            throw new EntityNotFoundException("Category not found");
+        List<ProductSizeResponseDTO> result = new ArrayList<>();
+        if (categoryId != null) {
+            List<ProductSize> productSizes = productSizeRepository.findProductSizesByCategory(categoryId);
+            System.console().printf("productSizes: " + productSizes);
+            if (productSizes.isEmpty()) {
+                throw new EntityNotFoundException("Product Supplier not found");
+            }
+
+            productSizes.stream().toList().forEach(productSize -> {
+                ProductSizeResponseDTO productSizeResponseDTO = new ProductSizeResponseDTO();
+                productSizeResponseDTO.toDto(productSize);
+                result.add(productSizeResponseDTO);
+            });
+            if (result.isEmpty()) {
+                throw new ListNotFoundException("List product size not found");
+            }
         }
-        List<ProductSize> productSizes = productSizeRepository.findProductSizesByCategory(categoryId);
-        System.console().printf("productSizes: " + productSizes);
+        if(categoryId == null || categoryId.equals("")){
+            List<ProductSize> productSizes = productSizeRepository.findAll();
+            if (productSizes.isEmpty()) {
+                throw new ListNotFoundException("List product size không tồn tại");
+            }
+            productSizes.stream().toList().forEach(productSize -> {
+                ProductSizeResponseDTO productSizeResponseDTO = new ProductSizeResponseDTO();
+                productSizeResponseDTO.toDto(productSize);
+                result.add(productSizeResponseDTO);
+            });
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<ProductSizeResponseDTO> getAllProductSize() {
+        List<ProductSize> productSizes = productSizeRepository.findAll();
         if (productSizes.isEmpty()) {
-            throw new EntityNotFoundException("Product Supplier not found");
+            throw new ListNotFoundException("List product size không tồn tại");
         }
         List<ProductSizeResponseDTO> result = new ArrayList<>();
-        productSizes.stream().forEach(productSize -> {
+        productSizes.stream().toList().forEach(productSize -> {
             ProductSizeResponseDTO productSizeResponseDTO = new ProductSizeResponseDTO();
             productSizeResponseDTO.toDto(productSize);
             result.add(productSizeResponseDTO);
         });
-        if (result.isEmpty()) {
-            throw new ListNotFoundException("List product size not found");
-        }
         return result;
     }
 }

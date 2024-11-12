@@ -21,23 +21,40 @@ public class ProductSupplierServiceImpl extends AbService<ProductSupplier, UUID>
 
     @Override
     public List<ProductSupplierResponseDTO> getAllProductSupplier(UUID categoryId) {
-        if (categoryId == null) {
-            throw new EntityNotFoundException("Category not found");
-        }
-        List<ProductSupplier> productSuppliers = supplierRepository.findProductSupplierByCategory(categoryId);
-
-        if (productSuppliers.isEmpty()) {
-            throw new EntityNotFoundException("Product Supplier not found");
-        }
         List<ProductSupplierResponseDTO> result = new ArrayList<>();
-        productSuppliers.stream().forEach(productSupplier -> {
-            ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
-            productSupplierResponseDTO.toDto(productSupplier);
-            result.add(productSupplierResponseDTO);
-        });
-        if (result.isEmpty()) {
-            throw new ListNotFoundException("List product size not found");
+        if (categoryId != null) {
+            List<ProductSupplier> productSuppliers = supplierRepository.findProductSupplierByCategory(categoryId);
+
+            if (productSuppliers.isEmpty()) {
+                throw new EntityNotFoundException("Product Supplier not found");
+            }
+
+            productSuppliers.stream().toList().forEach(productSupplier -> {
+                ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
+                productSupplierResponseDTO.toDto(productSupplier);
+                result.add(productSupplierResponseDTO);
+            });
+            if (result.isEmpty()) {
+                throw new ListNotFoundException("List product size not found");
+            }
         }
+        if (categoryId == null || categoryId.equals("")) {
+            List<ProductSupplier> productSuppliers = supplierRepository.findAll();
+
+            if (productSuppliers.isEmpty()) {
+                throw new EntityNotFoundException("Product Supplier not found");
+            }
+
+            productSuppliers.stream().toList().forEach(productSupplier -> {
+                ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
+                productSupplierResponseDTO.toDto(productSupplier);
+                result.add(productSupplierResponseDTO);
+            });
+            if (result.isEmpty()) {
+                throw new ListNotFoundException("List product size not found");
+            }
+        }
+
         return result;
     }
 }

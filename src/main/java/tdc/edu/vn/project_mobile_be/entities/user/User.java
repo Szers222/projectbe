@@ -85,11 +85,11 @@ public class User {
     @JoinColumn(name = "icard_id", nullable = false)
     private IdCard iCard;
 
-    @OneToOne(mappedBy = "user")
+    @OneToMany(mappedBy = "user")
     @JsonBackReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private Post post;
+    private Set<Post> post;
 
     @ManyToOne
     @JoinColumn(name = "user_status_id", nullable = false)
