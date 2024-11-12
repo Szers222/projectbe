@@ -9,6 +9,7 @@ import java.util.UUID;
 
 @Repository
 public interface CategoryStatusRepository extends JpaRepository<CategoryStatus, UUID> {
-    Optional<CategoryStatus> findByCategoryStatusType(int type);
+    CategoryStatus findByCategoryStatusId(UUID categoryStatusId);
     boolean existsById(UUID id);
+    CategoryStatus findByCategoryStatusType(int categoryStatusType);
 }

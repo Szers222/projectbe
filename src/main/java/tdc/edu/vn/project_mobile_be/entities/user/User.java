@@ -84,10 +84,14 @@ public class User {
     @JsonBackReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+
     private IdCard iCard;
 
-    @OneToOne(mappedBy = "user")
-    private Post post;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonBackReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Post> post;
 
     @OneToMany(mappedBy = "user")
     private Set<OneTimePassword> oneTimePasswords = new HashSet<>();

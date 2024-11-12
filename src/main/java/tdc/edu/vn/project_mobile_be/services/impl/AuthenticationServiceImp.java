@@ -62,7 +62,6 @@ public class AuthenticationServiceImp {
     @Value("${jwt.refreshable-duration}")
     protected long REFRESHABLE_DURATION;
 
-    //Xac thực user
     @Transactional
     public AuthenticationResponseDTO authenticate(AuthenticationRequestDTO request) {
         Optional<User> optionalUser = userRepository.findByUserEmail(request.getUserEmail());
@@ -73,7 +72,7 @@ public class AuthenticationServiceImp {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(request.getUserPassword(), user.getUserPassword());
 
-        if (!authenticated) throw new EntityNotFoundException("Unauthentication");
+        if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
 
         var token = generateToken(user);
 
@@ -115,7 +114,6 @@ public class AuthenticationServiceImp {
         }
     }
 
-    // Xacs minh token va kiem tra token
     private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
@@ -164,7 +162,6 @@ public class AuthenticationServiceImp {
 
     }
 
-    // Tao JWT token User
     @Transactional
     public String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
@@ -191,7 +188,6 @@ public class AuthenticationServiceImp {
         }
     }
 
-    //ROLE
     private String buildScope(User user) {
         StringJoiner stringJoiner = new StringJoiner(" ");
         if (user != null) {
