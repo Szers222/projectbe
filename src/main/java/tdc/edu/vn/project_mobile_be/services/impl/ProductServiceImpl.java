@@ -167,7 +167,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             throw new EntityNotFoundException("SizeProduct không tồn tại !");
         }
         Set<ProductImage> productImages = productImageService.updateProductImageForProduct(
-                params.getProductImageResponseDTOs(),
+                params.getProductImageResponseDTOs(), productId,
                 files);
         if (productImages.isEmpty()) {
             throw new EntityNotFoundException("ProductImage không tồn tại !");

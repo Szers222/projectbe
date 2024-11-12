@@ -26,7 +26,9 @@ import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CartService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.UserService;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -81,11 +83,15 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
         }
 
         User userSave = userRepository.save(user);
-        Cart cart = cartService.createCartByUser(userSave.getUserId());
-        userSave.setCart(cart);
+        Set<Cart> carts = new HashSet<>();
+        for (int i = 0; i <= 2; i++) {
+            Cart cart = cartService.createCartByUser(userSave.getUserId());
+            cart.setCartStatus(i);
+            carts.add(cart);
+        }
+        userSave.setCarts(carts);
 
         return userSave;
-
     }
 
     @Override

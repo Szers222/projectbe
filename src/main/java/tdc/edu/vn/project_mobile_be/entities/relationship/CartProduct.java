@@ -12,7 +12,7 @@ import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
 
 public class CartProduct {
     @EmbeddedId
-    private CartProductId id;
+    private CartProductId id = new CartProductId();
 
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("product_id")
