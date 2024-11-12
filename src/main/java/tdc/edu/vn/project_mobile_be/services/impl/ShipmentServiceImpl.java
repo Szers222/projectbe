@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipment.ShipmentCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipment.ShipmentUpdateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.shipmentproduct.ShipmentProductCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.shipmentproduct.ShipmentProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.shipment.ShipmentResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
@@ -51,7 +51,7 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
 
         Shipment savedShipment = shipmentRepository.save(shipment);
 
-        Set<ShipmentProduct> shipmentProducts = createShipmentProduct(requestDTO.getShipmentProductCreateRequestDTO(), savedShipment);
+        Set<ShipmentProduct> shipmentProducts = createShipmentProduct(requestDTO.getShipmentProductCreateRequestDTO(), savedShipment, requestDTO.getProductPrice());
         if (shipmentProducts.isEmpty()) {
             throw new IllegalArgumentException("Shipment product is empty");
         }
@@ -79,7 +79,7 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
         shipment.setShipmentDate(Timestamp.valueOf(shipmentDateTime));
         shipment.setProductSupplier(productSupplier);
 
-        Set<ShipmentProduct> shipmentProducts = createShipmentProduct(requestDTO.getShipmentProductCreateRequestDTO(), shipment);
+        Set<ShipmentProduct> shipmentProducts = createShipmentProduct(requestDTO.getShipmentProductUpdateRequestDTO(), shipment, requestDTO.getProductPrice());
         if (shipmentProducts.isEmpty()) {
             throw new IllegalArgumentException("Shipment product is empty");
         }
@@ -131,7 +131,7 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
         return true;
     }
 
-    public <T extends ShipmentProductCreateRequestDTO> Set<ShipmentProduct> createShipmentProduct(List<T> requestDTO, Shipment shipment) {
+    public <T extends ShipmentProductRequestParamsDTO> Set<ShipmentProduct> createShipmentProduct(List<T> requestDTO, Shipment shipment, double productPrice) {
         if (requestDTO == null || requestDTO.isEmpty()) {
             throw new IllegalArgumentException("Request data cannot be null or empty.");
         }
@@ -146,13 +146,12 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
             Product product = productRepository
                     .findById(params.getProductId())
                     .orElseThrow(() -> new IllegalArgumentException("Product with ID " + params.getProductId() + " not found"));
-
-            product.setProductPrice(calculateProductPrice(params.getProductPrice()));
             product.getSizeProducts().forEach(sizeProduct -> {
                 if (sizeProduct.getSize().getProductSizeId().equals(params.getSizeProductId())) {
                     sizeProduct.setQuantity(sizeProduct.getQuantity() + params.getProductQuantity());
                 }
             });
+            product.setProductPrice(calculateProductPrice(productPrice));
             productRepository.save(product);
 
             shipmentProduct.setProduct(product);
