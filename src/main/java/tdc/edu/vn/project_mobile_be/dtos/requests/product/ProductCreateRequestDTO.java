@@ -41,15 +41,15 @@ public class ProductCreateRequestDTO implements IDto<Product> {
     @JsonProperty("productSupplier")
     private UUID productSupplier;
 
-    @NotNull(message = "Size không được để null")
+
     @JsonProperty("sizesProduct")
     private List<SizeProductRequestParamsDTO> sizesProduct;
 
-    @NotNull(message = "Category không được để null")
+
     @JsonProperty("categories")
     private List<UUID> categoryId;
 
-    @NotNull(message = "Post không được để trống")
+
     @JsonProperty("post")
     private PostCreateRequestDTO post;
 

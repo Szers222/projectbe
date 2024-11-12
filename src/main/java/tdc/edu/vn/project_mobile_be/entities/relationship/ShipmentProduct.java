@@ -29,4 +29,6 @@ public class ShipmentProduct {
     @Column(name = "shipments_products_quantity", nullable = false, columnDefinition = "int default 0")
     private int quantity;
 
+
+
 }

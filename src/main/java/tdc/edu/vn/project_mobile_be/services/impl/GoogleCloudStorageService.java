@@ -41,7 +41,7 @@ public class GoogleCloudStorageService {
            storage.create(blobInfo, file.getBytes());
 
         // Trả về URL công khai của file
-        return String.format("https://storage.cloud.google.com/%s/%s", bucketName, fileName);
+        return String.format("https://storage.googleapis.com/%s/%s", bucketName, fileName);
     }
 
     //update file
@@ -52,7 +52,7 @@ public class GoogleCloudStorageService {
         storage.create(blobInfo, file.getBytes());
 
         // Trả về URL công khai của file
-        return String.format("https://storage.cloud.google.com/%s/%s", bucketName, fileName);
+        return String.format("https://storage.googleapis.com/%s/%s", bucketName, fileName);
     }
 
     public void deleteFile(String fileName) {
