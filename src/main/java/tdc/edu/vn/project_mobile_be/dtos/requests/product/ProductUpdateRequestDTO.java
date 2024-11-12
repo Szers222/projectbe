@@ -44,7 +44,7 @@ public class ProductUpdateRequestDTO implements IDto<Product> {
 
     @NotBlank(message = "Category không được để trống")
     @NotNull(message = "Category không được để null")
-    @JsonProperty("categoryId")
+    @JsonProperty("")
     private List<UUID> categoryId;
 
     @NotBlank(message = "ProductSupplier không được để trống")

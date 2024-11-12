@@ -140,15 +140,19 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
         }
 
         Set<ShipmentProduct> shipmentProducts = new HashSet<>();
-        for (T shipmentProductCreateRequestDTO : requestDTO) {
-            ShipmentProduct shipmentProduct = shipmentProductCreateRequestDTO.toEntity();
+        for (T params : requestDTO) {
+            ShipmentProduct shipmentProduct = params.toEntity();
 
             Product product = productRepository
-                    .findById(shipmentProductCreateRequestDTO.getProductId())
-                    .orElseThrow(() -> new IllegalArgumentException("Product with ID " + shipmentProductCreateRequestDTO.getProductId() + " not found"));
+                    .findById(params.getProductId())
+                    .orElseThrow(() -> new IllegalArgumentException("Product with ID " + params.getProductId() + " not found"));
 
-            product.setProductQuantity(product.getProductQuantity() + shipmentProductCreateRequestDTO.getProductQuantity());
-            product.setProductPrice(calculateProductPrice(shipmentProductCreateRequestDTO.getProductPrice()));
+            product.setProductPrice(calculateProductPrice(params.getProductPrice()));
+            product.getSizeProducts().forEach(sizeProduct -> {
+                if (sizeProduct.getSize().getProductSizeId().equals(params.getSizeProductId())) {
+                    sizeProduct.setQuantity(sizeProduct.getQuantity() + params.getProductQuantity());
+                }
+            });
             productRepository.save(product);
 
             shipmentProduct.setProduct(product);

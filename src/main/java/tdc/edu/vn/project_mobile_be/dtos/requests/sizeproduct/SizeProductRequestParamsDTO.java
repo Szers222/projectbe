@@ -3,15 +3,16 @@ package tdc.edu.vn.project_mobile_be.dtos.requests.sizeproduct;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -19,10 +20,17 @@ import java.util.UUID;
 @NoArgsConstructor
 public class SizeProductRequestParamsDTO implements IDto<SizeProduct> {
 
+    @NotNull(message = "productSizeQuantity không được để trống")
     @JsonProperty("productSizeQuantity")
     private int productSizeQuantity;
+
+    @NotNull(message = "productSizeId không được để trống")
     @JsonProperty("productSizeId")
     private UUID productSizeId;
+
+    @NotNull(message = "productSizePrice không được để trống")
+    @JsonProperty("productSizePrice")
+    private double productSizePrice;
 
     @JsonIgnore
     private Product product;
@@ -31,7 +39,9 @@ public class SizeProductRequestParamsDTO implements IDto<SizeProduct> {
 
     @Override
     public SizeProduct toEntity() {
-        return null;
+        SizeProduct sizeProduct = new SizeProduct();
+        BeanUtils.copyProperties(this, sizeProduct, "product", "size");
+        return sizeProduct;
     }
 
     @Override

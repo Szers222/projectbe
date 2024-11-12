@@ -86,7 +86,6 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         } else {
             post = null;
         }
-
         Coupon coupon;
         if (params.getCoupon() == null) {
             coupon = null;
@@ -178,7 +177,6 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         int quantity = setQuantityProduct(sizeProducts);
         product.setProductQuantity(quantity);
         product.setProductName(params.getProductName());
-        product.setProductPrice(params.getProductPrice());
         product.setProductQuantity(params.getProductQuantity());
         product.setProductYearOfManufacture(params.getProductYearOfManufacture());
         product.setCoupon(coupon);
@@ -498,6 +496,9 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     }
 
     private Set<Category> retrieveCategories(List<UUID> categoryIds) {
+        if (categoryIds.isEmpty()) {
+            throw new EntityNotFoundException("Category not found !");
+        }
         Set<Category> categories = new HashSet<>();
         for (UUID categoryId : categoryIds) {
             Category category = categoryRepository.findByCategoryId(categoryId);
@@ -514,15 +515,14 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
     private Set<SizeProduct> createSizeProducts(List<SizeProductRequestParamsDTO> paramsDTOS, Product product) {
         Set<SizeProduct> sizeProducts = new HashSet<>();
-        for (SizeProductRequestParamsDTO size : paramsDTOS) {
-            ProductSize productSize = productSizeRepository.findByProductSizeId(size.getProductSizeId());
+        for (SizeProductRequestParamsDTO param : paramsDTOS) {
+            ProductSize productSize = productSizeRepository.findByProductSizeId(param.getProductSizeId());
             if (productSize == null) {
-                throw new EntityNotFoundException("Size not found for ID: " + size.getProductSizeId());
+                throw new EntityNotFoundException("Size not found for ID: " + param.getProductSizeId());
             }
-            SizeProduct sizeProduct = new SizeProduct();
+            SizeProduct sizeProduct = param.toEntity();
             sizeProduct.setProduct(product);
             sizeProduct.setSize(productSize);
-            sizeProduct.setQuantity(size.getProductSizeQuantity());
             sizeProducts.add(sizeProduct);
         }
         if (sizeProducts.isEmpty()) {
