@@ -18,10 +18,6 @@ import java.util.UUID;
 public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
     List<Product> findAll();
 
-    Optional<Product> findById(UUID id);
-
-    Page<Product> findAll(Pageable pageable);
-
     @Query("SELECT p FROM Product p LEFT JOIN FETCH p.images i WHERE p.productId= :productId ORDER BY i.productImageIndex desc")
     Optional<Product> findByIdWithImages(@Param("productId") UUID productId);
 

@@ -30,7 +30,7 @@ public class Cart {
     @Column(name = "cart_status", columnDefinition = "int default 0")
     private int cartStatus;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

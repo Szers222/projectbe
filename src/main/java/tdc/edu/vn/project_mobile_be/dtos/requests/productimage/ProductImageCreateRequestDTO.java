@@ -19,14 +19,14 @@ import java.util.UUID;
 public class ProductImageCreateRequestDTO implements IDto<ProductImage> {
 
     @JsonIgnore
-    private String imagePath;
+    private String productImagePath;
 
     @NotBlank(message = "product-image-alt không được để trống")
-    @JsonProperty("product-image-alt")
-    private String imageAlt;
+    @JsonProperty("productImageAlt")
+    private String productImageAlt;
 
     @NotBlank(message = "product-id không được để trống")
-    @JsonProperty("product-id")
+    @JsonProperty("productId")
     private UUID productId;
     @JsonIgnore
     private Timestamp createdAt;

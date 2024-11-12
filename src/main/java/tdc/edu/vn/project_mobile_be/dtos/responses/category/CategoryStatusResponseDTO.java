@@ -1,4 +1,4 @@
-package tdc.edu.vn.project_mobile_be.dtos.responses;
+package tdc.edu.vn.project_mobile_be.dtos.responses.category;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

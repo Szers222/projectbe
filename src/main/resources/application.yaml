@@ -7,6 +7,7 @@ spring:
     username: "root"
     password: ''
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     database: mysql
     show-sql: true
@@ -24,10 +25,11 @@ spring:
                 fetch_size: 100
                 batch_size: 30
 
-    servlet:
-      multipart:
-        max-file-size: 20MB
-        max-request-size: 50MB
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 20MB
+      max-request-size: 50MB
     server:
       port: 8080
       file:
@@ -37,6 +39,23 @@ spring:
             enabled: true
           api-docs:
             enabled: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: thietasasasa@gmail.com
+    password: wcrs zxrv wofz bfje
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
+
+jwt:
+  signerKey: "CHpSZnAya03fnmgaxVnU9u4gdxZvnx+UFcrrC5i9+ZwI4+f5CNP0BlQEDCjNeyHh"
+  valid-duration: 60
+  refreshable-duration: 7
+
 
 spring.devtools:
   restart:
@@ -49,3 +68,11 @@ redis:
     host: 192.168.57.128
     port: 6379
     password: ''
+
+
+google:
+  cloud:
+    storage:
+      bucket-name: mobileproject
+    credentials:
+      path: src/main/resources/service-account.json

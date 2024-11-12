@@ -1,11 +1,14 @@
 package tdc.edu.vn.project_mobile_be.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,18 +18,20 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.commond.Breadcrumb;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductRequestParamsDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
-import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.BreadcrumbService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
@@ -34,6 +39,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping(value = "/api/v1")
 @CrossOrigin(origins = "*")
@@ -77,21 +83,46 @@ public class ProductController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping(value = {"/product", "/product/"})
+    @PostMapping(value = {"/product", "/product/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseData<?>> createProduct(
-            @Valid @RequestBody ProductCreateRequestDTO params,
-            BindingResult bindingResult) {
+            @RequestPart("file") MultipartFile[] files,
+            @Valid @RequestPart("params") String paramsJson,
+            BindingResult bindingResult) throws JsonProcessingException {
+
         if (bindingResult.hasErrors()) {
             List<String> errorMessages = bindingResult.getFieldErrors().stream()
                     .map(FieldError::getDefaultMessage)
                     .collect(Collectors.toList());
             throw new MultipleFieldsNullOrEmptyException(errorMessages);
         }
-        Product product = productService.createProduct(params);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ProductCreateRequestDTO params = objectMapper.readValue(paramsJson, ProductCreateRequestDTO.class);
+
+        Product product = productService.createProduct(params, files);
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Tạo Sản Phẩm Thành Công", product);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseData);
     }
 
+    @PutMapping(value = {"/product/{productId}", "/product/{productId}/"}, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE})
+    public ResponseEntity<ResponseData<?>> updateProduct(
+            @Valid @RequestPart String paramsJson,
+            @PathVariable("productId") UUID productId,
+            @RequestPart("file") MultipartFile[] files,
+            BindingResult bindingResult) throws JsonProcessingException {
+        if (bindingResult.hasErrors()) {
+            List<String> errorMessages = bindingResult.getFieldErrors().stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
+            throw new MultipleFieldsNullOrEmptyException(errorMessages);
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        ProductUpdateRequestDTO params = objectMapper.readValue(paramsJson, ProductUpdateRequestDTO.class);
+
+        Product product = productService.updateProduct(params, productId, files);
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Cập nhật sản phẩm thành công", product);
+        return ResponseEntity.ok(responseData);
+    }
 
     @GetMapping(value = {"/products/relate/{categoryId}", "/product/relate/{categoryId}/"})
     public ResponseEntity<ResponseData<PagedModel<EntityModel<ProductResponseDTO>>>> getProductsByCategory(
@@ -148,4 +179,15 @@ public class ProductController {
         return ResponseEntity.ok(responseData);
     }
 
+
+    @DeleteMapping("/product/{productId}")
+    public ResponseEntity<ResponseData<?>> deleteProduct(@PathVariable("productId") UUID productId) {
+         boolean isCheck = productService.deleteProduct(productId);
+         if(isCheck){
+             ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Xóa sản phẩm thành công", null);
+             return ResponseEntity.ok(responseData);
+         }
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.BAD_REQUEST, "Xóa sản phẩm không thành công", null);
+        return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
+    }
 }

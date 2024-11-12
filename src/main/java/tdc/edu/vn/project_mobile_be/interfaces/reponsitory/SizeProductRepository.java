@@ -13,4 +13,6 @@ import java.util.UUID;
 public interface SizeProductRepository extends JpaRepository<SizeProduct, SizeProductId> {
     @Query("SELECT sp FROM SizeProduct sp WHERE sp.id.product_id = :productIds")
     List<SizeProduct> findByProductId(UUID productIds);
+
+
 }

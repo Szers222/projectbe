@@ -64,7 +64,7 @@ public class CategoryController {
     @DeleteMapping({"/category/","/category"})
     public ResponseEntity<ResponseData<?>> deleteCategory(
             @RequestBody CategoryRemoveRequestDTO params) {
-        boolean isDeleted = categoryService.deleteCategory(params.getCategoryId());
+        boolean isDeleted = categoryService.deleteCategory(params.getId());
         if (isDeleted) {
             ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Category đã được xóa !", null);
             return new ResponseEntity<>(responseData, HttpStatus.OK);

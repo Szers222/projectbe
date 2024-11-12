@@ -13,10 +13,8 @@ import tdc.edu.vn.project_mobile_be.entities.one_time_password.OneTimePassword;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
-import tdc.edu.vn.project_mobile_be.entities.status.UserStatus;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -28,6 +26,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
+@Builder
 public class User {
 
     @Id
@@ -79,6 +78,9 @@ public class User {
     @Column(name = "user_wrong_password", columnDefinition = "int default 0")
     private int userWrongPassword;
 
+    @Column(name = "user_status", columnDefinition = "int default 0")
+    private int userStatus;
+
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
@@ -91,9 +93,11 @@ public class User {
     @EqualsAndHashCode.Exclude
     private Set<Post> post;
 
-    @ManyToOne
-    @JoinColumn(name = "user_status_id", nullable = false)
-    private UserStatus userStatus;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Cart> carts = new HashSet<>();
 
     @OneToMany(mappedBy = "user")
     private Set<OneTimePassword> oneTimePasswords = new HashSet<>();
@@ -104,10 +108,6 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Order> orders = new HashSet<>();
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private Cart cart;
 }

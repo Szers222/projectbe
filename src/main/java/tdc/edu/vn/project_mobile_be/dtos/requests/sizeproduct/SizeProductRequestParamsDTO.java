@@ -1,7 +1,9 @@
-package tdc.edu.vn.project_mobile_be.dtos.responses;
+package tdc.edu.vn.project_mobile_be.dtos.requests.sizeproduct;
+
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,12 +13,25 @@ import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
+import java.util.UUID;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SizeProductResponseDTO implements IDto<SizeProduct> {
+public class SizeProductRequestParamsDTO implements IDto<SizeProduct> {
+
+    @NotNull(message = "productSizeQuantity không được để trống")
     @JsonProperty("productSizeQuantity")
     private int productSizeQuantity;
+
+    @NotNull(message = "productSizeId không được để trống")
+    @JsonProperty("productSizeId")
+    private UUID productSizeId;
+
+    @NotNull(message = "productSizePrice không được để trống")
+    @JsonProperty("productSizePrice")
+    private double productSizePrice;
+
     @JsonIgnore
     private Product product;
     @JsonIgnore
@@ -24,11 +39,13 @@ public class SizeProductResponseDTO implements IDto<SizeProduct> {
 
     @Override
     public SizeProduct toEntity() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        SizeProduct sizeProduct = new SizeProduct();
+        BeanUtils.copyProperties(this, sizeProduct, "product", "size");
+        return sizeProduct;
     }
 
     @Override
     public void toDto(SizeProduct entity) {
-        BeanUtils.copyProperties(entity, this, "id");
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

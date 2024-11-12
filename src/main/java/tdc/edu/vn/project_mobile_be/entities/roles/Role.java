@@ -1,10 +1,9 @@
 package tdc.edu.vn.project_mobile_be.entities.roles;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -42,9 +41,11 @@ public class Role {
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
 
-    @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER)
     @ToString.Exclude
-    private Set<User> users = new HashSet<>();
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
+    private Set<User> users;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
