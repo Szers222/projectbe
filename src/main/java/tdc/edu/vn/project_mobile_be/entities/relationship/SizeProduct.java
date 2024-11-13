@@ -25,7 +25,4 @@ public class SizeProduct {
     @Column(name = "sizes_products_quantity", columnDefinition = "int default 0")
     private int quantity;
 
-    @Column(name = "sizes_products_price", columnDefinition = "double default 0")
-    private double price;
-
 }

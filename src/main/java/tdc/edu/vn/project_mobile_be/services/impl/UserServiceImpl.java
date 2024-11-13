@@ -141,6 +141,8 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
         return responseDTO;
     }
 
+
+
     // Get All Users
     @Override
     public List<UserResponseDTO> getAllUsers() {
@@ -157,6 +159,7 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
                 })
                 .collect(Collectors.toList());
     }
+
 
     private void createCartsForUser(User user) {
         Set<Cart> carts = new HashSet<>();

@@ -85,7 +85,7 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JoinColumn(name = "icard_id", nullable = false)
+    @JoinColumn(name = "card_id", nullable = false)
     private IdCard iCard;
 
     @OneToMany(mappedBy = "user")
