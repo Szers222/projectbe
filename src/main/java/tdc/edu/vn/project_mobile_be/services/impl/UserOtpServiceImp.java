@@ -42,7 +42,7 @@ public class UserOtpServiceImp implements UserOtpService {
     @Autowired
     private final ForgotPasswordRepository forgotPasswordRepository;
 
-    private static final Duration OTP_EXPIRATION_DURATION = Duration.ofSeconds(120); // OTP expires after 30 seconds
+    private static final Duration OTP_EXPIRATION_DURATION = Duration.ofSeconds(120);
 
     private String generateOTP() {
         Random random = new Random();

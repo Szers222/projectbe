@@ -35,7 +35,8 @@ public class SecurityConfig {
             "/api/v1/carts/*",
             "/api/v1/carts/guest/*",
 
-    };
+            "/api/v1/auth/*/*"
+
 
 
     @Autowired
