@@ -7,7 +7,6 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
@@ -18,7 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tdc.edu.vn.project_mobile_be.commond.AppException;
-import tdc.edu.vn.project_mobile_be.commond.ErrorCode;
+import tdc.edu.vn.project_mobile_be.enums.ErrorCode;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.AuthenticationRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.IntrospectRequestDTO;
@@ -37,7 +36,6 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

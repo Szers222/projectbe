@@ -20,18 +20,18 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ShipmentCreateRequestDTO implements IDto<Shipment> {
-    @NotBlank(message = "Ngay giao hang khong duoc de trong")
+    @NotNull(message = "Ngày giao hàng không được để trống")
     @Property("shipmentDate")
     private LocalDate shipmentDate;
 
     @Property("shipmentDiscount")
     private float shipmentDiscount;
 
-    @NotBlank(message = "Phi van chuyen khong duoc de trong")
+    @NotNull(message = "Phí vận chuyển không được để trống")
     @Property("shipmentShipCost")
-    private double shipmentShipCost;
+    private float shipmentShipCost;
 
-    @NotNull(message = "Id nha cung cap khong duoc de trong")
+    @NotNull(message = "Nhà cung cấp không được để trống")
     @JsonProperty("supplierId")
     private UUID supplierId;
 

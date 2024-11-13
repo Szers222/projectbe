@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import tdc.edu.vn.project_mobile_be.commond.GuestAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -28,6 +30,11 @@ public class SecurityConfig {
             "/api/v1/auth/*",
             "/api/v1/*",
             "/api/v1/product/size",
+            "/api/v1/cart/guest",
+            "/api/v1/cart/*",
+            "/api/v1/carts/*",
+            "/api/v1/carts/guest/*",
+
     };
 
 
@@ -58,6 +65,8 @@ public class SecurityConfig {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable);
 
+        httpSecurity.addFilterBefore(guestAuthenticationFilter(), AnonymousAuthenticationFilter.class);
+
         return httpSecurity.build();
     }
 
@@ -78,4 +87,9 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(10);
     }
 
+
+    @Bean
+    public GuestAuthenticationFilter guestAuthenticationFilter() {
+        return new GuestAuthenticationFilter();
+    }
 }

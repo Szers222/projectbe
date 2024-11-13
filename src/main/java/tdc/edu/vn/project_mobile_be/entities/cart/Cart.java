@@ -1,9 +1,9 @@
 package tdc.edu.vn.project_mobile_be.entities.cart;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
@@ -30,11 +30,20 @@ public class Cart {
     @Column(name = "cart_status", columnDefinition = "int default 0")
     private int cartStatus;
 
-    @ManyToOne(cascade = CascadeType.ALL,optional = true)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = true)
+    @JsonBackReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User user;
 
+    @Column(name = "guest_id", columnDefinition = "BINARY(16)", unique = true)
+    private UUID guestId;
+
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
     private Set<CartProduct> cartProducts = new HashSet<>();
 
 }

@@ -14,13 +14,24 @@ import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 @NoArgsConstructor
 public class CartProductResponseDTO implements IDto<CartProduct> {
 
+
+    @JsonProperty("productName")
+    private String productName;
+
+    @JsonProperty("productImage")
+    private String productImage;
+
+    @JsonProperty("productSize")
+    private String productSize;
+
     @JsonProperty("productQuantity")
     private int cartProductQuantity;
+
     @JsonProperty("productPrice")
-    private double cartProductPrice;
+    private String cartProductPrice;
+
     @JsonProperty("productTotalPrice")
     private double cartProductTotalPrice;
-
 
 
     @Override

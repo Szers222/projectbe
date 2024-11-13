@@ -1,6 +1,7 @@
 package tdc.edu.vn.project_mobile_be.entities.user;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -97,6 +98,7 @@ public class User {
     @JsonBackReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+
     private Set<Cart> carts = new HashSet<>();
 
     @OneToMany(mappedBy = "user")

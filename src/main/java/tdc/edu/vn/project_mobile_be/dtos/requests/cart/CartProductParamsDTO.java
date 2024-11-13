@@ -7,11 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import tdc.edu.vn.project_mobile_be.dtos.requests.sizeproduct.SizeProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
-import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
-
-import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -23,8 +21,8 @@ public class CartProductParamsDTO implements IDto<CartProduct> {
     private int productQuantity;
 
     @NotNull(message = "Product id is required")
-    @JsonProperty("productId")
-    private SizeProduct sizeProduct;
+    @JsonProperty("sizeProduct")
+    private SizeProductRequestParamsDTO sizeProduct;
 
 
     @Override

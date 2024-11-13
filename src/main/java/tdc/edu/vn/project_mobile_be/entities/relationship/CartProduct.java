@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
 
 @Entity
@@ -23,6 +24,11 @@ public class CartProduct {
     @MapsId("cart_id")
     @JoinColumn(name = "cart_id")
     private Cart cart;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "product_size_id")
+    private ProductSize productSize;
+
 
     @Column(name = "carts_products_quantity", nullable = false, columnDefinition = "int default 0")
     private int quantity;

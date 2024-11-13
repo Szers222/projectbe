@@ -11,7 +11,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.commond.AppException;
-import tdc.edu.vn.project_mobile_be.commond.ErrorCode;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.CreateUserRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.UpdateUserRequestDTO;
@@ -20,6 +19,7 @@ import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
+import tdc.edu.vn.project_mobile_be.enums.ErrorCode;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.IdCardRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.RoleRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
@@ -83,14 +83,7 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
         }
 
         User userSave = userRepository.save(user);
-        Set<Cart> carts = new HashSet<>();
-        for (int i = 0; i <= 2; i++) {
-            Cart cart = cartService.createCartByUser(userSave.getUserId());
-            cart.setCartStatus(i);
-            carts.add(cart);
-        }
-        userSave.setCarts(carts);
-
+        createCartsForUser(userSave);
         return userSave;
     }
 
@@ -163,5 +156,15 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
                     return responseDTO;
                 })
                 .collect(Collectors.toList());
+    }
+
+    private void createCartsForUser(User user) {
+        Set<Cart> carts = new HashSet<>();
+        for (int i = 0; i <= 2; i++) {
+            Cart cart = cartService.createCartByUser(user.getUserId());
+            cart.setCartStatus(i);
+            carts.add(cart);
+        }
+        user.setCarts(carts);
     }
 }
