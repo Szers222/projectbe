@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.*;
 
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.dtos.requests.CreateUserRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.UpdateCustomerRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.UpdateUserRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.UserResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.UserService;
 
 import java.util.List;
@@ -31,18 +33,8 @@ public class UserController {
     @Autowired
     @Qualifier("user_ServiceImpl")
     UserService userService;
-
-    @PostMapping("/users")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ResponseData<?>> createUser(@RequestBody CreateUserRequestDTO createUserRequestDTO) {
-
-        User createdUser = userService.createUser(createUserRequestDTO);
-        ResponseData<?> responseData = new ResponseData<>(
-                HttpStatus.CREATED
-                , "User tạo thành công!"
-                , createdUser);
-        return new ResponseEntity<>(responseData, HttpStatus.CREATED);
-    }
+    @Autowired
+    UserRepository userRepository;
     // Get All Users
     @GetMapping("/users")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -56,10 +48,12 @@ public class UserController {
                 );
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
-    @PutMapping("/users/{userId}")
+    @PutMapping("/users/{users}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ResponseData<?>> updateUser(@PathVariable UUID userId, @RequestBody UpdateUserRequestDTO request) {
-        User user = userService.updateUser(userId,request);
+    public ResponseEntity<ResponseData<?>> updateUser(@PathVariable("users") UUID userId, @RequestBody UpdateUserRequestDTO request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        userService.updateUser(user,request);
 
         ResponseData<?> responseData = new ResponseData<>(
                 HttpStatus.CREATED
@@ -86,6 +80,16 @@ public class UserController {
                 HttpStatus.OK,
                 "Thông tin người dùng hiện tại",
                 userResponse
+        );
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+    @PutMapping("/customer/myInfo")
+    public ResponseEntity<ResponseData<?>> updateMyInfo(@RequestBody UpdateCustomerRequestDTO request) {
+        User user = userService.updateMyInfo(request);
+        ResponseData<?> responseData = new ResponseData<>(
+                HttpStatus.OK,
+                "Thông tin người dùng đã được cập nhật thành công",
+                user
         );
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
