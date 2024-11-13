@@ -1,5 +1,7 @@
 package tdc.edu.vn.project_mobile_be.commond;
 
+import tdc.edu.vn.project_mobile_be.enums.ErrorCode;
+
 public class AppException extends RuntimeException {
     private ErrorCode errorCode;
     public ErrorCode getErrorCode() {

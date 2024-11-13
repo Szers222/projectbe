@@ -164,4 +164,18 @@ public class ControllerAdvitor extends ResponseEntityExceptionHandler {
         errorResponseDTO.setStatus(HttpStatus.valueOf("BAD_REQUEST"));
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(ParamNullException.class)
+    public ResponseEntity<Object> handleParamNullException(
+            ParamNullException ex, WebRequest request) {
+        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO();
+        List<String> erros = new ArrayList<>();
+        erros.add(ex.getMessage());
+        errorResponseDTO.setError(erros);
+        List<String> details = new ArrayList<>();
+        details.add("Tham số không được để trống!");
+        errorResponseDTO.setMessage(details);
+        errorResponseDTO.setStatus(HttpStatus.valueOf("BAD_REQUEST"));
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+    }
 }

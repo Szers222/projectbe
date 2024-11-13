@@ -54,7 +54,7 @@ public class Category {
      * ManyToOne
      */
     @ManyToOne
-    @JoinColumn(name = "category_status_id", nullable = false)
+    @JoinColumn(name = "category_status_id")
     @JsonBackReference
     private CategoryStatus categoryStatus;
 

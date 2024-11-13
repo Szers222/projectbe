@@ -32,7 +32,7 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> , JpaS
 
     //    void deleteAllByStatusAndDeletionDateLessThanEqual(int status, LocalDate deletionDate);
     @Modifying
-    @Query("DELETE FROM Category c WHERE c.categoryStatus.categoryStatusType = :statusType AND c.deletionDate <= :deletionDate")
+    @Query("DELETE FROM Category c WHERE c.categoryStatus.categoryStatusType =:statusType AND c.deletionDate<=:deletionDate")
     void deleteByStatusAndDeletionDate(@Param("statusType") int status, @Param("deletionDate") LocalDate deletionDate);
 
 }

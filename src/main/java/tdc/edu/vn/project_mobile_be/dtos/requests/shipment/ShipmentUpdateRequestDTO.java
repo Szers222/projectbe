@@ -21,14 +21,14 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ShipmentUpdateRequestDTO implements IDto<Shipment> {
-    @NotBlank(message = "Ngay giao hang khong duoc de trong")
+    @NotNull(message = "Ngay giao hang khong duoc de trong")
     @Property("shipmentDate")
     private LocalDate shipmentDate;
 
     @Property("shipmentDiscount")
     private float shipmentDiscount;
 
-    @NotBlank(message = "Phi van chuyen khong duoc de trong")
+    @NotNull(message = "Phi van chuyen khong duoc de trong")
     @Property("shipmentShipCost")
     private double shipmentShipCost;
 

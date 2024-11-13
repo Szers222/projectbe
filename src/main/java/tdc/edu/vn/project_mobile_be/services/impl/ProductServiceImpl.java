@@ -167,7 +167,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             throw new EntityNotFoundException("SizeProduct không tồn tại !");
         }
         Set<ProductImage> productImages = productImageService.updateProductImageForProduct(
-                params.getProductImageResponseDTOs(),
+                params.getProductImageResponseDTOs(), productId,
                 files);
         if (productImages.isEmpty()) {
             throw new EntityNotFoundException("ProductImage không tồn tại !");
@@ -516,9 +516,9 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private Set<SizeProduct> createSizeProducts(List<SizeProductRequestParamsDTO> paramsDTOS, Product product) {
         Set<SizeProduct> sizeProducts = new HashSet<>();
         for (SizeProductRequestParamsDTO param : paramsDTOS) {
-            ProductSize productSize = productSizeRepository.findByProductSizeId(param.getProductSizeId());
+            ProductSize productSize = productSizeRepository.findByProductSizeId(param.getSizeId());
             if (productSize == null) {
-                throw new EntityNotFoundException("Size not found for ID: " + param.getProductSizeId());
+                throw new EntityNotFoundException("Size not found for ID: " + param.getSizeId());
             }
             SizeProduct sizeProduct = param.toEntity();
             sizeProduct.setProduct(product);
@@ -538,5 +538,4 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         }
         return quantity;
     }
-
 }

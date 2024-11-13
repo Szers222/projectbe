@@ -22,10 +22,10 @@ public class SizeProduct {
     @JoinColumn(name = "product_size_id")
     private ProductSize size;
 
-    @Column(name = "sizes_products_quantity", nullable = false, columnDefinition = "int default 0")
+    @Column(name = "sizes_products_quantity", columnDefinition = "int default 0")
     private int quantity;
 
-    @Column(name = "sizes_products_price", nullable = false, columnDefinition = "double default 0")
+    @Column(name = "sizes_products_price", columnDefinition = "double default 0")
     private double price;
 
 }

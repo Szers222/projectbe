@@ -1,20 +1,21 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipment.ShipmentCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipment.ShipmentUpdateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.shipmentproduct.ShipmentProductRequestParamsDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.shipmentproduct.ShipmentProductCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.shipment.ShipmentResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
 import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
+import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
-import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
-import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductSupplierRepository;
-import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ShipmentRepository;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ShipmentService;
 
 import java.sql.Timestamp;
@@ -26,6 +27,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements ShipmentService {
 
     @Autowired
@@ -34,6 +36,12 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
     private ProductRepository productRepository;
     @Autowired
     private ProductSupplierRepository productSupplierRepository;
+    @Autowired
+    private ShipmentProductRepository shipmentProductRepository;
+    @Autowired
+    private SizeProductRepository sizeProductRepository;
+    @Autowired
+    private ProductSizeRepository productSizeRepository;
 
     @Override
     public Shipment createShipment(ShipmentCreateRequestDTO requestDTO) {
@@ -48,14 +56,15 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
         shipment.setShipmentId(UUID.randomUUID());
         shipment.setShipmentDate(Timestamp.valueOf(shipmentDateTime));
         shipment.setProductSupplier(productSupplier);
-
+        shipment.setShipmentShipCost(requestDTO.getShipmentShipCost());
         Shipment savedShipment = shipmentRepository.save(shipment);
 
-        Set<ShipmentProduct> shipmentProducts = createShipmentProduct(requestDTO.getShipmentProductCreateRequestDTO(), savedShipment, requestDTO.getProductPrice());
+        Set<ShipmentProduct> shipmentProducts = createShipmentProduct(requestDTO.getShipmentProductCreateRequestDTO(), savedShipment);
         if (shipmentProducts.isEmpty()) {
             throw new IllegalArgumentException("Shipment product is empty");
         }
-        shipment.setShipmentProducts(shipmentProducts);
+        log.info("Shipment products: {}", shipmentProducts);
+        shipment.getShipmentProducts().addAll(shipmentProducts);
         return savedShipment;
     }
 
@@ -79,7 +88,7 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
         shipment.setShipmentDate(Timestamp.valueOf(shipmentDateTime));
         shipment.setProductSupplier(productSupplier);
 
-        Set<ShipmentProduct> shipmentProducts = createShipmentProduct(requestDTO.getShipmentProductUpdateRequestDTO(), shipment, requestDTO.getProductPrice());
+        Set<ShipmentProduct> shipmentProducts = createShipmentProduct(requestDTO.getShipmentProductCreateRequestDTO(), shipment);
         if (shipmentProducts.isEmpty()) {
             throw new IllegalArgumentException("Shipment product is empty");
         }
@@ -131,7 +140,7 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
         return true;
     }
 
-    public <T extends ShipmentProductRequestParamsDTO> Set<ShipmentProduct> createShipmentProduct(List<T> requestDTO, Shipment shipment, double productPrice) {
+    public <T extends ShipmentProductCreateRequestDTO> Set<ShipmentProduct> createShipmentProduct(List<T> requestDTO, Shipment shipment) {
         if (requestDTO == null || requestDTO.isEmpty()) {
             throw new IllegalArgumentException("Request data cannot be null or empty.");
         }
@@ -146,18 +155,32 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
             Product product = productRepository
                     .findById(params.getProductId())
                     .orElseThrow(() -> new IllegalArgumentException("Product with ID " + params.getProductId() + " not found"));
-            product.getSizeProducts().forEach(sizeProduct -> {
-                if (sizeProduct.getSize().getProductSizeId().equals(params.getSizeProductId())) {
-                    sizeProduct.setQuantity(sizeProduct.getQuantity() + params.getProductQuantity());
-                }
-            });
-            product.setProductPrice(calculateProductPrice(productPrice));
+            product.setProductPrice(calculateProductPrice(params.getProductPrice()));
+            if (product.getSizeProducts() == null || product.getSizeProducts().isEmpty()) {
+                ProductSize newSize = productSizeRepository.findByProductSizeId(params.getSizeProductId());
+                SizeProduct newSizeProduct = new SizeProduct();
+                newSizeProduct.setProduct(product);
+                newSizeProduct.setSize(newSize);
+                newSizeProduct.setQuantity(params.getProductQuantity());
+                sizeProductRepository.save(newSizeProduct);
+            } else {
+                product.getSizeProducts().forEach(sizeProduct -> {
+                    if (sizeProduct.getSize().getProductSizeId().equals(params.getSizeProductId())) {
+                        sizeProduct.setQuantity(sizeProduct.getQuantity() + params.getProductQuantity());
+                    }
+                });
+            }
+
             productRepository.save(product);
 
+            shipmentProduct.setPrice(params.getProductPrice());
+            shipmentProduct.setQuantity(params.getProductQuantity());
             shipmentProduct.setProduct(product);
             shipmentProduct.setShipment(shipment);
+            shipmentProductRepository.save(shipmentProduct);
             shipmentProducts.add(shipmentProduct);
         }
+
         return shipmentProducts;
     }
 

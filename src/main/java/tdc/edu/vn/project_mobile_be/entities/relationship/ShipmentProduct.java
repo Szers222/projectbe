@@ -12,7 +12,7 @@ import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
 
 public class ShipmentProduct {
     @EmbeddedId
-    private ShipmentProductId id;
+    private ShipmentProductId id = new ShipmentProductId();
 
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("product_id")
