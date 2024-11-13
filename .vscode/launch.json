@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-ProjectMobileBeApplication<project_mobile_be>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "tdc.edu.vn.project_mobile_be.ProjectMobileBeApplication",
+            "projectName": "project_mobile_be",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
