@@ -19,7 +19,7 @@ public class UserOtp {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "otp_id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID otpId;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonBackReference
     private User user;
