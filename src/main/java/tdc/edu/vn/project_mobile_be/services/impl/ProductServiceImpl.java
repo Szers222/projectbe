@@ -2,6 +2,7 @@ package tdc.edu.vn.project_mobile_be.services.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -69,11 +70,12 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Autowired
     private ProductImageService productImageService;
     @Autowired
-    private ProductImageRepository productImageRepository;
-    @Autowired
     private ProductSizeRepository productSizeRepository;
     @Autowired
     private GoogleCloudStorageService googleCloudStorageService;
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+
     @Override
     @Transactional
     public Product createProduct(ProductCreateRequestDTO params, MultipartFile[] files) {
@@ -185,7 +187,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         product.setProductSale(productSale);
         product.setImages(productImages);
         product.setSizeProducts(sizeProducts);
-
+        applicationEventPublisher.publishEvent(new ProductListeners(this, product));
         return productRepository.save(product);
     }
 
