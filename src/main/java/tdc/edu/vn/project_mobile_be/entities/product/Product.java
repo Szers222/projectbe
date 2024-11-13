@@ -22,13 +22,11 @@ import java.util.UUID;
 @Data
 @Table(name = "products")
 @Entity
-@EntityListeners(ProductListeners.class)
 @AllArgsConstructor
 @NoArgsConstructor
 @DynamicInsert
 @DynamicUpdate
 //@EqualsAndHashCode(exclude = {"sizes", "images"})
-
 public class Product {
     @Id
     @Column(name = "product_id", nullable = false,columnDefinition = "BINARY(16)")

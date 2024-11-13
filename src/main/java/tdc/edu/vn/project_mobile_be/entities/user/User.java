@@ -80,7 +80,7 @@ public class User {
     private int userWrongPassword;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "icard_id", nullable = false)
+    @JoinColumn(name = "card_id", nullable = false)
     private IdCard iCard;
 
     @OneToOne(mappedBy = "user")
