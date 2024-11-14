@@ -39,6 +39,4 @@ public class Permission {
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
 
-    @ManyToMany(mappedBy = "permissions", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<Role> roles = new HashSet<>();
 }

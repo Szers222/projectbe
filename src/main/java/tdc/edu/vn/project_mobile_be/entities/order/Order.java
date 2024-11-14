@@ -9,8 +9,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
+import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
-import tdc.edu.vn.project_mobile_be.entities.status.OrderStatus;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 
 import java.sql.Timestamp;
@@ -38,6 +38,7 @@ public class Order {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
+
     @Column(name = "order_payment",nullable = false,columnDefinition = "int default 0")
     private int orderPayment;
 
@@ -46,9 +47,8 @@ public class Order {
     @Column(name = "order_product_price",nullable = false,columnDefinition = "double default 0")
     private double productPrice;
 
-    @ManyToOne
-    @JoinColumn(name = "order_status_id",nullable = false)
-    private OrderStatus orderStatus;
+    @Column(name = "order_status",nullable = false,columnDefinition = "int default 0")
+    private int orderStatus;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -61,5 +61,9 @@ public class Order {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id",nullable = false)
     private User user;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "cart_id", nullable = false)
+    private Cart cart;
 
 }

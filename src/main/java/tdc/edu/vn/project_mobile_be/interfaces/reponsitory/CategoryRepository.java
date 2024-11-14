@@ -4,7 +4,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -31,9 +30,9 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> , JpaS
 
 
     //    void deleteAllByStatusAndDeletionDateLessThanEqual(int status, LocalDate deletionDate);
-    @Modifying
-    @Query("DELETE FROM Category c WHERE c.categoryStatus.categoryStatusType = :statusType AND c.deletionDate <= :deletionDate")
-    void deleteByStatusAndDeletionDate(@Param("statusType") int status, @Param("deletionDate") LocalDate deletionDate);
+
+    @Query("SELECT c FROM Category c join c.categoryStatus cs WHERE cs.categoryStatusType = :statusType AND c.deletionDate = :deletionDate")
+    List<Category> deleteByStatusAndDeletionDate(@Param("statusType") int statusType, @Param("deletionDate") LocalDate deletionDate);
 
 }
 
