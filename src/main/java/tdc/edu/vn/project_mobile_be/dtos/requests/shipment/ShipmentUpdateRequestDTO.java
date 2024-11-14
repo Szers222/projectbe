@@ -2,7 +2,6 @@ package tdc.edu.vn.project_mobile_be.dtos.requests.shipment;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.j2objc.annotations.Property;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;

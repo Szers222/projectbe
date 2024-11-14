@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import tdc.edu.vn.project_mobile_be.commond.GuestAuthenticationFilter;
 
 @Configuration
@@ -34,7 +35,11 @@ public class SecurityConfig {
             "/api/v1/cart/*",
             "/api/v1/carts/*",
             "/api/v1/carts/guest/*",
-            "/api/v1/auth/*/*"};
+            "/api/v1/auth/*/*"
+
+    };
+
+
 
     @Autowired
     private CustomJwtDecoder customJwtDecoder;
@@ -63,7 +68,7 @@ public class SecurityConfig {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable);
 
-        httpSecurity.addFilterBefore(guestAuthenticationFilter(), AnonymousAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(guestAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
     }

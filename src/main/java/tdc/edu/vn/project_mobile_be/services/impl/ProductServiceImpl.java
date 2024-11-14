@@ -70,6 +70,9 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private ProductSizeRepository productSizeRepository;
     @Autowired
     private GoogleCloudStorageService googleCloudStorageService;
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+
 
     @Override
     @Transactional
@@ -181,6 +184,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         product.setProductSale(productSale);
         product.setImages(productImages);
         product.setSizeProducts(sizeProducts);
+        applicationEventPublisher.publishEvent(new ProductListeners(this, product));
         return productRepository.save(product);
     }
 
