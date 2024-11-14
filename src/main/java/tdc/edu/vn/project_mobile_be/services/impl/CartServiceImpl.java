@@ -135,8 +135,10 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
             newCartProduct.setProductSize(productSize);
             newCartProduct.setCart(cart);
             newCartProduct.setProduct(product);
+            newCartProduct.setQuantity(params.getSizeProduct().getProductSizeQuantity());
             return newCartProduct;
         });
+        cartProductRepository.save(cartProduct);
         return cartRepository.save(cart);
     }
 
