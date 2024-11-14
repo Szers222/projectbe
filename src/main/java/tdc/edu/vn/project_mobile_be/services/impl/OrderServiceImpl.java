@@ -134,9 +134,9 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         orderEntity.setOrderPhone(cart.getUser().getUserPhone());
         orderEntity.setOrderEmail(cart.getUser().getUserEmail());
         orderEntity.setOrderAddress(cart.getUser().getUserAddress());
-        orderEntity.setOrderWard(cart.getUser().getUserAddress().get);
-        orderEntity.setOrderDistrict(cart.getUser().getUserDistrict());
-        orderEntity.setOrderCity(cart.getUser().getUserCity());
+        orderEntity.setOrderWard(cart.getUser().getDetail().getWard());
+        orderEntity.setOrderDistrict(cart.getUser().getDetail().getDistrict());
+        orderEntity.setOrderCity(cart.getUser().getDetail().getCity());
         return orderEntity;
     }
 
