@@ -85,6 +85,8 @@ public class User {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
 
+    @JoinColumn(name = "card_id", nullable = false)
+
     private IdCard iCard;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
@@ -115,3 +117,4 @@ public class User {
     private List<UserOtp> userOtp = new ArrayList<>();
 
 }
+
