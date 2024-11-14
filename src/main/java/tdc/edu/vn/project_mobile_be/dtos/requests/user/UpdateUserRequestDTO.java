@@ -1,18 +1,13 @@
-package tdc.edu.vn.project_mobile_be.dtos.requests;
+package tdc.edu.vn.project_mobile_be.dtos.requests.user;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -20,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UpdateCustomerRequestDTO {
+public class UpdateUserRequestDTO {
     @NotEmpty(message = "Mật khẩu không được để trống")
     @Size(min = 8, message = "PASSWORD_EXISTED")
     @JsonProperty("userPassword")
@@ -48,4 +43,6 @@ public class UpdateCustomerRequestDTO {
     @JsonProperty("userWrongPassword")
     int userWrongPassword;
     UUID idCards;
+    List<String> roles;
+
 }

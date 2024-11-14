@@ -3,12 +3,10 @@ package tdc.edu.vn.project_mobile_be.services.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
-import tdc.edu.vn.project_mobile_be.dtos.requests.CreateIdCardRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.idcard.CreateIdCardRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.IdCardResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
-import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.IdCardRepository;
-import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.IdCardService;
 
 import java.lang.module.ResolutionException;

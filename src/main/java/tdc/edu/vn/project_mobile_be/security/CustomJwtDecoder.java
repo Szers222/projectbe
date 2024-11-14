@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
-import tdc.edu.vn.project_mobile_be.dtos.requests.IntrospectRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.IntrospectRequestDTO;
 import tdc.edu.vn.project_mobile_be.services.impl.AuthenticationServiceImp;
 
 import javax.crypto.spec.SecretKeySpec;

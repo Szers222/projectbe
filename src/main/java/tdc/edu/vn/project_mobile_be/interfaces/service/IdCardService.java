@@ -1,6 +1,6 @@
 package tdc.edu.vn.project_mobile_be.interfaces.service;
 
-import tdc.edu.vn.project_mobile_be.dtos.requests.CreateIdCardRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.idcard.CreateIdCardRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.IdCardResponseDTO;
 
 import java.util.List;
