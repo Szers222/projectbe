@@ -46,8 +46,8 @@ public class User {
     @Column(name = "user_birthday", columnDefinition = "TIMESTAMP")
     private Timestamp userBirthday;
 
-//    @Column(name = "user_address", columnDefinition = "TEXT", nullable = true)
-//    private String userAddress;
+
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_address_id", referencedColumnName = "user_address_id")
     private UserAddress userAddress;
