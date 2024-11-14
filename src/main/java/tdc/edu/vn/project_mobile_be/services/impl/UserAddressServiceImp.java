@@ -6,11 +6,15 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.dtos.requests.CreateAddressRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.UpdateAddressRequestDTO;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.entities.user.UserAddress;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserAddressRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.UserAddressService;
+
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -38,5 +42,17 @@ public class UserAddressServiceImp {
         // Save UserAddress to database
         return userAddressRepository.save(userAddress);
     }
+    public UserAddress update(UserAddress userAddress, UpdateAddressRequestDTO request) {
+        // Find the existing UserAddress by its ID
+        userAddress = userAddressRepository.findById(userAddress.getAddressId())
+                .orElseThrow(() -> new RuntimeException("User address not found"));
+        userAddress.setAddressName(request.getUserAddress());
+        userAddress.setWard(request.getWard());
+        userAddress.setDistrict(request.getDistrict());
+        userAddress.setCity(request.getCity());
+
+        return userAddressRepository.save(userAddress);
+    }
+
 }
 
