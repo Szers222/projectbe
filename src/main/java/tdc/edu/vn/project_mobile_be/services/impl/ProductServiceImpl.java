@@ -26,6 +26,7 @@ import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.product.*;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
+import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProductId;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CouponService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.PostService;
@@ -145,13 +146,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             }
         }
 
-        Coupon coupon = new Coupon();
-        if (params.getCoupon() != null) {
-            coupon = couponService.updateCouponByProductId(params.getCoupon(), productId);
-            if (coupon == null) {
-                throw new EntityNotFoundException("Coupon không tồn tại !");
-            }
-        }
+
         Optional<Product> optionalProduct = productRepository.findById(productId);
         if (optionalProduct.isEmpty()) {
             throw new EntityNotFoundException("Product không tồn tại !");
@@ -172,17 +167,33 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             throw new EntityNotFoundException("ProductImage không tồn tại !");
         }
 
+        Coupon coupon = new Coupon();
+        if (params.getCoupon() != null) {
+            coupon = couponService.updateCouponByProductId(params.getCoupon(), productId);
+            if (coupon == null) {
+                throw new EntityNotFoundException("Coupon không tồn tại !");
+            }
+            product.setCoupon(coupon);
+        }
+
         double productSale = solveProductSale(params.getProductPrice(), coupon);
+
         int quantity = setQuantityProduct(sizeProducts);
         product.setProductQuantity(quantity);
         product.setProductName(params.getProductName());
         product.setProductQuantity(params.getProductQuantity());
         product.setProductYearOfManufacture(params.getProductYearOfManufacture());
-        product.setCoupon(coupon);
         product.setPost(post);
         product.setCategories(categories);
         product.setProductSale(productSale);
-        product.setImages(productImages);
+        if (productImages.size() == files.length) {
+            product.getImages().clear();
+            product.getImages().addAll(productImages);
+        }else {
+            throw new IllegalArgumentException("Số lượng không trùng khớp");
+        }
+        product.getImages().clear(); // Xóa hết nếu cần
+        product.getImages().addAll(productImages);
         product.setSizeProducts(sizeProducts);
         applicationEventPublisher.publishEvent(new ProductListeners(this, product));
         return productRepository.save(product);
@@ -519,7 +530,15 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             if (productSize == null) {
                 throw new EntityNotFoundException("Size not found for ID: " + param.getSizeId());
             }
-            SizeProduct sizeProduct = param.toEntity();
+
+            SizeProduct sizeProduct = sizeProductRepository.findBySizeIdAndProductId(productSize.getProductSizeId(), product.getProductId());
+            if (sizeProduct == null) {
+                sizeProduct = new SizeProduct();
+            }
+            SizeProductId sizeProductId = new SizeProductId();
+            sizeProductId.setProduct_id(product.getProductId());
+            sizeProductId.setProduct_size_id(productSize.getProductSizeId());
+            sizeProduct.setId(sizeProductId);
             sizeProduct.setProduct(product);
             sizeProduct.setSize(productSize);
             sizeProductRepository.save(sizeProduct);
