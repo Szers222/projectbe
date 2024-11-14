@@ -169,7 +169,6 @@ public class UserOtpServiceImp implements UserOtpService {
         if (existingUser.getUserStatus() == 1) {
             existingUser.setUserPhone(request.getUserPhone());
             existingUser.setUserBirthday(request.getUserBirthday());
-            existingUser.setUserAddress(request.getUserAddress());
             existingUser.setUserLastName(request.getUserLastName());
             existingUser.setUserFirstName(request.getUserFirstName());
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);

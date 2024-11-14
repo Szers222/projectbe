@@ -5,6 +5,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import tdc.edu.vn.project_mobile_be.dtos.responses.cart.CartResponseDTO;
+import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
@@ -33,9 +35,6 @@ public class UserResponseDTO implements IDto<User> {
 
     @JsonProperty("userBirthday")
     Timestamp userBirthday;
-
-    @JsonProperty("userAddress")
-    String userAddress;
 
     @JsonProperty("userImagePath")
     String userImagePath;
@@ -67,7 +66,11 @@ public class UserResponseDTO implements IDto<User> {
     @JsonProperty("updatedAt")
     Timestamp updatedAt;
 
+    @JsonProperty("roles")
     Set<RoleResponseDTO> roles;
+
+    @JsonProperty("address")
+    UserAddressResponseDTO address;
 
     @Override
     public User toEntity() {
@@ -84,7 +87,10 @@ public class UserResponseDTO implements IDto<User> {
             this.iCard = new IdCardResponseDTO();
             this.iCard.toDto(user.getICard());
         }
-
+       if (user.getDetail() != null) {
+           this.address = new UserAddressResponseDTO();
+           this.address.toDto(user.getDetail());
+       }
         // Lấy createdAt và updatedAt từ entity
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();

@@ -87,7 +87,8 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
         String email = context.getAuthentication().getName();
 
         User user = userRepository.findByUserEmail(email)
-                .orElseThrow(() -> new RuntimeException("Tai khong ton tai"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         UserResponseDTO responseDTO = new UserResponseDTO();
         responseDTO.toDto(user);
 
