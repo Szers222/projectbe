@@ -14,6 +14,7 @@ spring:
     hibernate:
       ddl-auto: update
     properties:
+      org.hibernate.envers.store_data_at_delete: true
       hibernate:
         use_sql_comments: true
         format_sql: true
@@ -27,6 +28,72 @@ spring:
 
   servlet:
     multipart:
+<<<<<<< HEAD
+      max-file-size: 20MB
+      max-request-size: 50MB
+
+  server:
+    port: 8080
+    file:
+      upload-dir: C:\\Users\\Vinh\\Desktop\\project_mobile\\project_mobile_be\\src\\main\\java\\tdc\\edu\\vn\\project_mobile_be\\services\\impl
+
+  jackson:
+    time-zone: Asia/Ho_Chi_Minh
+
+  devtools:
+    restart:
+      enabled: true
+      exclude: static/**,public/**
+
+springdoc:
+  swagger-ui:
+    enabled: true
+  api-docs:
+    enabled: true
+
+rabbitmq:
+  host: localhost
+  port: 5672                     # Changed port for application use
+  username: guest
+  password: guest
+  virtual-host: /
+  connection-timeout: 60000
+
+  publisher:
+    confirm-type: correlated
+    returns: true
+
+  listener:
+    simple:
+      retry:
+        enabled: true
+        initial-interval: 1000
+        max-attempts: 3
+        max-interval: 10000
+        multiplier: 2
+      prefetch: 1
+      acknowledge-mode: auto
+      concurrency: 1
+      max-concurrency: 5
+
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          socket:
+            messaging:
+              StompSubProtocolHandler: TRACE
+        messaging:
+          simp:
+            stomp:
+              StompDecoder: TRACE
+
+websocket:
+  message-size-limit: 2MB
+  buffer-size-limit: 2MB
+  send-time-limit: 10000
+=======
       enabled: true
       max-file-size: 20MB
       max-request-size: 50MB
@@ -76,3 +143,4 @@ google:
       bucket-name: mobileproject
     credentials:
       path: src/main/resources/service-account.json
+>>>>>>> dev
