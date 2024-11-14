@@ -2,14 +2,13 @@ package tdc.edu.vn.project_mobile_be.dtos.requests.shipment;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.j2objc.annotations.Property;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import tdc.edu.vn.project_mobile_be.dtos.requests.shipmentproduct.ShipmentProductRequestParamsDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.shipmentproduct.ShipmentProductCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
@@ -36,13 +35,9 @@ public class ShipmentCreateRequestDTO implements IDto<Shipment> {
     @JsonProperty("supplierId")
     private UUID supplierId;
 
-    @Min(value = 0, message = "ProductPrice phải lớn hơn hoặc bằng 0")
-    @JsonProperty("productPrice")
-    private double productPrice;
-
     @NotNull(message = "ShipmentProducts không được để trống")
     @JsonProperty("shipmentProducts")
-    private List<ShipmentProductRequestParamsDTO> shipmentProductCreateRequestDTO;
+    private List<ShipmentProductCreateRequestDTO> shipmentProductCreateRequestDTO;
 
 
 
