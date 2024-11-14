@@ -231,7 +231,7 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         if (params.getSizeProduct().getProductSizeQuantity() != 0) {
 
             if (cartProduct.getQuantity() < params.getSizeProduct().getProductSizeQuantity()) {
-                throw new NumberErrorException("Quantity must be greater than 0");
+                cartProductRepository.delete(cartProduct);
             }
             cartProduct.setQuantity(cartProduct.getQuantity() - params.getSizeProduct().getProductSizeQuantity());
         }
