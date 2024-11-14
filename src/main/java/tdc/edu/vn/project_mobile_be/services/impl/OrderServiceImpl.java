@@ -114,6 +114,11 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         return orderResponseDTOS;
     }
 
+    @Override
+    public List<CartResponseDTO> getCartByOrderId(UUID orderId) {
+        return List.of();
+    }
+
     private Order populateOrderForGuest(OrderCreateRequestDTO order, Cart cart, Set<Coupon> coupons,
                                         Coupon couponShip, Coupon couponDiscount) {
         Order orderEntity = populateBaseOrderEntity(order, cart, coupons, couponShip, couponDiscount);
