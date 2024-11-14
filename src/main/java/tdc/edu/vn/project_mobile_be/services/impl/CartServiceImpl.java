@@ -61,6 +61,8 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         UUID cartId = UUID.randomUUID();
         cart.setCartId(cartId);
         cart.setUser(user);
+        cart.setCartStatus(CART_STATUS_USER);
+        cart.setGuestId(null);
         return cartRepository.save(cart);
     }
 
@@ -74,6 +76,10 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         Cart cartSaved = cartRepository.findByUserId(guestId)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
+                    UUID cartId = UUID.randomUUID();
+                    newCart.setCartId(cartId);
+                    newCart.setCartStatus(CART_STATUS_GUEST);
+                    newCart.setUser(null);
                     newCart.setGuestId(guestId);
                     return cartRepository.save(newCart);
                 });
