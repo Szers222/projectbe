@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.entities.user;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,6 +36,7 @@ public class UserAddress {
     private String city;
 
     @OneToOne
+    @JsonBackReference
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private User user;
 
