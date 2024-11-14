@@ -1,4 +1,4 @@
-package tdc.edu.vn.project_mobile_be.dtos.requests;
+package tdc.edu.vn.project_mobile_be.dtos.requests.idcard;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,8 +11,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import org.springframework.beans.BeanUtils;
-
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
