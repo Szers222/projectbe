@@ -34,4 +34,6 @@ public class UserAddress {
     @Column(name = "user_city",columnDefinition = "VARCHAR(45)", nullable = false)
     private String city;
 
+    @OneToOne(mappedBy = "userAddress", cascade = CascadeType.ALL)
+    private User user;
 }
