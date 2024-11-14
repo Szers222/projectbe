@@ -126,8 +126,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         Set<SizeProduct> sizeProducts;
         if (params.getSizesProduct() != null) {
             sizeProducts = createSizeProducts(params.getSizesProduct(), savedProduct);
-            int quantity = setQuantityProduct(sizeProducts);
-            savedProduct.setProductQuantity(quantity);
+            savedProduct.setProductQuantity(PRODUCT_DEFAULT_SIZE);
             savedProduct.setSizeProducts(sizeProducts);
         }
 
@@ -522,6 +521,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             SizeProduct sizeProduct = param.toEntity();
             sizeProduct.setProduct(product);
             sizeProduct.setSize(productSize);
+            sizeProductRepository.save(sizeProduct);
             sizeProducts.add(sizeProduct);
         }
         if (sizeProducts.isEmpty()) {
