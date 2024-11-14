@@ -192,6 +192,8 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
             String productPrice = formatProductPrice(item.getProduct().getProductPrice());
             double totalPrice = item.getProduct().getProductPrice() * quantity;
 
+            dto.setProductId(item.getProduct().getProductId());
+            dto.setProductSizeId(item.getProductSize().getProductSizeId());
             dto.setProductImage(imagePath);
             dto.setProductName(productName);
             dto.setProductSize(sizeName);
@@ -205,6 +207,7 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
 
         CartResponseDTO cartResponseDTO = new CartResponseDTO();
         cartResponseDTO.setCartProducts(dtos);
+        cartResponseDTO.setCartId(cartId);
         cartResponseDTO.setCartProductTotalPrice(formatPrice(total));
 
         return cartResponseDTO;
@@ -228,11 +231,11 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         if (params.getSizeProduct().getProductSizeQuantity() != 0) {
 
             if (cartProduct.getQuantity() < params.getSizeProduct().getProductSizeQuantity()) {
-                throw new NumberErrorException("Quantity must be greater than 0");
+                cartProductRepository.delete(cartProduct);
             }
             cartProduct.setQuantity(cartProduct.getQuantity() - params.getSizeProduct().getProductSizeQuantity());
         }
-        if (params.getSizeProduct().getProductSizeQuantity() == 0) {
+        if (cartProduct.getQuantity() == 0 || params.getSizeProduct().getProductSizeQuantity() == 0) {
             cartProductRepository.delete(cartProduct);
         }
     }
