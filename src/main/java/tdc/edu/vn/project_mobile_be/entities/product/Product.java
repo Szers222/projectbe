@@ -77,7 +77,7 @@ public class Product {
     @JoinColumn(name = "post_id", referencedColumnName = "post_id")
     private Post post;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "product", orphanRemoval = true, cascade = CascadeType.ALL)
     @JsonBackReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
