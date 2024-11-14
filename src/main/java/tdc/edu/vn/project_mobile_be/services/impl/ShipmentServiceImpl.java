@@ -155,6 +155,7 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
             Product product = productRepository
                     .findById(params.getProductId())
                     .orElseThrow(() -> new IllegalArgumentException("Product with ID " + params.getProductId() + " not found"));
+
             product.setProductPrice(calculateProductPrice(params.getProductPrice()));
             if (product.getSizeProducts() == null || product.getSizeProducts().isEmpty()) {
                 ProductSize newSize = productSizeRepository.findByProductSizeId(params.getSizeProductId());
@@ -170,6 +171,7 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
                     }
                 });
             }
+
 
             productRepository.save(product);
 

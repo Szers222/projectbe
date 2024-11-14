@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,10 +70,19 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
     @Override
     public Cart createCartNoUser(CartCreateRequestDTO params, HttpServletRequest request) {
 
-        final UUID guestId = (UUID) request.getSession().getAttribute("guestId");
+        UUID guestId = null;
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("guestId".equals(cookie.getName())) {
+                    guestId = UUID.fromString(cookie.getValue());
+                    break;
+                }
+            }
+        }
         if (guestId == null) {
             throw new EntityNotFoundException("Guest not found");
         }
+        final UUID finalGuestId = guestId;
         Cart cartSaved = cartRepository.findByUserId(guestId)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
