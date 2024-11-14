@@ -183,10 +183,15 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         product.setProductName(params.getProductName());
         product.setProductQuantity(params.getProductQuantity());
         product.setProductYearOfManufacture(params.getProductYearOfManufacture());
-
         product.setPost(post);
         product.setCategories(categories);
         product.setProductSale(productSale);
+        if (productImages.size() == files.length) {
+            product.getImages().clear();
+            product.getImages().addAll(productImages);
+        }else {
+            throw new IllegalArgumentException("Số lượng không trùng khớp");
+        }
         product.getImages().clear(); // Xóa hết nếu cần
         product.getImages().addAll(productImages);
         product.setSizeProducts(sizeProducts);
