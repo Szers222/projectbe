@@ -1,4 +1,4 @@
-package tdc.edu.vn.project_mobile_be.dtos.requests;
+package tdc.edu.vn.project_mobile_be.dtos.requests.jwt;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
@@ -6,8 +6,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor

@@ -2,7 +2,7 @@ package tdc.edu.vn.project_mobile_be.interfaces.service;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import tdc.edu.vn.project_mobile_be.dtos.requests.RoleRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.RoleRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.RoleResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 

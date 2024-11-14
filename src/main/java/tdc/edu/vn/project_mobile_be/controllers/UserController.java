@@ -12,9 +12,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
-import tdc.edu.vn.project_mobile_be.dtos.requests.CreateUserRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.UpdateCustomerRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.UpdateUserRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateCustomerRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateUserRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.UserResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
