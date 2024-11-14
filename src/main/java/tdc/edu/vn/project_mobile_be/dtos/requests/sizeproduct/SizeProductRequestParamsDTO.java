@@ -20,17 +20,16 @@ import java.util.UUID;
 @NoArgsConstructor
 public class SizeProductRequestParamsDTO implements IDto<SizeProduct> {
 
-    @NotNull(message = "productSizeQuantity không được để trống")
-    @JsonProperty("productSizeQuantity")
+    @JsonProperty("productQuantity")
     private int productSizeQuantity;
 
-    @NotNull(message = "productSizeId không được để trống")
-    @JsonProperty("productSizeId")
-    private UUID productSizeId;
+    @JsonProperty("productId")
+    private UUID productId;
 
-    @NotNull(message = "productSizePrice không được để trống")
-    @JsonProperty("productSizePrice")
-    private double productSizePrice;
+    @NotNull(message = "Size không được để trống")
+    @JsonProperty("sizeId")
+    private UUID sizeId;
+
 
     @JsonIgnore
     private Product product;

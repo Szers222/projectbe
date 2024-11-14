@@ -12,6 +12,7 @@ import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.dtos.requests.coupon.CouponUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.post.PostUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageUpdateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageUpdateWithProductRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.sizeproduct.SizeProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductSizeResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductSupplierResponseDTO;
@@ -32,8 +33,7 @@ public class ProductUpdateRequestDTO implements IDto<Product> {
     @JsonProperty("productName")
     private String productName;
 
-    @Min(value = 0, message = "ProductPrice phải lớn hơn hoặc bằng 0")
-    @JsonProperty("productPrice")
+    @JsonIgnore
     private double productPrice;
 
     @JsonIgnore
@@ -42,17 +42,17 @@ public class ProductUpdateRequestDTO implements IDto<Product> {
     @JsonIgnore
     private double productSale;
 
-    @NotBlank(message = "Category không được để trống")
+
     @NotNull(message = "Category không được để null")
-    @JsonProperty("")
+    @JsonProperty("categories")
     private List<UUID> categoryId;
 
-    @NotBlank(message = "ProductSupplier không được để trống")
+
     @NotNull(message = "ProductSupplier không được để null")
     @JsonProperty("productSupplier")
     private UUID productSupplier;
 
-    @NotBlank(message = "SizeProduct không được để trống")
+
     @NotNull(message = "SizeProduct không được để null")
     @JsonProperty("sizesProduct")
     private List<SizeProductRequestParamsDTO> sizesProduct;
@@ -68,7 +68,7 @@ public class ProductUpdateRequestDTO implements IDto<Product> {
     private Timestamp updatedAt;
 
     @JsonProperty("productImage")
-    private ProductImageUpdateRequestDTO productImageResponseDTOs;
+    private ProductImageUpdateWithProductRequestDTO productImageResponseDTOs;
 
     @JsonIgnore
     private ProductSupplierResponseDTO supplier;

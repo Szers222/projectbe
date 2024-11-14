@@ -98,4 +98,16 @@ public class ProductSupplierController {
         ResponseData<PagedModel<EntityModel<ProductSupplierResponseDTO>>> responseData = new ResponseData<>(HttpStatus.OK, "Success", pagedModel);
         return ResponseEntity.ok(responseData);
     }
+
+    @DeleteMapping(value = {"/product-supplier/{productSupplierId}", "/product-supplier/{productSupplierId}/"})
+    public ResponseEntity<ResponseData<?>> deleteProductSupplier(
+            @PathVariable(value = "productSupplierId") UUID productSupplierId) {
+        boolean isDeleted = supplierService.deleteProductSupplier(productSupplierId);
+        if (!isDeleted) {
+            ResponseData<?> responseData = new ResponseData<>(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm size", null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseData);
+        }
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Xóa thành công", null);
+        return ResponseEntity.ok(responseData);
+    }
 }

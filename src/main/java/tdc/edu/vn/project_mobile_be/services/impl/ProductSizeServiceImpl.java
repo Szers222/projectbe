@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.ListNotFoundException;
+import tdc.edu.vn.project_mobile_be.commond.customexception.ParamNullException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.ProductSizeRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productsize.ProductSizeCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productsize.ProductSizeUpdateRequestDTO;
@@ -38,6 +39,9 @@ public class ProductSizeServiceImpl extends AbService<ProductSize, UUID> impleme
 
     @Override
     public ProductSize createProductSize(ProductSizeCreateRequestDTO request) {
+        if(request == null){
+            throw new ParamNullException("Request is null");
+        }
         ProductSize productSize = request.toEntity();
         productSize.setProductSizeId(UUID.randomUUID());
         return productSizeRepository.save(productSize);
@@ -51,7 +55,6 @@ public class ProductSizeServiceImpl extends AbService<ProductSize, UUID> impleme
         }
         ProductSize productSize = productSizeOP.get();
         productSize.setProductSizeName(request.getProductSizeName());
-        productSize.setProductSizeType(request.getProductSizeType());
         return productSizeRepository.save(productSize);
     }
 
