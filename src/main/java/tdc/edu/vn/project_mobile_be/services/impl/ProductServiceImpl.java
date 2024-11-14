@@ -73,6 +73,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
+
     @Override
     @Transactional
     public Product createProduct(ProductCreateRequestDTO params, MultipartFile[] files) {
