@@ -235,7 +235,7 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
             }
             cartProduct.setQuantity(cartProduct.getQuantity() - params.getSizeProduct().getProductSizeQuantity());
         }
-        if (params.getSizeProduct().getProductSizeQuantity() == 0) {
+        if (cartProduct.getQuantity() == 0 || params.getSizeProduct().getProductSizeQuantity() == 0) {
             cartProductRepository.delete(cartProduct);
         }
     }
