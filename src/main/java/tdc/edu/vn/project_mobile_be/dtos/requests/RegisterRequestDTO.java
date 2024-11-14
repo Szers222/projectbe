@@ -2,12 +2,12 @@ package tdc.edu.vn.project_mobile_be.dtos.requests;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 
+import javax.validation.constraints.*;
 import java.sql.Timestamp;
 
 @Data
