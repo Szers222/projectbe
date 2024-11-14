@@ -168,7 +168,7 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         return buildCartResponse(cart.getCartId());
     }
 
-    private CartResponseDTO buildCartResponse(UUID cartId) {
+    public CartResponseDTO buildCartResponse(UUID cartId) {
     List<CartProduct> cartProducts = cartProductRepository.findByCartId(cartId);
         if (cartProducts.isEmpty()) {
             throw new ListNotFoundException("No products found in the cart.");

@@ -2,6 +2,7 @@ package tdc.edu.vn.project_mobile_be.interfaces.service;
 
 import tdc.edu.vn.project_mobile_be.dtos.requests.order.OrderChangeStatusDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.order.OrderCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.order.OrderResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.interfaces.IService;
 
@@ -15,5 +16,5 @@ public interface OrderService extends IService<Order, UUID> {
     Order orderChangeStatus(OrderChangeStatusDTO orderChangeStatusDTO);
 
 
-    List<Order> getOrderByUserId(UUID userId);
+    List<OrderResponseDTO> getOrderByUserId(UUID userId);
 }
