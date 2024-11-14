@@ -23,4 +23,7 @@ public interface CouponRepository extends JpaRepository<Coupon, UUID> {
 
     @Query("SELECT c FROM Coupon c WHERE c.couponType = :type")
     List<Coupon> findCouponByType(@Param("type") int type);
+
+    @Query("SELECT c FROM Coupon c WHERE c.couponCode = :code")
+    Optional<Coupon> findCouponByCode(@Param("code") String code);
 }
