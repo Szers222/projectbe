@@ -62,6 +62,8 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         UUID cartId = UUID.randomUUID();
         cart.setCartId(cartId);
         cart.setUser(user);
+        cart.setCartStatus(CART_STATUS_USER);
+        cart.setGuestId(null);
         return cartRepository.save(cart);
     }
 
@@ -84,6 +86,10 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         Cart cartSaved = cartRepository.findByUserId(guestId)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
+                    UUID cartId = UUID.randomUUID();
+                    newCart.setCartId(cartId);
+                    newCart.setCartStatus(CART_STATUS_GUEST);
+                    newCart.setUser(null);
                     newCart.setGuestId(finalGuestId);
                     return cartRepository.save(newCart);
                 });
@@ -125,7 +131,7 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         ProductSize productSize = productSizeRepository.findById(params.getSizeProduct().getSizeId())
                 .orElseThrow(() -> new EntityNotFoundException("Size not found"));
         Optional<CartProduct> cartProductOp = cartProductRepository.findByCartIdAndSizeProductId(cartId, product.getProductId(), productSize.getProductSizeId());
-        if (!cartProductOp.isEmpty()) {
+        if (cartProductOp.isPresent()) {
             CartProduct cartProduct = cartProductOp.get();
             cartProduct.setQuantity(cartProduct.getQuantity() + params.getSizeProduct().getProductSizeQuantity());
             return cartRepository.save(cart);
@@ -135,8 +141,10 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
             newCartProduct.setProductSize(productSize);
             newCartProduct.setCart(cart);
             newCartProduct.setProduct(product);
+            newCartProduct.setQuantity(params.getSizeProduct().getProductSizeQuantity());
             return newCartProduct;
         });
+        cartProductRepository.save(cartProduct);
         return cartRepository.save(cart);
     }
 
