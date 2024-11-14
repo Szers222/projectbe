@@ -34,10 +34,7 @@ public class SecurityConfig {
             "/api/v1/cart/*",
             "/api/v1/carts/*",
             "/api/v1/carts/guest/*",
-
-            "/api/v1/auth/*/*"
-
-
+            "/api/v1/auth/*/*"};
 
     @Autowired
     private CustomJwtDecoder customJwtDecoder;

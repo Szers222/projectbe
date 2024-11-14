@@ -1,14 +1,13 @@
 package tdc.edu.vn.project_mobile_be.entities.user;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
-import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import tdc.edu.vn.project_mobile_be.entities.one_time_password.OneTimePassword;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
@@ -37,11 +36,11 @@ public class User {
     private String userEmail;
 
     @Column(name = "user_password", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String userPassword;
+    private String userPassword = "";
 
 
     @Column(name = "user_phone", nullable = false, columnDefinition = "VARCHAR(15)")
-    private String userPhone;
+    private String userPhone = "";
 
     @Column(name = "user_birthday", columnDefinition = "TIMESTAMP")
     private Timestamp userBirthday;
@@ -63,10 +62,10 @@ public class User {
     private String userPasswordLevel2;
 
     @Column(name = "user_last_name", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String userLastName;
+    private String userLastName = "";
 
     @Column(name = "user_first_name", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String userFirstName;
+    private String userFirstName = "";
 
     @Column(name = "user_money", nullable = false, columnDefinition = "DOUBLE default 0")
     private Double userMoney;
@@ -81,36 +80,38 @@ public class User {
     private int userStatus;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "card_id", nullable = true)
+    @JsonBackReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JoinColumn(name = "icard_id", nullable = false)
+
     private IdCard iCard;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonBackReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<Post> post;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonBackReference
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-
-    private Set<Cart> carts = new HashSet<>();
-
     @OneToMany(mappedBy = "user")
     private Set<OneTimePassword> oneTimePasswords = new HashSet<>();
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonManagedReference
     @JoinTable(
             name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
+
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Order> orders = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<UserOtp> userOtp = new ArrayList<>();
+
+}

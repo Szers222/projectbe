@@ -523,6 +523,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             SizeProduct sizeProduct = param.toEntity();
             sizeProduct.setProduct(product);
             sizeProduct.setSize(productSize);
+            sizeProductRepository.save(sizeProduct);
             sizeProducts.add(sizeProduct);
         }
         if (sizeProducts.isEmpty()) {
