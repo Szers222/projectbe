@@ -31,7 +31,7 @@ public class CartController {
     @Autowired
     private CartRepository cartRepository;
 
-    @PostMapping(value = {"/cart/guest", "/cart/"})
+    @PostMapping(value = {"/cart/guest", "/cart/guest/"})
     public ResponseEntity<ResponseData<?>> createCart(
             @Valid @RequestBody CartCreateRequestDTO params,
             HttpServletRequest request,
