@@ -18,5 +18,6 @@ public interface UserService extends IService<User, UUID> {
     UserResponseDTO getUserById(UUID id);
     UserResponseDTO getMyInfo();
     User updateMyInfo(UpdateCustomerRequestDTO request);
+    void deleteUserById(UUID user);
 
 }

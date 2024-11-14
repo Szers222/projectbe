@@ -119,6 +119,19 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
         return userRepository.save(user);
     }
 
+    @Override
+    public void deleteUserById(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new RuntimeException("User not fount"));
+        user.getRoles().clear();
+        user.getOrders().clear();
+        user.getUserOtp().clear();
+        user.getCarts().clear();
+        if (user.getDetail() != null) {
+            user.getDetail().setUser(null);
+        }
+        userRepository.deleteById(userId);
+    }
 
 
     // Get All Users
