@@ -24,16 +24,20 @@ public class UserAddress {
     @Column(name = "user_address_id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID addressId;
 
-    @Column(name = "user_address_name", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "user_address", columnDefinition = "TEXT", nullable = false)
     private String addressName;
 
-    @Column(name = "user_commune", columnDefinition = "VARCHAR(45)", nullable = false)
-    private String commune;
+    @Column(name = "user_ward", columnDefinition = "VARCHAR(45)", nullable = false)
+    private String ward;
     @Column(name = "user_district", columnDefinition = "VARCHAR(45)", nullable = false)
     private String district;
     @Column(name = "user_city",columnDefinition = "VARCHAR(45)", nullable = false)
     private String city;
 
-    @OneToOne(mappedBy = "userAddress", cascade = CascadeType.ALL)
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private User user;
+
+
+
 }

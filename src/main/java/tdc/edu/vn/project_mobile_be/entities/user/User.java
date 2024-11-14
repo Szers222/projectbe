@@ -46,11 +46,8 @@ public class User {
     @Column(name = "user_birthday", columnDefinition = "TIMESTAMP")
     private Timestamp userBirthday;
 
-
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_address_id", referencedColumnName = "user_address_id")
-    private UserAddress userAddress;
+    @Column(name = "user_address", columnDefinition = "TEXT", nullable = true)
+    private String userAddress;
 
     @Column(name = "user_image_path", columnDefinition = "VARCHAR(255)")
     private String userImagePath;
@@ -82,7 +79,6 @@ public class User {
 
     @Column(name = "user_status", columnDefinition = "int default 0")
     private int userStatus;
-
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "card_id", nullable = true)
     @JsonBackReference
@@ -112,15 +108,10 @@ public class User {
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private Set<Order> orders = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private List<UserOtp> userOtp = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
@@ -128,4 +119,11 @@ public class User {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<Cart> carts = new HashSet<>();
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private UserAddress detail;
+
 }
