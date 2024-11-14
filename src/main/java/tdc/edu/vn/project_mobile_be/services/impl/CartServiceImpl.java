@@ -192,7 +192,8 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
             String productPrice = formatProductPrice(item.getProduct().getProductPrice());
             double totalPrice = item.getProduct().getProductPrice() * quantity;
 
-
+            dto.setProductId(item.getProduct().getProductId());
+            dto.setProductSizeId(item.getProductSize().getProductSizeId());
             dto.setProductImage(imagePath);
             dto.setProductName(productName);
             dto.setProductSize(sizeName);
