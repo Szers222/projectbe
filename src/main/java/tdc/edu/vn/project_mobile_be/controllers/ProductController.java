@@ -32,6 +32,7 @@ import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductRequestParamsDT
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.BreadcrumbService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
@@ -50,6 +51,8 @@ public class ProductController {
     private ProductService productService;
     @Autowired
     private BreadcrumbService breadcrumbService;
+    @Autowired
+    private ProductRepository p;
 
 
 
@@ -104,7 +107,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseData);
     }
 
-    @PutMapping(value = {"/product/{productId}", "/product/{productId}/"}, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE})
+    @PutMapping(value = {"/product/{productId}", "/product/{productId}/"}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseData<?>> updateProduct(
             @Valid @RequestPart String paramsJson,
             @PathVariable("productId") UUID productId,
@@ -176,6 +179,13 @@ public class ProductController {
     public ResponseEntity<ResponseData<ProductResponseDTO>> getProductById(@PathVariable UUID productId) {
         ProductResponseDTO product = productService.getProductById(productId);
         ResponseData<ProductResponseDTO> responseData = new ResponseData<>(HttpStatus.OK, "Success", product);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @GetMapping("/product/size")
+    public ResponseEntity<ResponseData<Product>> getProductByIdSize(@RequestParam UUID sizerID, @RequestParam UUID productId) {
+        Product product = p.findBySizeId(productId,sizerID);
+        ResponseData<Product> responseData = new ResponseData<>(HttpStatus.OK, "Success", product);
         return ResponseEntity.ok(responseData);
     }
 

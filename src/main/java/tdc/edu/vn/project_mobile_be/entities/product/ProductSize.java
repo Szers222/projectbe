@@ -28,8 +28,7 @@ public class ProductSize {
     private UUID productSizeId;
     @Column(name = "product_size_name", nullable = false)
     private String productSizeName;
-    @Column(name = "product_size_type", nullable = false, columnDefinition = "int default 0")
-    private int productSizeType;
+
 
 
 

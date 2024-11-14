@@ -27,6 +27,9 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
     @Query("SELECT p FROM Product p JOIN p.categories c WHERE c.categoryId = :categoryId")
     Page<Product> findByIdWithCategories(@Param("categoryId") UUID categoryId, Pageable pageable);
 
+    @Query("SELECT p FROM Product p JOIN  p.sizeProducts sp on p.productId =:productId WHERE sp.size.productSizeId = :sizeId")
+    Product findBySizeId(@Param("productId") UUID productId,@Param("sizeId") UUID sizeId);
+
 
 
 }

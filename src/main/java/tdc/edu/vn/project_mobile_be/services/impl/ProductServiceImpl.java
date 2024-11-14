@@ -2,6 +2,7 @@ package tdc.edu.vn.project_mobile_be.services.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -23,10 +24,7 @@ import tdc.edu.vn.project_mobile_be.dtos.responses.product.*;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
-import tdc.edu.vn.project_mobile_be.entities.product.Product;
-import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
-import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
-import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
+import tdc.edu.vn.project_mobile_be.entities.product.*;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CouponService;
@@ -69,11 +67,10 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Autowired
     private ProductImageService productImageService;
     @Autowired
-    private ProductImageRepository productImageRepository;
-    @Autowired
     private ProductSizeRepository productSizeRepository;
     @Autowired
     private GoogleCloudStorageService googleCloudStorageService;
+
     @Override
     @Transactional
     public Product createProduct(ProductCreateRequestDTO params, MultipartFile[] files) {
@@ -127,8 +124,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         Set<SizeProduct> sizeProducts;
         if (params.getSizesProduct() != null) {
             sizeProducts = createSizeProducts(params.getSizesProduct(), savedProduct);
-            int quantity = setQuantityProduct(sizeProducts);
-            savedProduct.setProductQuantity(quantity);
+            savedProduct.setProductQuantity(PRODUCT_DEFAULT_SIZE);
             savedProduct.setSizeProducts(sizeProducts);
         }
 
@@ -167,7 +163,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             throw new EntityNotFoundException("SizeProduct không tồn tại !");
         }
         Set<ProductImage> productImages = productImageService.updateProductImageForProduct(
-                params.getProductImageResponseDTOs(),
+                params.getProductImageResponseDTOs(), productId,
                 files);
         if (productImages.isEmpty()) {
             throw new EntityNotFoundException("ProductImage không tồn tại !");
@@ -185,7 +181,6 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         product.setProductSale(productSale);
         product.setImages(productImages);
         product.setSizeProducts(sizeProducts);
-
         return productRepository.save(product);
     }
 
@@ -516,13 +511,14 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private Set<SizeProduct> createSizeProducts(List<SizeProductRequestParamsDTO> paramsDTOS, Product product) {
         Set<SizeProduct> sizeProducts = new HashSet<>();
         for (SizeProductRequestParamsDTO param : paramsDTOS) {
-            ProductSize productSize = productSizeRepository.findByProductSizeId(param.getProductSizeId());
+            ProductSize productSize = productSizeRepository.findByProductSizeId(param.getSizeId());
             if (productSize == null) {
-                throw new EntityNotFoundException("Size not found for ID: " + param.getProductSizeId());
+                throw new EntityNotFoundException("Size not found for ID: " + param.getSizeId());
             }
             SizeProduct sizeProduct = param.toEntity();
             sizeProduct.setProduct(product);
             sizeProduct.setSize(productSize);
+            sizeProductRepository.save(sizeProduct);
             sizeProducts.add(sizeProduct);
         }
         if (sizeProducts.isEmpty()) {
@@ -538,5 +534,4 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         }
         return quantity;
     }
-
 }

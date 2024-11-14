@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.category.CategoryCreateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.category.CategoryRemoveRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.category.CategoryRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.category.CategoryUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.category.CategoryResponseDTO;
@@ -61,10 +60,9 @@ public class CategoryController {
         return ResponseEntity.ok(responseData);
     }
 
-    @DeleteMapping({"/category/","/category"})
-    public ResponseEntity<ResponseData<?>> deleteCategory(
-            @RequestBody CategoryRemoveRequestDTO params) {
-        boolean isDeleted = categoryService.deleteCategory(params.getId());
+    @DeleteMapping({"/category/{categoryId}", "/category/{categoryId}/"})
+    public ResponseEntity<ResponseData<?>> deleteCategory(@PathVariable UUID categoryId) {
+        boolean isDeleted = categoryService.deleteCategory(categoryId);
         if (isDeleted) {
             ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Category đã được xóa !", null);
             return new ResponseEntity<>(responseData, HttpStatus.OK);
@@ -93,8 +91,4 @@ public class CategoryController {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
-    @DeleteMapping("/category/t")
-    public void deleteCategory(@RequestParam UUID id) {
-        categoryRepository.deleteById(id);
-    }
 }

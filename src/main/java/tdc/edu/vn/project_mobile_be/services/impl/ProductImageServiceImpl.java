@@ -10,6 +10,7 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.FileUploadException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateWithProductRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageUpdateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageUpdateWithProductRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductImageResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
@@ -174,9 +175,9 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
 
     @Override
     @Transactional
-    public Set<ProductImage> updateProductImageForProduct(ProductImageUpdateRequestDTO params, MultipartFile[] files) {
+    public Set<ProductImage> updateProductImageForProduct(ProductImageUpdateWithProductRequestDTO params,UUID productId, MultipartFile[] files) {
         // Kiểm tra nếu productId null
-        UUID productId = params.getProductId();
+
         if (productId == null) {
             throw new EntityNotFoundException("Product ID is null");
         }

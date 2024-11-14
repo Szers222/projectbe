@@ -1,4 +1,4 @@
-package tdc.edu.vn.project_mobile_be.commond;
+package tdc.edu.vn.project_mobile_be.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
