@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import tdc.edu.vn.project_mobile_be.dtos.requests.RoleRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.RoleRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.RoleResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.permissions.Permission;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.PermissionRepository;

@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 import tdc.edu.vn.project_mobile_be.commond.ApiResponse;
-import tdc.edu.vn.project_mobile_be.dtos.requests.PermissionRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.PermissionRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.PermissionResponseDTO;
 import tdc.edu.vn.project_mobile_be.services.impl.PermissionServiceImp;
 
