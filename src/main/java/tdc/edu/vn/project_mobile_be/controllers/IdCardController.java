@@ -8,14 +8,11 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.commond.customexception.ValidateException;
-import tdc.edu.vn.project_mobile_be.dtos.ErrorResponseDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.CreateIdCardRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.idcard.CreateIdCardRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.IdCardResponseDTO;
 import tdc.edu.vn.project_mobile_be.interfaces.service.IdCardService;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController

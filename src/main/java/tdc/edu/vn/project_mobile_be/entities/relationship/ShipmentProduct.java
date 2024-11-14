@@ -12,7 +12,7 @@ import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
 
 public class ShipmentProduct {
     @EmbeddedId
-    private ShipmentProductId id;
+    private ShipmentProductId id = new ShipmentProductId();
 
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("product_id")
@@ -24,8 +24,11 @@ public class ShipmentProduct {
     @JoinColumn(name = "shipment_id")
     private Shipment shipment;
 
-    @Column(name = "shipments_products_quantity", nullable = false, columnDefinition = "int default 0")
-    private int quantity;
     @Column(name = "shipments_products_price", nullable = false, columnDefinition = "double default 0")
     private double price;
+    @Column(name = "shipments_products_quantity", nullable = false, columnDefinition = "int default 0")
+    private int quantity;
+
+
+
 }

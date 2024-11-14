@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
+import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,12 +28,20 @@ public class ProductSize {
     private UUID productSizeId;
     @Column(name = "product_size_name", nullable = false)
     private String productSizeName;
-    @Column(name = "product_size_type", nullable = false, columnDefinition = "int default 0")
-    private int productSizeType;
 
-    @ManyToMany(mappedBy = "sizes")
+
+
+
+    @OneToMany(mappedBy = "size", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @JsonBackReference
     @EqualsAndHashCode.Exclude
-    private Set<Product> products = new HashSet<>();
+    private Set<SizeProduct> sizeProducts = new HashSet<>();
+
+    @OneToMany(mappedBy = "productSize", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @JsonBackReference
+    @EqualsAndHashCode.Exclude
+    private Set<CartProduct> cartProducts = new HashSet<>();
+
 }

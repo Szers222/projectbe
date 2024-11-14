@@ -28,6 +28,7 @@ spring:
 
   servlet:
     multipart:
+<<<<<<< HEAD
       max-file-size: 20MB
       max-request-size: 50MB
 
@@ -92,3 +93,54 @@ websocket:
   message-size-limit: 2MB
   buffer-size-limit: 2MB
   send-time-limit: 10000
+=======
+      enabled: true
+      max-file-size: 20MB
+      max-request-size: 50MB
+    server:
+      port: 8080
+      file:
+        upload-dir: C:\Users\Vinh\Desktop\project_mobile\project_mobile_be\src\main\java\tdc\edu\vn\project_mobile_be\services\impl
+        springdoc:
+          swagger-ui:
+            enabled: true
+          api-docs:
+            enabled: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: thietasasasa@gmail.com
+    password: wcrs zxrv wofz bfje
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
+
+jwt:
+  signerKey: "CHpSZnAya03fnmgaxVnU9u4gdxZvnx+UFcrrC5i9+ZwI4+f5CNP0BlQEDCjNeyHh"
+  valid-duration: 60
+  refreshable-duration: 7
+
+
+spring.devtools:
+  restart:
+    enabled: true  # Kích hoạt tự động tải lại
+    exclude: static/**,public/** # Loại trừ thư mục static và public
+    spring:
+      jackson:
+        time-zone: Asia/Ho_Chi_Minh
+redis:
+    host: 192.168.57.128
+    port: 6379
+    password: ''
+
+
+google:
+  cloud:
+    storage:
+      bucket-name: mobileproject
+    credentials:
+      path: src/main/resources/service-account.json
+>>>>>>> dev

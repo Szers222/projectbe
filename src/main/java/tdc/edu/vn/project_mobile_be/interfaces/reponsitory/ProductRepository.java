@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.interfaces.reponsitory;
 
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,11 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
-import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
-import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,17 +18,18 @@ import java.util.UUID;
 public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
     List<Product> findAll();
 
-    Optional<Product> findById(UUID id);
-
-    Page<Product> findAll(Pageable pageable);
-
-    Product save(Product product);
-
-    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.images i WHERE p.productId = :productId ORDER BY i.productImageIndex ASC")
+    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.images i WHERE p.productId= :productId ORDER BY i.productImageIndex desc")
     Optional<Product> findByIdWithImages(@Param("productId") UUID productId);
 
+    @Query("SELECT DISTINCT p FROM Product p JOIN FETCH p.categories c WHERE c.categoryId= :categoryId")
+    Page<Product> findByCategoryId(@Param("categoryId") UUID categoryId, Pageable pageable);
 
-    @Query("SELECT MAX(p.updatedAt) FROM Product p")
-    Timestamp getLatestUpdatedTimestamp();
+    @Query("SELECT p FROM Product p JOIN p.categories c WHERE c.categoryId = :categoryId")
+    Page<Product> findByIdWithCategories(@Param("categoryId") UUID categoryId, Pageable pageable);
+
+    @Query("SELECT p FROM Product p JOIN  p.sizeProducts sp on p.productId =:productId WHERE sp.size.productSizeId = :sizeId")
+    Product findBySizeId(@Param("productId") UUID productId,@Param("sizeId") UUID sizeId);
+
+
 
 }

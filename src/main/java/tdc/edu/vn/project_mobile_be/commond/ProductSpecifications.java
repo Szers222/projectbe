@@ -39,21 +39,19 @@ public class ProductSpecifications implements Specification<Product> {
 
     // Lọc theo khoảng giá
     public static Specification<Product> priceBetween(BigDecimal minPrice, BigDecimal maxPrice) {
-        return (root, query, cb) -> cb.between(root.get("productPrice"), minPrice, maxPrice);
+        return (root, query, cb) -> cb.between(root.get("productPriceSale"), minPrice, maxPrice);
     }
 
     // Lọc theo danh sách kích cỡ
     public static Specification<Product> hasSizes(List<UUID> sizeIds) {
-        return (root, query, cb) -> root.join("sizes").get("sizeId").in(sizeIds);
+        return (root, query, cb) -> root.join("sizeProducts").get("size").get("productSizeId").in(sizeIds);
     }
 
     // Lọc theo nhà cung cấp (supplier)
-    public static Specification<Product> hasSupplier(UUID supplierId) {
-
+    public static Specification<Product> hasSupplier(List<UUID> supplierIds) {
         return (root, query, cb) -> {
-            // Join giữa Product và Category
             Join<Product, ProductSupplier> suppliers = root.join("supplier", JoinType.INNER);
-            return cb.equal(suppliers.get("supplierId"), supplierId);
+            return suppliers.get("productSupplierId").in(supplierIds);
         };
     }
 

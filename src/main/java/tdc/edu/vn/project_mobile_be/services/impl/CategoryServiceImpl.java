@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.InvalidRoleException;
-import tdc.edu.vn.project_mobile_be.dtos.requests.CategoryCreateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.CategoryUpdateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.CategoryResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.category.CategoryCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.category.CategoryUpdateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.category.CategoryResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.entities.status.CategoryStatus;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.CategoryRepository;
@@ -210,5 +210,9 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
     private CategoryStatus getStatus(UUID statusId) {
         return categoryStatusRepository.findByCategoryStatusId((statusId)) != null ? categoryStatusRepository.findByCategoryStatusId((statusId)) : null;
     }
+
+
+
+
 
 }
