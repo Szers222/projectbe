@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tdc.edu.vn.project_mobile_be.dtos.requests.EmailRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.RegisterRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.ResetPasswordRequestDTO;
+import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.entities.user.UserOtp;
@@ -18,6 +19,7 @@ import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ForgotPasswordReposit
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.RegisterRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.RoleRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserOtpRepository;
+import tdc.edu.vn.project_mobile_be.interfaces.service.CartService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.UserOtpService;
 
 import java.time.Duration;
@@ -41,6 +43,8 @@ public class UserOtpServiceImp implements UserOtpService {
     private final EmailService emailService;
     @Autowired
     private final ForgotPasswordRepository forgotPasswordRepository;
+    @Autowired
+    private CartService cartService;
 
     private static final Duration OTP_EXPIRATION_DURATION = Duration.ofSeconds(120);
 
@@ -165,6 +169,10 @@ public class UserOtpServiceImp implements UserOtpService {
         User existingUser = registerRepository.findByUserEmail(userEmail);
         if (existingUser.getUserStatus() == 0) {
             throw new RuntimeException("Tài khoản chưa xác thực");
+        }
+        for (int i = 0; i < 1; i++) {
+            Cart cartByUser = cartService.createCartByUser(existingUser.getUserId());
+            cartByUser.setCartStatus(i);
         }
         if (existingUser.getUserStatus() == 1) {
             existingUser.setUserPhone(request.getUserPhone());
