@@ -51,7 +51,7 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
         ProductSupplier productSupplier = productSupplierRepository
                 .findById(requestDTO.getSupplierId())
                 .orElseThrow(() -> new IllegalArgumentException("Supplier not found"));
-
+        log.info("Product supplier: {}", productSupplier);
         Shipment shipment = requestDTO.toEntity();
         shipment.setShipmentId(UUID.randomUUID());
         shipment.setShipmentDate(Timestamp.valueOf(shipmentDateTime));

@@ -109,7 +109,7 @@ public class Product {
     private Set<CartProduct> cartProducts = new HashSet<>();
 
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonBackReference
