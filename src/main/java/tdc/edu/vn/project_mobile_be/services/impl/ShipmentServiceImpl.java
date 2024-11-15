@@ -157,6 +157,8 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
                     .orElseThrow(() -> new IllegalArgumentException("Product with ID " + params.getProductId() + " not found"));
 
             product.setProductPrice(calculateProductPrice(params.getProductPrice()));
+            int quantity = calculateQuantityProduct(product.getProductQuantity(), params.getProductQuantity());
+            product.setProductQuantity(quantity);
             if (product.getSizeProducts() == null || product.getSizeProducts().isEmpty()) {
                 ProductSize newSize = productSizeRepository.findByProductSizeId(params.getSizeProductId());
                 SizeProduct newSizeProduct = new SizeProduct();
@@ -193,5 +195,9 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
 
     private LocalDateTime resolveShipmentDate(LocalDate shipmentDate) {
         return shipmentDate != null ? shipmentDate.atStartOfDay() : LocalDateTime.now();
+    }
+
+    private int calculateQuantityProduct(int quantity, int productQuantity) {
+        return quantity + productQuantity;
     }
 }
