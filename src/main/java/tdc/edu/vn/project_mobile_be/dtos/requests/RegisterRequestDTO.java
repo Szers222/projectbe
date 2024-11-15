@@ -31,7 +31,7 @@ public class RegisterRequestDTO {
     @NotEmpty(message = "Khong duoc de trong ngay sinh")
     @JsonProperty("userBirthday")
     @Min(value = 1990, message = "")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     Timestamp userBirthday;
 
     @NotEmpty(message = "Khong de trong dia chi")
