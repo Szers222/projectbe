@@ -19,8 +19,8 @@ public class ProductSupplierResponseDTO implements IDto<ProductSupplier> {
     private UUID productSupplierId;
     @JsonProperty("productSupplierName")
     private String productSupplierName;
-    @JsonProperty("productSupplierType")
-    private int productSupplierType;
+    @JsonProperty("productSupplierLogo")
+    private String productSupplierLogo;
 
     @Override
     public ProductSupplier toEntity() {
