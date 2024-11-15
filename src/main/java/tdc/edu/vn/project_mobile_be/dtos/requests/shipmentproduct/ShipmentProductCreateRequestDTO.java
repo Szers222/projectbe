@@ -12,6 +12,7 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.UnsupportedOperation
 import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -32,7 +33,7 @@ public class ShipmentProductCreateRequestDTO implements IDto<ShipmentProduct> {
     private int productQuantity;
 
     @JsonProperty("sizeProduct")
-    private UUID sizeProductId;
+    private List<UUID> sizeProductId;
 
 
     @Override

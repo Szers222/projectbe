@@ -129,9 +129,12 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
             List<ShipmentProduct> shipmentProducts = shipmentProductRepository.findByShipmentId(shipment.getShipmentId());
             List<ShipmentProductResponseDTO> shipmentProductResponseDTOs = new ArrayList<>();
             shipmentProducts.forEach(shipmentProduct -> {
+                List<UUID> sizeProductIds = shipmentProduct.getProduct().getSizeProducts().stream().map(sizeProduct -> sizeProduct.getSize().getProductSizeId()).toList();
                 ShipmentProductResponseDTO shipmentProductResponseDTO = new ShipmentProductResponseDTO();
                 shipmentProductResponseDTO.setShipmentProductPrice(shipmentProduct.getPrice());
                 shipmentProductResponseDTO.setShipmentProductQuantity(shipmentProduct.getQuantity());
+                shipmentProductResponseDTO.setShipmentProductId(shipmentProduct.getProduct().getProductId());
+                shipmentProductResponseDTO.setShipmentProductSizeId(sizeProductIds);
                 shipmentProductResponseDTOs.add(shipmentProductResponseDTO);
             });
 
@@ -179,10 +182,14 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
             int quantity = calculateQuantityProduct(product.getProductQuantity(), params.getProductQuantity());
             product.setProductQuantity(quantity);
             if (product.getSizeProducts() == null || product.getSizeProducts().isEmpty()) {
-                ProductSize newSize = productSizeRepository.findByProductSizeId(params.getSizeProductId());
+                List<ProductSize> newSizes = productSizeRepository.findByProductId(params.getProductId());
                 SizeProduct newSizeProduct = new SizeProduct();
                 newSizeProduct.setProduct(product);
-                newSizeProduct.setSize(newSize);
+                newSizes.forEach(size -> {
+                    if (size.getProductSizeId().equals(params.getSizeProductId())) {
+                        newSizeProduct.setSize(size);
+                    }
+                });
                 newSizeProduct.setQuantity(params.getProductQuantity());
                 sizeProductRepository.save(newSizeProduct);
             } else {
