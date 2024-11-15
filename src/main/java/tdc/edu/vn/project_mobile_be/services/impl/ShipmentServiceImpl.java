@@ -106,21 +106,41 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
         return true;
     }
 
+
+    @Override
+    public ShipmentResponseDTO getShipmentBySupplier(String supplier) {
+        // Method body to be implemented
+        return null;
+    }
+
+
     @Override
     public ShipmentResponseDTO getShipmentById(UUID shipmentId) {
         Shipment shipment = shipmentRepository
                 .findById(shipmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
 
+        List<ShipmentProduct> shipmentProducts = shipmentProductRepository.findByShipmentId(shipment.getShipmentId());
+        List<ShipmentProductResponseDTO> shipmentProductResponseDTOs = new ArrayList<>();
+        shipmentProducts.forEach(shipmentProduct -> {
+            List<UUID> sizeProductIds = shipmentProduct.getProduct().getSizeProducts().stream().map(sizeProduct -> sizeProduct.getSize().getProductSizeId()).toList();
+            ShipmentProductResponseDTO shipmentProductResponseDTO = new ShipmentProductResponseDTO();
+            shipmentProductResponseDTO.setShipmentProductPrice(shipmentProduct.getPrice());
+            shipmentProductResponseDTO.setShipmentProductQuantity(shipmentProduct.getQuantity());
+            shipmentProductResponseDTO.setShipmentProductId(shipmentProduct.getProduct().getProductId());
+            shipmentProductResponseDTO.setShipmentProductSizeId(sizeProductIds);
+            shipmentProductResponseDTOs.add(shipmentProductResponseDTO);
+        });
         ShipmentResponseDTO shipmentResponseDTO = new ShipmentResponseDTO();
         shipmentResponseDTO.toDto(shipment);
+        shipmentResponseDTO.setShipmentId(shipment.getShipmentId());
+        shipmentResponseDTO.setShipmentShipCost(shipment.getShipmentShipCost());
+        shipmentResponseDTO.setShipmentDate(shipment.getShipmentDate().toLocalDateTime().toLocalDate());
+        ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
+        productSupplierResponseDTO.toDto(shipment.getProductSupplier());
+        shipmentResponseDTO.setProductSupplierResponseDTO(productSupplierResponseDTO);
+        shipmentResponseDTO.setResponseDTOS(shipmentProductResponseDTOs);
         return shipmentResponseDTO;
-    }
-
-    @Override
-    public ShipmentResponseDTO getShipmentBySupplier(String supplier) {
-        // Method body to be implemented
-        return null;
     }
 
     @Override
