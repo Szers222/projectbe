@@ -13,10 +13,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ResetPasswordRequestDTO {
-    @NotNull(message = "OTP không được để trống")
-    @NotEmpty(message = "Chua nhap OTP")
-    @JsonProperty("otp")
-    String otp;
 
     @NotNull(message = "Mật khẩu không được để trống")
     @NotEmpty(message = "Chua nhap password")
