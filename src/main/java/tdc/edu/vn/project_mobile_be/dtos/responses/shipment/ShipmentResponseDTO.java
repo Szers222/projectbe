@@ -6,13 +6,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import tdc.edu.vn.project_mobile_be.dtos.requests.shipmentproduct.ShipmentProductCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductSupplierResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.shipmentproduct.ShipmentProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
 import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -33,6 +36,9 @@ public class ShipmentResponseDTO implements IDto<Shipment> {
 
     @JsonProperty("productSupplier")
     private ProductSupplierResponseDTO productSupplierResponseDTO;
+
+    @JsonProperty("shipmentProducts")
+    private List<ShipmentProductResponseDTO> responseDTOS;
 
     @JsonIgnore
     private Timestamp createdAt;
