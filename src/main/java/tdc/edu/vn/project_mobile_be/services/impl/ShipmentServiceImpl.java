@@ -23,10 +23,7 @@ import tdc.edu.vn.project_mobile_be.interfaces.service.ShipmentService;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -129,16 +126,19 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
     @Override
     public Page<ShipmentResponseDTO> getAllShipment(Pageable pageable) {
         Page<ShipmentResponseDTO> shipmentResponseDTOs = shipmentRepository.findAll(pageable).map(shipment -> {
-            ShipmentResponseDTO shipmentResponseDTO = new ShipmentResponseDTO();
-            List<ShipmentProductResponseDTO> shipmentProductResponseDTOs = shipment.getShipmentProducts().stream().map(shipmentProduct -> {
+            List<ShipmentProduct> shipmentProducts = shipmentProductRepository.findByShipmentId(shipment.getShipmentId());
+            List<ShipmentProductResponseDTO> shipmentProductResponseDTOs = new ArrayList<>();
+            shipmentProducts.forEach(shipmentProduct -> {
                 ShipmentProductResponseDTO shipmentProductResponseDTO = new ShipmentProductResponseDTO();
                 shipmentProductResponseDTO.setShipmentProductPrice(shipmentProduct.getPrice());
                 shipmentProductResponseDTO.setShipmentProductQuantity(shipmentProduct.getQuantity());
-                return shipmentProductResponseDTO;
-            }).toList();
+                shipmentProductResponseDTOs.add(shipmentProductResponseDTO);
+            });
 
+            ShipmentResponseDTO shipmentResponseDTO = new ShipmentResponseDTO();
             shipmentResponseDTO.toDto(shipment);
             shipmentResponseDTO.setShipmentId(shipment.getShipmentId());
+            shipmentResponseDTO.setShipmentShipCost(shipment.getShipmentShipCost());
             shipmentResponseDTO.setShipmentDate(shipment.getShipmentDate().toLocalDateTime().toLocalDate());
             ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
             productSupplierResponseDTO.toDto(shipment.getProductSupplier());
