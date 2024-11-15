@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipment.ShipmentCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipment.ShipmentUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipmentproduct.ShipmentProductCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductSupplierResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.shipment.ShipmentResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.shipmentproduct.ShipmentProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
@@ -126,8 +128,25 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
 
     @Override
     public Page<ShipmentResponseDTO> getAllShipment(Pageable pageable) {
-        // Method body to be implemented
-        return null;
+        Page<ShipmentResponseDTO> shipmentResponseDTOs = shipmentRepository.findAll(pageable).map(shipment -> {
+            ShipmentResponseDTO shipmentResponseDTO = new ShipmentResponseDTO();
+            List<ShipmentProductResponseDTO> shipmentProductResponseDTOs = shipment.getShipmentProducts().stream().map(shipmentProduct -> {
+                ShipmentProductResponseDTO shipmentProductResponseDTO = new ShipmentProductResponseDTO();
+                shipmentProductResponseDTO.setShipmentProductPrice(shipmentProduct.getPrice());
+                shipmentProductResponseDTO.setShipmentProductQuantity(shipmentProduct.getQuantity());
+                return shipmentProductResponseDTO;
+            }).toList();
+
+            shipmentResponseDTO.toDto(shipment);
+            shipmentResponseDTO.setShipmentId(shipment.getShipmentId());
+            shipmentResponseDTO.setShipmentDate(shipment.getShipmentDate().toLocalDateTime().toLocalDate());
+            ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
+            productSupplierResponseDTO.toDto(shipment.getProductSupplier());
+            shipmentResponseDTO.setProductSupplierResponseDTO(productSupplierResponseDTO);
+            shipmentResponseDTO.setResponseDTOS(shipmentProductResponseDTOs);
+            return shipmentResponseDTO;
+        });
+        return shipmentResponseDTOs;
     }
 
     public boolean validateDiscountAndCost(float discount, double shipCost) {

@@ -2,6 +2,13 @@ package tdc.edu.vn.project_mobile_be.controllers;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -11,6 +18,7 @@ import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipment.ShipmentCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipment.ShipmentUpdateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.shipment.ShipmentResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ShipmentService;
 
@@ -68,5 +76,31 @@ public class ShipmentController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseData);
         }
     }
+
+    @GetMapping({"/shipments", "/shipments"})
+    public ResponseEntity<ResponseData<PagedModel<EntityModel<ShipmentResponseDTO>>>> getShipments(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            PagedResourcesAssembler<ShipmentResponseDTO> assembler
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("shipmentDate").descending());
+        Page<ShipmentResponseDTO> shipments = shipmentService.getAllShipment(pageable);
+        if (shipments.isEmpty()) {
+            ResponseData<PagedModel<EntityModel<ShipmentResponseDTO>>> responseData = new ResponseData<>(HttpStatus.NOT_FOUND, "Không Tìm Thấy Lô Hàng", null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseData);
+        }
+        PagedModel<EntityModel<ShipmentResponseDTO>> pagedModel = assembler.toModel(shipments);
+        ResponseData<PagedModel<EntityModel<ShipmentResponseDTO>>> responseData = new ResponseData<>(HttpStatus.OK, "Success", pagedModel);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @GetMapping("/shipment/{shipmentId}")
+    public ResponseEntity<ResponseData<ShipmentResponseDTO>> getShipmentById(@PathVariable UUID shipmentId) {
+        ShipmentResponseDTO shipment = shipmentService.getShipmentById(shipmentId);
+        ResponseData<ShipmentResponseDTO> responseData = new ResponseData<>(HttpStatus.OK, "Success", shipment);
+        return ResponseEntity.ok(responseData);
+    }
+
+
 
 }
