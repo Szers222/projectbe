@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.dtos.requests.coupon.CouponUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.post.PostUpdateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageParamsWithProductRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageUpdateWithProductRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.sizeproduct.SizeProductRequestParamsDTO;
@@ -68,7 +69,7 @@ public class ProductUpdateRequestDTO implements IDto<Product> {
     private Timestamp updatedAt;
 
     @JsonProperty("productImage")
-    private ProductImageUpdateWithProductRequestDTO productImageResponseDTOs;
+    private ProductImageParamsWithProductRequestDTO productImageResponseDTOs;
 
     @JsonIgnore
     private ProductSupplierResponseDTO supplier;

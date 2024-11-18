@@ -10,6 +10,7 @@ import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 @Data
 public class SizeProduct {
     @EmbeddedId
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private SizeProductId id = new SizeProductId();
 
     @ManyToOne(fetch = FetchType.EAGER)

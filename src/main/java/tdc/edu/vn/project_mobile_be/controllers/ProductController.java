@@ -133,22 +133,16 @@ public class ProductController {
     }
 
     @GetMapping(value = {"/products/relate/{categoryId}", "/product/relate/{categoryId}/"})
-    public ResponseEntity<ResponseData<PagedModel<EntityModel<ProductResponseDTO>>>> getProductsByCategory(
-            @PathVariable("categoryId") UUID categoryId,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "20") int size,
-            PagedResourcesAssembler<ProductResponseDTO> assembler) {
+    public ResponseEntity<ResponseData<List<ProductResponseDTO>>> getProductsByCategory(
+            @PathVariable("categoryId") UUID categoryId) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("productPriceSale").ascending());
-        Page<ProductResponseDTO> productDtoPage = productService.findProductRelate(categoryId, pageable);
-
-        if (productDtoPage.isEmpty()) {
-            ResponseData<PagedModel<EntityModel<ProductResponseDTO>>> responseData = new ResponseData<>(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm", null);
+        List<ProductResponseDTO> productData = productService.findProductRelate(categoryId);
+        ResponseData<List<ProductResponseDTO>> responseData;
+        if (productData.isEmpty()) {
+            responseData = new ResponseData<>(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm", null);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseData);
         }
-        PagedModel<EntityModel<ProductResponseDTO>> pagedModel = assembler.toModel(productDtoPage);
-
-        ResponseData<PagedModel<EntityModel<ProductResponseDTO>>> responseData = new ResponseData<>(HttpStatus.OK, "Success", pagedModel);
+        responseData = new ResponseData<>(HttpStatus.OK, "Success", productData);
         return ResponseEntity.ok(responseData);
     }
 
@@ -212,4 +206,15 @@ public class ProductController {
         Product product = event.getProduct();
         this.template.convertAndSend("/topic/products", product);
     }
+
+    @GetMapping("/products/test/{categoryId}")
+    public ResponseEntity<ResponseData<List<Product>>> getAllProductsByCategories(
+            @PathVariable UUID categoryId
+
+    ) {
+        List<Product> products = p.findByIdWithCategories(categoryId);
+        ResponseData<List<Product>> responseData = new ResponseData<>(HttpStatus.OK, "Success", products);
+        return ResponseEntity.ok(responseData);
+    }
+
 }

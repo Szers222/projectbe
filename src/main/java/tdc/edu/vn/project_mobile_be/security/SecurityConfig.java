@@ -21,7 +21,7 @@ import tdc.edu.vn.project_mobile_be.commond.GuestAuthenticationFilter;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS = {
-             "/api/v1/auth/login",
+            "/api/v1/auth/login",
             "/api/v1/auth/introspect",
             "/api/v1/auth/role",
             "/api/v1/auth/logout",
@@ -30,6 +30,8 @@ public class SecurityConfig {
             "/api/v1/auth/create-email",
             "/api/v1/auth/*",
             "/api/v1/*",
+            "/api/v1/*/*",
+            "/api/v1/*/*/*",
             "/api/v1/product/size",
             "/api/v1/cart/guest",
             "/api/v1/cart/*",

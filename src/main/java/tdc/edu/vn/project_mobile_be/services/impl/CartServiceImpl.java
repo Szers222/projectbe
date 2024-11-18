@@ -131,20 +131,19 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         ProductSize productSize = productSizeRepository.findById(params.getSizeProduct().getSizeId())
                 .orElseThrow(() -> new EntityNotFoundException("Size not found"));
         Optional<CartProduct> cartProductOp = cartProductRepository.findByCartIdAndSizeProductId(cartId, product.getProductId(), productSize.getProductSizeId());
+        CartProduct cartProduct;
         if (cartProductOp.isPresent()) {
-            CartProduct cartProduct = cartProductOp.get();
+            cartProduct = cartProductOp.get();
             cartProduct.setQuantity(cartProduct.getQuantity() + params.getSizeProduct().getProductSizeQuantity());
-            return cartRepository.save(cart);
+            cart.getCartProducts().add(cartProduct);
+        } else {
+            cartProduct = new CartProduct();
+            cartProduct.setProductSize(productSize);
+            cartProduct.setCart(cart);
+            cartProduct.setProduct(product);
+            cartProduct.setQuantity(params.getSizeProduct().getProductSizeQuantity());
+            cart.getCartProducts().add(cartProduct);
         }
-        CartProduct cartProduct = cartProductOp.orElseGet(() -> {
-            CartProduct newCartProduct = new CartProduct();
-            newCartProduct.setProductSize(productSize);
-            newCartProduct.setCart(cart);
-            newCartProduct.setProduct(product);
-            newCartProduct.setQuantity(params.getSizeProduct().getProductSizeQuantity());
-            return newCartProduct;
-        });
-        cartProductRepository.save(cartProduct);
         return cartRepository.save(cart);
     }
 

@@ -76,3 +76,9 @@ google:
       bucket-name: mobileproject
     credentials:
       path: src/main/resources/service-account.json
+
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG

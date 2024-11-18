@@ -35,13 +35,11 @@ public class ProductSize {
     @OneToMany(mappedBy = "size", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @JsonBackReference
-    @EqualsAndHashCode.Exclude
     private Set<SizeProduct> sizeProducts = new HashSet<>();
 
     @OneToMany(mappedBy = "productSize", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @JsonBackReference
-    @EqualsAndHashCode.Exclude
     private Set<CartProduct> cartProducts = new HashSet<>();
 
 }
