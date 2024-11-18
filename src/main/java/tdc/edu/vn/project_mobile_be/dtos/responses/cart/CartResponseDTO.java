@@ -27,6 +27,9 @@ public class CartResponseDTO implements IDto<Cart> {
     @JsonProperty("productTotalPrice")
     private String cartProductTotalPrice;
 
+    @JsonProperty("productQuantity")
+    private int cartProductQuantity;
+
 
     @Override
     public Cart toEntity() {

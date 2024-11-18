@@ -208,6 +208,7 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         cartResponseDTO.setCartProducts(dtos);
         cartResponseDTO.setCartId(cartId);
         cartResponseDTO.setCartProductTotalPrice(formatPrice(total));
+        cartResponseDTO.setCartProductQuantity(cartProducts.size());
 
         return cartResponseDTO;
     }

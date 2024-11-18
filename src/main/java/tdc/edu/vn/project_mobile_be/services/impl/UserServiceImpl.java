@@ -40,18 +40,18 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
     IdCardRepository idCardRepository;
     @Autowired
     private RoleRepository roleRepository;
-    @Autowired
-    PasswordEncoder passwordEncoder;
+//    @Autowired
+//    PasswordEncoder passwordEncoder;
 
 
     @Override
     public User updateUser(User user, UpdateUserRequestDTO request) {
         user = userRepository.findById(user.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        user.setUserPassword(passwordEncoder.encode(request.getUserPassword()));
+//        user.setUserPassword(passwordEncoder.encode(request.getUserPassword()));
         user.setUserPhone(request.getUserPhone());
         user.setUserBirthday(request.getUserBirthday());
-        user.setUserPasswordLevel2(passwordEncoder.encode(request.getUserPasswordLevel2()));
+//        user.setUserPasswordLevel2(passwordEncoder.encode(request.getUserPasswordLevel2()));
         user.setUserImagePath(request.getUserImagePath());
         user.setUserFirstName(request.getUserFirstName());
         user.setUserLastName(request.getUserLastName());
@@ -104,10 +104,10 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
         User user = userRepository.findByUserEmail(email)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
 
-        user.setUserPassword(passwordEncoder.encode(request.getUserPassword()));
+//        user.setUserPassword(passwordEncoder.encode(request.getUserPassword()));
         user.setUserPhone(request.getUserPhone());
         user.setUserBirthday(request.getUserBirthday());
-        user.setUserPasswordLevel2(passwordEncoder.encode(request.getUserPasswordLevel2()));
+//        user.setUserPasswordLevel2(passwordEncoder.encode(request.getUserPasswordLevel2()));
         user.setUserImagePath(request.getUserImagePath());
         user.setUserFirstName(request.getUserFirstName());
         user.setUserLastName(request.getUserLastName());

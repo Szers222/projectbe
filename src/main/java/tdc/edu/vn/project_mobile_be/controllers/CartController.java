@@ -66,7 +66,7 @@ public class CartController {
         return ResponseEntity.ok(responseData);
     }
 
-    @DeleteMapping(value = {"/cart/{cartId}", "/cart/"})
+    @DeleteMapping(value = {"/cart/{cartId}", "/cart/{cartId}/"})
     public ResponseEntity<ResponseData<?>> deleteProductInCart(
             @Valid @RequestBody RemoveSizeProductRequestParamsDTO params,
             @PathVariable UUID cartId,
