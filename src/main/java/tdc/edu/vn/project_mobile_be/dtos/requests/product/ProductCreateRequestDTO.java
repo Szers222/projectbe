@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.dtos.requests.coupon.CouponCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.post.PostCreateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateWithProductRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageParamsWithProductRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.sizeproduct.SizeProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
@@ -35,7 +35,7 @@ public class ProductCreateRequestDTO implements IDto<Product> {
     private int productYearOfManufacture;
 
     @JsonProperty("productImage")
-    private ProductImageCreateWithProductRequestDTO productImageResponseDTOs;
+    private ProductImageParamsWithProductRequestDTO productImageResponseDTOs;
 
     @NotNull(message = "ProductSupplier không được để trống")
     @JsonProperty("productSupplier")

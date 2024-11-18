@@ -91,7 +91,6 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
 
         UserResponseDTO responseDTO = new UserResponseDTO();
         responseDTO.toDto(user);
-
         return responseDTO;
     }
 
