@@ -60,6 +60,9 @@ public class UserResponseDTO implements IDto<User> {
     @JsonProperty("iCard")
     IdCardResponseDTO iCard;
 
+    @JsonProperty("cartId")
+    UUID cartId;
+
     @JsonProperty("createdAt")
     Timestamp createdAt;
 
@@ -77,7 +80,7 @@ public class UserResponseDTO implements IDto<User> {
         return null;
     }
 
-   @Override
+    @Override
     public void toDto(User user) {
         // Sao chép các thuộc tính từ entity sang DTO, ngoại trừ createdAt và updatedAt
         BeanUtils.copyProperties(user, this, "createdAt", "updatedAt", "roles");
@@ -87,10 +90,10 @@ public class UserResponseDTO implements IDto<User> {
             this.iCard = new IdCardResponseDTO();
             this.iCard.toDto(user.getICard());
         }
-       if (user.getDetail() != null) {
-           this.address = new UserAddressResponseDTO();
-           this.address.toDto(user.getDetail());
-       }
+        if (user.getDetail() != null) {
+            this.address = new UserAddressResponseDTO();
+            this.address.toDto(user.getDetail());
+        }
         // Lấy createdAt và updatedAt từ entity
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();

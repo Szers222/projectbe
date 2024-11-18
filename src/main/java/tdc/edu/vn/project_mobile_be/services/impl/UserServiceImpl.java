@@ -13,6 +13,7 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundExcept
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateCustomerRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateUserRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.UserResponseDTO;
+import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
@@ -91,6 +92,13 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
 
         UserResponseDTO responseDTO = new UserResponseDTO();
         responseDTO.toDto(user);
+        Set<Cart> carts = user.getCarts();
+        carts.forEach(cart -> {
+            if (cart.getCartStatus() == 1) {
+                responseDTO.setCartId(cart.getCartId());
+            }
+        });
+
         return responseDTO;
     }
 
@@ -117,21 +125,12 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
 
         return userRepository.save(user);
     }
-
     @Override
     public void deleteUserById(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new RuntimeException("User not fount"));
-        user.getRoles().clear();
-        user.getOrders().clear();
-        user.getUserOtp().clear();
-        user.getCarts().clear();
-        if (user.getDetail() != null) {
-            user.getDetail().setUser(null);
-        }
-        userRepository.deleteById(userId);
+        userRepository.delete(user);
     }
-
 
     // Get All Users
     @Override

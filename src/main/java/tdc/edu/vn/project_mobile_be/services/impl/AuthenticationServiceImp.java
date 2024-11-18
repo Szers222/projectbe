@@ -51,14 +51,13 @@ public class AuthenticationServiceImp {
     @NonFinal
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
-
-    @NonFinal
-    @Value("${jwt.valid-duration}")
-    protected long VALID_DURATION;
-
-    @NonFinal
-    @Value("${jwt.refreshable-duration}")
-    protected long REFRESHABLE_DURATION;
+//    @NonFinal
+//    @Value("${jwt.valid-duration}")
+//    protected long VALID_DURATION;
+//
+//    @NonFinal
+//    @Value("${jwt.refreshable-duration}")
+//    protected long REFRESHABLE_DURATION;
 
     @Transactional
     public AuthenticationResponseDTO authenticate(AuthenticationRequestDTO request) {
@@ -80,8 +79,7 @@ public class AuthenticationServiceImp {
                 .build();
     }
     //Kiem tra token
-    public IntrospectResponseDTO introspect(IntrospectRequestDTO request)
-            throws JOSEException, ParseException {
+    public IntrospectResponseDTO introspect(IntrospectRequestDTO request) throws JOSEException, ParseException {
         var token = request.getToken();
         boolean isValid = true;
         try {
@@ -89,18 +87,19 @@ public class AuthenticationServiceImp {
         } catch (Exception e) {
             isValid = false;
         }
+
         return IntrospectResponseDTO.builder()
                 .valid(isValid)
                 .build();
-
     }
+
 
     public void logout(LogoutRequestDTO request) throws ParseException, JOSEException {
         try {
-            var signToken = verifyToken(request.getToken(),true);
+            var signToken = verifyToken(request.getToken(), true);
 
             String jit = signToken.getJWTClaimsSet().getJWTID();
-            Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+            Date expiryTime = new Date();
 
             InvalidatedToken invalidatedToken = InvalidatedToken.builder()
                     .id(jit)
@@ -108,30 +107,26 @@ public class AuthenticationServiceImp {
                     .build();
             invalidatedTokenRepository.save(invalidatedToken);
         } catch (AppException e) {
-            log.info("Token da het han");
+            log.info("Token không hợp lệ hoặc đã hết hạn");
         }
     }
+
 
     private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
-        Date expirationTime = (isRefresh)
-                ? new Date(signedJWT.getJWTClaimsSet().getIssueTime()
-                        .toInstant().plus(REFRESHABLE_DURATION,ChronoUnit.DAYS).toEpochMilli())
-                : signedJWT.getJWTClaimsSet().getExpirationTime();
+        boolean verified = signedJWT.verify(verifier);
+        if (!verified) {
+            throw new RuntimeException("Token không hợp lệ");
+        }
 
-
-        var verified = signedJWT.verify(verifier);
-        if(!(verified && expirationTime.after(new Date())))
-            throw new RuntimeException("Token het han hoac khong dung");
-
-        if(invalidatedTokenRepository
-                .existsById(signedJWT.getJWTClaimsSet().getJWTID()))
-            throw new RuntimeException("Token het han");
-
+        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) {
+            throw new RuntimeException("Token đã bị vô hiệu hóa");
+        }
 
         return signedJWT;
     }
+
     public AuthenticationResponseDTO refreshToken(RefreshRequestDTO request) throws ParseException, JOSEException {
         //Kiem tra hieu luc token
         var signedJWT = verifyToken(request.getToken(),true);
@@ -168,9 +163,6 @@ public class AuthenticationServiceImp {
                 .subject(user.getUserEmail())
                 .issuer("22211tt4420.mail.tdc.edu.vn")
                 .issueTime(new Date())
-                .expirationTime(new Date(
-                        Instant.now().plus(VALID_DURATION, ChronoUnit.MINUTES).toEpochMilli()
-                ))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user))
                 .build();
