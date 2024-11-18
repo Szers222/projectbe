@@ -62,6 +62,8 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         UUID cartId = UUID.randomUUID();
         cart.setCartId(cartId);
         cart.setUser(user);
+        cart.setCartStatus(CART_STATUS_USER);
+        cart.setGuestId(null);
         return cartRepository.save(cart);
     }
 
@@ -84,6 +86,10 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         Cart cartSaved = cartRepository.findByUserId(guestId)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
+                    UUID cartId = UUID.randomUUID();
+                    newCart.setCartId(cartId);
+                    newCart.setCartStatus(CART_STATUS_GUEST);
+                    newCart.setUser(null);
                     newCart.setGuestId(finalGuestId);
                     return cartRepository.save(newCart);
                 });
@@ -125,18 +131,19 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         ProductSize productSize = productSizeRepository.findById(params.getSizeProduct().getSizeId())
                 .orElseThrow(() -> new EntityNotFoundException("Size not found"));
         Optional<CartProduct> cartProductOp = cartProductRepository.findByCartIdAndSizeProductId(cartId, product.getProductId(), productSize.getProductSizeId());
-        if (!cartProductOp.isEmpty()) {
-            CartProduct cartProduct = cartProductOp.get();
+        CartProduct cartProduct;
+        if (cartProductOp.isPresent()) {
+            cartProduct = cartProductOp.get();
             cartProduct.setQuantity(cartProduct.getQuantity() + params.getSizeProduct().getProductSizeQuantity());
-            return cartRepository.save(cart);
+            cart.getCartProducts().add(cartProduct);
+        } else {
+            cartProduct = new CartProduct();
+            cartProduct.setProductSize(productSize);
+            cartProduct.setCart(cart);
+            cartProduct.setProduct(product);
+            cartProduct.setQuantity(params.getSizeProduct().getProductSizeQuantity());
+            cart.getCartProducts().add(cartProduct);
         }
-        CartProduct cartProduct = cartProductOp.orElseGet(() -> {
-            CartProduct newCartProduct = new CartProduct();
-            newCartProduct.setProductSize(productSize);
-            newCartProduct.setCart(cart);
-            newCartProduct.setProduct(product);
-            return newCartProduct;
-        });
         return cartRepository.save(cart);
     }
 
@@ -184,6 +191,8 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
             String productPrice = formatProductPrice(item.getProduct().getProductPrice());
             double totalPrice = item.getProduct().getProductPrice() * quantity;
 
+            dto.setProductId(item.getProduct().getProductId());
+            dto.setProductSizeId(item.getProductSize().getProductSizeId());
             dto.setProductImage(imagePath);
             dto.setProductName(productName);
             dto.setProductSize(sizeName);
@@ -197,6 +206,7 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
 
         CartResponseDTO cartResponseDTO = new CartResponseDTO();
         cartResponseDTO.setCartProducts(dtos);
+        cartResponseDTO.setCartId(cartId);
         cartResponseDTO.setCartProductTotalPrice(formatPrice(total));
 
         return cartResponseDTO;
@@ -220,11 +230,11 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         if (params.getSizeProduct().getProductSizeQuantity() != 0) {
 
             if (cartProduct.getQuantity() < params.getSizeProduct().getProductSizeQuantity()) {
-                throw new NumberErrorException("Quantity must be greater than 0");
+                cartProductRepository.delete(cartProduct);
             }
             cartProduct.setQuantity(cartProduct.getQuantity() - params.getSizeProduct().getProductSizeQuantity());
         }
-        if (params.getSizeProduct().getProductSizeQuantity() == 0) {
+        if (cartProduct.getQuantity() == 0 || params.getSizeProduct().getProductSizeQuantity() == 0) {
             cartProductRepository.delete(cartProduct);
         }
     }

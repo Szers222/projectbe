@@ -26,6 +26,7 @@ public class CartProduct {
     private Cart cart;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @MapsId("product_size_id")
     @JoinColumn(name = "product_size_id")
     private ProductSize productSize;
 

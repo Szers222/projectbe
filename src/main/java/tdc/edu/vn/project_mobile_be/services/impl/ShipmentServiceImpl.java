@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipment.ShipmentCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipment.ShipmentUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipmentproduct.ShipmentProductCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductSupplierResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.shipment.ShipmentResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.shipmentproduct.ShipmentProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
@@ -21,10 +23,7 @@ import tdc.edu.vn.project_mobile_be.interfaces.service.ShipmentService;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -51,7 +50,7 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
         ProductSupplier productSupplier = productSupplierRepository
                 .findById(requestDTO.getSupplierId())
                 .orElseThrow(() -> new IllegalArgumentException("Supplier not found"));
-
+        log.info("Product supplier: {}", productSupplier);
         Shipment shipment = requestDTO.toEntity();
         shipment.setShipmentId(UUID.randomUUID());
         shipment.setShipmentDate(Timestamp.valueOf(shipmentDateTime));
@@ -107,16 +106,6 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
         return true;
     }
 
-    @Override
-    public ShipmentResponseDTO getShipmentById(UUID shipmentId) {
-        Shipment shipment = shipmentRepository
-                .findById(shipmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
-
-        ShipmentResponseDTO shipmentResponseDTO = new ShipmentResponseDTO();
-        shipmentResponseDTO.toDto(shipment);
-        return shipmentResponseDTO;
-    }
 
     @Override
     public ShipmentResponseDTO getShipmentBySupplier(String supplier) {
@@ -124,10 +113,63 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
         return null;
     }
 
+
+    @Override
+    public ShipmentResponseDTO getShipmentById(UUID shipmentId) {
+        Shipment shipment = shipmentRepository
+                .findById(shipmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
+
+        List<ShipmentProduct> shipmentProducts = shipmentProductRepository.findByShipmentId(shipment.getShipmentId());
+        List<ShipmentProductResponseDTO> shipmentProductResponseDTOs = new ArrayList<>();
+        shipmentProducts.forEach(shipmentProduct -> {
+            List<UUID> sizeProductIds = shipmentProduct.getProduct().getSizeProducts().stream().map(sizeProduct -> sizeProduct.getSize().getProductSizeId()).toList();
+            ShipmentProductResponseDTO shipmentProductResponseDTO = new ShipmentProductResponseDTO();
+            shipmentProductResponseDTO.setShipmentProductPrice(shipmentProduct.getPrice());
+            shipmentProductResponseDTO.setShipmentProductQuantity(shipmentProduct.getQuantity());
+            shipmentProductResponseDTO.setShipmentProductId(shipmentProduct.getProduct().getProductId());
+            shipmentProductResponseDTO.setShipmentProductSizeId(sizeProductIds);
+            shipmentProductResponseDTOs.add(shipmentProductResponseDTO);
+        });
+        ShipmentResponseDTO shipmentResponseDTO = new ShipmentResponseDTO();
+        shipmentResponseDTO.toDto(shipment);
+        shipmentResponseDTO.setShipmentId(shipment.getShipmentId());
+        shipmentResponseDTO.setShipmentShipCost(shipment.getShipmentShipCost());
+        shipmentResponseDTO.setShipmentDate(shipment.getShipmentDate().toLocalDateTime().toLocalDate());
+        ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
+        productSupplierResponseDTO.toDto(shipment.getProductSupplier());
+        shipmentResponseDTO.setProductSupplierResponseDTO(productSupplierResponseDTO);
+        shipmentResponseDTO.setResponseDTOS(shipmentProductResponseDTOs);
+        return shipmentResponseDTO;
+    }
+
     @Override
     public Page<ShipmentResponseDTO> getAllShipment(Pageable pageable) {
-        // Method body to be implemented
-        return null;
+        Page<ShipmentResponseDTO> shipmentResponseDTOs = shipmentRepository.findAll(pageable).map(shipment -> {
+            List<ShipmentProduct> shipmentProducts = shipmentProductRepository.findByShipmentId(shipment.getShipmentId());
+            List<ShipmentProductResponseDTO> shipmentProductResponseDTOs = new ArrayList<>();
+            shipmentProducts.forEach(shipmentProduct -> {
+                List<UUID> sizeProductIds = shipmentProduct.getProduct().getSizeProducts().stream().map(sizeProduct -> sizeProduct.getSize().getProductSizeId()).toList();
+                ShipmentProductResponseDTO shipmentProductResponseDTO = new ShipmentProductResponseDTO();
+                shipmentProductResponseDTO.setShipmentProductPrice(shipmentProduct.getPrice());
+                shipmentProductResponseDTO.setShipmentProductQuantity(shipmentProduct.getQuantity());
+                shipmentProductResponseDTO.setShipmentProductId(shipmentProduct.getProduct().getProductId());
+                shipmentProductResponseDTO.setShipmentProductSizeId(sizeProductIds);
+                shipmentProductResponseDTOs.add(shipmentProductResponseDTO);
+            });
+
+            ShipmentResponseDTO shipmentResponseDTO = new ShipmentResponseDTO();
+            shipmentResponseDTO.toDto(shipment);
+            shipmentResponseDTO.setShipmentId(shipment.getShipmentId());
+            shipmentResponseDTO.setShipmentShipCost(shipment.getShipmentShipCost());
+            shipmentResponseDTO.setShipmentDate(shipment.getShipmentDate().toLocalDateTime().toLocalDate());
+            ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
+            productSupplierResponseDTO.toDto(shipment.getProductSupplier());
+            shipmentResponseDTO.setProductSupplierResponseDTO(productSupplierResponseDTO);
+            shipmentResponseDTO.setResponseDTOS(shipmentProductResponseDTOs);
+            return shipmentResponseDTO;
+        });
+        return shipmentResponseDTOs;
     }
 
     public boolean validateDiscountAndCost(float discount, double shipCost) {
@@ -157,11 +199,17 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
                     .orElseThrow(() -> new IllegalArgumentException("Product with ID " + params.getProductId() + " not found"));
 
             product.setProductPrice(calculateProductPrice(params.getProductPrice()));
+            int quantity = calculateQuantityProduct(product.getProductQuantity(), params.getProductQuantity());
+            product.setProductQuantity(quantity);
             if (product.getSizeProducts() == null || product.getSizeProducts().isEmpty()) {
-                ProductSize newSize = productSizeRepository.findByProductSizeId(params.getSizeProductId());
+                List<ProductSize> newSizes = productSizeRepository.findByProductId(params.getProductId());
                 SizeProduct newSizeProduct = new SizeProduct();
                 newSizeProduct.setProduct(product);
-                newSizeProduct.setSize(newSize);
+                newSizes.forEach(size -> {
+                    if (size.getProductSizeId().equals(params.getSizeProductId())) {
+                        newSizeProduct.setSize(size);
+                    }
+                });
                 newSizeProduct.setQuantity(params.getProductQuantity());
                 sizeProductRepository.save(newSizeProduct);
             } else {
@@ -193,5 +241,9 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
 
     private LocalDateTime resolveShipmentDate(LocalDate shipmentDate) {
         return shipmentDate != null ? shipmentDate.atStartOfDay() : LocalDateTime.now();
+    }
+
+    private int calculateQuantityProduct(int quantity, int productQuantity) {
+        return quantity + productQuantity;
     }
 }

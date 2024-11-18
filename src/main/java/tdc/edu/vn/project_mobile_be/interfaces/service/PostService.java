@@ -3,7 +3,6 @@ package tdc.edu.vn.project_mobile_be.interfaces.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
 import tdc.edu.vn.project_mobile_be.dtos.requests.post.PostCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.post.PostUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.post.PostResponseDTO;
