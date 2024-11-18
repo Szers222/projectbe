@@ -1,9 +1,8 @@
 package tdc.edu.vn.project_mobile_be.entities.permissions;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -39,7 +38,11 @@ public class Permission {
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
 
-    @ManyToMany(mappedBy = "permissions",fetch = FetchType.EAGER)
-    private Set<Role> roles;
+    @ManyToMany(mappedBy = "permissions", fetch = FetchType.EAGER)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
+    private Set<Role> roles = new HashSet<>();
+
 
 }

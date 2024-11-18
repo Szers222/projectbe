@@ -132,10 +132,6 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
         userRepository.delete(user);
     }
 
-
-
-
-
     // Get All Users
     @Override
     public List<UserResponseDTO> getAllUsers() {

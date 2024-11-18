@@ -21,13 +21,13 @@ import java.util.UUID;
 public class RoleController {
     RoleServiceImp roleServiceImp;
 
-    @PostMapping
+    @PostMapping("/role")
     ApiResponse<RoleResponseDTO> create(@RequestBody RoleRequestDTO request) {
         return ApiResponse.<RoleResponseDTO>builder()
                 .result(roleServiceImp.create(request))
                 .build();
     }
-    @GetMapping
+    @GetMapping("/role")
     ApiResponse<List<RoleResponseDTO>> getAll(){
         return ApiResponse.<List<RoleResponseDTO>>builder()
                 .result(roleServiceImp.findAll())

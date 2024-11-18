@@ -15,6 +15,7 @@ import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.entities.user.UserOtp;
+import tdc.edu.vn.project_mobile_be.enums.UserRole;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ForgotPasswordRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.RegisterRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.RoleRepository;
@@ -179,10 +180,13 @@ public class UserOtpServiceImp implements UserOtpService {
             existingUser.setUserBirthday(request.getUserBirthday());
             existingUser.setUserLastName(request.getUserLastName());
             existingUser.setUserFirstName(request.getUserFirstName());
+
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
             String encodedPassword = passwordEncoder.encode(request.getUserPassword());
             existingUser.setUserPassword(encodedPassword);
-            Role role = roleRepository.findByRoleName("USER")
+            
+            UserRole chosRole = UserRole.fromValue(request.getRole());
+            Role role = roleRepository.findByRoleName(chosRole.name())
                     .orElseThrow(()-> new RuntimeException("Khoong tim thay role"));
             if (!existingUser.getRoles().contains(role)) {
                 existingUser.getRoles().add(role);
