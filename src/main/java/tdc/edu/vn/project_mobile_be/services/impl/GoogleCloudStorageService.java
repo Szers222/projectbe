@@ -54,6 +54,9 @@ public class GoogleCloudStorageService {
             String fixName = fileName.substring(fileName.lastIndexOf("/") + 1);
 
             BlobId blobId = BlobId.of(bucketName, fixName);
+            if (blobId == null) {
+                return null;
+            }
             // Xóa blob cũ
             deleted = storage.delete(blobId);
             if (deleted) {
@@ -62,6 +65,7 @@ public class GoogleCloudStorageService {
                 return this.uploadFile(file);
             }
         }
+
         return this.uploadFile(file);
     }
 
