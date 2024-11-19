@@ -176,52 +176,58 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
     @Override
     @Transactional
     public Set<ProductImage> updateProductImageForProduct(ProductImageParamsWithProductRequestDTO params, UUID productId, MultipartFile[] files) {
-        // Kiểm tra nếu productId null
-
         if (productId == null) {
             throw new EntityNotFoundException("Product ID is null");
         }
 
-        // Lấy danh sách ProductImage từ productId
-        Set<ProductImage> productImages = productImageRepository.findByProductId(productId);
-        if (productImages.isEmpty()) {
-            throw new EntityNotFoundException("No product images found for the given product ID");
-        }
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
-        // Kiểm tra có file được upload không
+        List<ProductImage> existingImages = new ArrayList<>(productImageRepository.findByProductId(productId));
+
         if (files == null || files.length == 0) {
             throw new FileEmptyException("No files provided for update");
         }
 
-        // Kiểm tra Product có tồn tại không
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-
-        // Cập nhật từng ProductImage
         try {
-            List<ProductImage> productImageList = new ArrayList<>(productImages.stream().toList());
-            int index = 0;
-            for (MultipartFile file : files) {
+            for (int i = 0; i < files.length; i++) {
+                MultipartFile file = files[i];
+
                 if (file.isEmpty()) {
                     throw new FileEmptyException("One of the files is empty");
                 }
-                if (index >= productImageList.size()) {
-                    productImageList.add(new ProductImage());
-                }
-                String imageUrl = googleCloudStorageService.updateFile(file, productImageList.get(index).getProductImagePath());
 
-                // Cập nhật thông tin ProductImage
-                ProductImage productImage = productImageList.get(index++);
+                ProductImage productImage = i < existingImages.size() ? existingImages.get(i) : new ProductImage();
                 productImage.setProduct(product);
+
+                String imageUrl = googleCloudStorageService.updateFile(file, productImage.getProductImagePath());
+                log.info("Image URL: " + imageUrl);
+
+                if (imageUrl == null) {
+                    if (i < existingImages.size()) {
+                        productImageRepository.deleteById(productImage.getProductImageId()); // Or consider deleting in bulk later
+                    }
+                    continue;
+                }
+
                 productImage.setProductImageAlt(params.getProductImageAlt());
                 productImage.setProductImagePath(imageUrl);
                 productImageRepository.save(productImage);
             }
+
+            if (files.length < existingImages.size()) {
+                List<UUID> imageIdsToDelete = existingImages.subList(files.length, existingImages.size())
+                        .stream()
+                        .map(ProductImage::getProductImageId)
+                        .toList();
+                productImageRepository.deleteByProductImageId(imageIdsToDelete);
+            }
+
         } catch (IOException e) {
-            throw new FileUploadException("Error while saving images to Google Cloud Storage" + e);
+            throw new FileUploadException("Error while saving images to Google Cloud Storage: " + e.getMessage());
         }
 
-        return productImages;
+        return new HashSet<>(productImageRepository.findByProductId(productId)); // Fetch updated images
     }
 
 
