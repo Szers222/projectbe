@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,8 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +35,7 @@ import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductRequestParamsDT
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductListeners;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ProductRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.BreadcrumbService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
@@ -53,7 +57,8 @@ public class ProductController {
     private BreadcrumbService breadcrumbService;
     @Autowired
     private ProductRepository p;
-
+    @Autowired
+    private SimpMessagingTemplate template;
 
 
     @Operation(summary = "Get all products by Category", description = "Retrieve all products by category with pagination support")
@@ -128,22 +133,16 @@ public class ProductController {
     }
 
     @GetMapping(value = {"/products/relate/{categoryId}", "/product/relate/{categoryId}/"})
-    public ResponseEntity<ResponseData<PagedModel<EntityModel<ProductResponseDTO>>>> getProductsByCategory(
-            @PathVariable("categoryId") UUID categoryId,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "20") int size,
-            PagedResourcesAssembler<ProductResponseDTO> assembler) {
+    public ResponseEntity<ResponseData<List<ProductResponseDTO>>> getProductsByCategory(
+            @PathVariable("categoryId") UUID categoryId) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("productPriceSale").ascending());
-        Page<ProductResponseDTO> productDtoPage = productService.findProductRelate(categoryId, pageable);
-
-        if (productDtoPage.isEmpty()) {
-            ResponseData<PagedModel<EntityModel<ProductResponseDTO>>> responseData = new ResponseData<>(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm", null);
+        List<ProductResponseDTO> productData = productService.findProductRelate(categoryId);
+        ResponseData<List<ProductResponseDTO>> responseData;
+        if (productData.isEmpty()) {
+            responseData = new ResponseData<>(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm", null);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseData);
         }
-        PagedModel<EntityModel<ProductResponseDTO>> pagedModel = assembler.toModel(productDtoPage);
-
-        ResponseData<PagedModel<EntityModel<ProductResponseDTO>>> responseData = new ResponseData<>(HttpStatus.OK, "Success", pagedModel);
+        responseData = new ResponseData<>(HttpStatus.OK, "Success", productData);
         return ResponseEntity.ok(responseData);
     }
 
@@ -184,7 +183,7 @@ public class ProductController {
 
     @GetMapping("/product/size")
     public ResponseEntity<ResponseData<Product>> getProductByIdSize(@RequestParam UUID sizerID, @RequestParam UUID productId) {
-        Product product = p.findBySizeId(productId,sizerID);
+        Product product = p.findBySizeId(productId, sizerID);
         ResponseData<Product> responseData = new ResponseData<>(HttpStatus.OK, "Success", product);
         return ResponseEntity.ok(responseData);
     }
@@ -192,12 +191,30 @@ public class ProductController {
 
     @DeleteMapping("/product/{productId}")
     public ResponseEntity<ResponseData<?>> deleteProduct(@PathVariable("productId") UUID productId) {
-         boolean isCheck = productService.deleteProduct(productId);
-         if(isCheck){
-             ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Xóa sản phẩm thành công", null);
-             return ResponseEntity.ok(responseData);
-         }
+        boolean isCheck = productService.deleteProduct(productId);
+        if (isCheck) {
+            ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Xóa sản phẩm thành công", null);
+            return ResponseEntity.ok(responseData);
+        }
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.BAD_REQUEST, "Xóa sản phẩm không thành công", null);
         return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
     }
+
+    @EventListener(ProductListeners.class)
+    @SendTo("/topic/products")
+    public void handleProductUpdated(ProductListeners event) {
+        Product product = event.getProduct();
+        this.template.convertAndSend("/topic/products", product);
+    }
+
+    @GetMapping("/products/test/{categoryId}")
+    public ResponseEntity<ResponseData<List<Product>>> getAllProductsByCategories(
+            @PathVariable UUID categoryId
+
+    ) {
+        List<Product> products = p.findByIdWithCategories(categoryId);
+        ResponseData<List<Product>> responseData = new ResponseData<>(HttpStatus.OK, "Success", products);
+        return ResponseEntity.ok(responseData);
+    }
+
 }

@@ -65,9 +65,9 @@ spring.devtools:
       jackson:
         time-zone: Asia/Ho_Chi_Minh
 redis:
-    host: 192.168.57.128
-    port: 6379
-    password: ''
+  host: 192.168.57.128
+  port: 6379
+  password: ''
 
 
 google:
@@ -76,3 +76,9 @@ google:
       bucket-name: mobileproject
     credentials:
       path: src/main/resources/service-account.json
+
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG

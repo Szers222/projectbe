@@ -36,7 +36,7 @@ public class ProductImage {
     private int productImageIndex;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
+    @Column(name = "created_at", nullable = false,updatable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")

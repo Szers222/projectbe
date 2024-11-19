@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.RoleRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.RoleResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.permissions.Permission;
+import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.PermissionRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.RoleRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.RoleService;
@@ -44,7 +45,9 @@ public class RoleServiceImp {
                 .toList();
     }
     public void delete(UUID id) {
-        roleRepository.deleteById(id);
+        Role role = roleRepository.findById(id)
+                .orElseThrow(()-> new RuntimeException("Role not found"));
+        roleRepository.delete(role);
     }
 
 }

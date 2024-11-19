@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,9 +9,8 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundExcept
 import tdc.edu.vn.project_mobile_be.commond.customexception.FileEmptyException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.FileUploadException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageCreateWithProductRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageParamsWithProductRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageUpdateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.productimage.ProductImageUpdateWithProductRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductImageResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ProductImageServiceImpl extends AbService<ProductImage, UUID> implements ProductImageService {
 
 
@@ -94,7 +95,7 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
     @Override
     @Transactional
     public Set<ProductImage> createProductImageWithProduct(
-            ProductImageCreateWithProductRequestDTO params,
+            ProductImageParamsWithProductRequestDTO params,
             UUID productId,
             MultipartFile[] files) {
 
@@ -140,7 +141,6 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
         return result;
     }
 
-
     @Override
     public ProductImage updateProductImage(ProductImageUpdateRequestDTO params, MultipartFile file, UUID productImageId) {
         Optional<ProductImage> productImageOp = productImageRepository.findById(productImageId);
@@ -175,7 +175,7 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
 
     @Override
     @Transactional
-    public Set<ProductImage> updateProductImageForProduct(ProductImageUpdateWithProductRequestDTO params,UUID productId, MultipartFile[] files) {
+    public Set<ProductImage> updateProductImageForProduct(ProductImageParamsWithProductRequestDTO params, UUID productId, MultipartFile[] files) {
         // Kiểm tra nếu productId null
 
         if (productId == null) {
@@ -197,29 +197,24 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
-        // Đảm bảo số file khớp với số lượng ProductImage hiện có
-        if (files.length != productImages.size()) {
-            throw new IllegalArgumentException("Mismatch between number of files and existing product images");
-        }
-
         // Cập nhật từng ProductImage
         try {
+            List<ProductImage> productImageList = new ArrayList<>(productImages.stream().toList());
             int index = 0;
-            List<ProductImage> productImageList = productImages.stream().toList(); // Đảm bảo có thể truy cập bằng chỉ mục
             for (MultipartFile file : files) {
                 if (file.isEmpty()) {
                     throw new FileEmptyException("One of the files is empty");
                 }
-
-                // Upload file và lấy URL từ Google Cloud Storage
+                if (index >= productImageList.size()) {
+                    productImageList.add(new ProductImage());
+                }
                 String imageUrl = googleCloudStorageService.updateFile(file, productImageList.get(index).getProductImagePath());
 
                 // Cập nhật thông tin ProductImage
                 ProductImage productImage = productImageList.get(index++);
                 productImage.setProduct(product);
+                productImage.setProductImageAlt(params.getProductImageAlt());
                 productImage.setProductImagePath(imageUrl);
-
-                // Lưu cập nhật vào repository
                 productImageRepository.save(productImage);
             }
         } catch (IOException e) {
