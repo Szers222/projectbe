@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import tdc.edu.vn.project_mobile_be.commond.GuestAuthenticationFilter;
 
@@ -29,6 +30,8 @@ public class SecurityConfig {
             "/api/v1/auth/create-email",
             "/api/v1/auth/*",
             "/api/v1/*",
+            "/api/v1/*/*",
+            "/api/v1/*/*/*",
             "/api/v1/product/size",
             "/api/v1/cart/guest",
             "/api/v1/cart/*",
@@ -36,11 +39,10 @@ public class SecurityConfig {
             "/api/v1/carts/guest/*",
             "/api/v1/auth/*/*",
             "/api/v1/product/*",
-            "/api/v1/products/filters",
-            "/api/v1/product-suppliers/category",
-            "/api/v1/product-sizes/category",
+            "/api/v1/shipment/*",
             "/ws"
     };
+
 
 
     @Autowired
@@ -64,9 +66,9 @@ public class SecurityConfig {
                 );
         httpSecurity
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer
-                                .decoder(customJwtDecoder)
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
+                        .decoder(customJwtDecoder)
+                        .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable);
 

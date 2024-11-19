@@ -92,4 +92,13 @@ public class UserController {
         );
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<ResponseData<?>> deleteUser(@PathVariable UUID id) {
+        userService.deleteUserById(id);
+
+        ResponseData<?> responseData = new ResponseData<>(
+                HttpStatus.OK, "User đã được xóa thành công", null
+        );
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
 }

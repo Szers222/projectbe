@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.BeanUtils;
+import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 
 import javax.validation.constraints.*;
@@ -31,7 +32,7 @@ public class RegisterRequestDTO {
     @NotEmpty(message = "Khong duoc de trong ngay sinh")
     @JsonProperty("userBirthday")
     @Min(value = 1990, message = "")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     Timestamp userBirthday;
 
     @NotEmpty(message = "Khong de trong dia chi")
@@ -45,6 +46,14 @@ public class RegisterRequestDTO {
     @NotEmpty(message = "Tên không được để trống")
     @JsonProperty("userFirstName")
     String userFirstName;
+
+    @Min(value = 1)
+    @Max(value = 2)
+    @JsonProperty("role")
+    int role;
+
+    @JsonProperty("idCard")
+    IdCard idCard;
 
     // Method to convert DTO to Entity
     public User toEntity() {
