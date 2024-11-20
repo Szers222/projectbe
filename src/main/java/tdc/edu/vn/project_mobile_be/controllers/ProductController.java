@@ -203,7 +203,7 @@ public class ProductController {
     @EventListener(ProductListeners.class)
     @SendTo("/topic/products")
     public void handleProductUpdated(ProductListeners event) {
-        Product product = event.getProduct();
+        ProductResponseDTO product = event.getProduct();
         this.template.convertAndSend("/topic/products", product);
     }
 
