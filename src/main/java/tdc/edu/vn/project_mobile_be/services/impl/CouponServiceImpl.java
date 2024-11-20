@@ -91,6 +91,7 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
             coupon.setCouponQuantity(params.getCouponQuantity());
             coupon.setCouponRelease(releaseDateTime);
             coupon.setCouponExpire(expireDateTime);
+            coupon.setCouponType(params.getCouponType());
             if (params.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
                 coupon.setCouponPrice(0);
                 coupon.setCouponPerHundred(params.getCouponPerHundred());
