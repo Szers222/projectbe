@@ -315,17 +315,19 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
     @Override
     @Transactional
-    public boolean deleteProduct(UUID productId) {
-        Optional<Product> productOptional = productRepository.findById(productId);
-        if (productOptional.isEmpty()) {
-            throw new EntityNotFoundException("Product không tồn tại !");
-        }
-        Product product = productOptional.get();
+    public void deleteProduct(UUID productId) {
+        Product product = productRepository
+                .findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
         for (ProductImage productImage : product.getImages()) {
+            System.console().printf("ProductImage: " + productImage);
+            if (productImage == null) {
+                break;
+            }
             googleCloudStorageService.deleteFile(productImage.getProductImagePath());
         }
-        productRepository.delete(product);
-        return true;
+        productRepository.deleteByProductId(productId);
     }
 
 
@@ -561,7 +563,6 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             }
             sizeProduct.setProduct(product);
             sizeProduct.setSize(productSize);
-            sizeProductRepository.save(sizeProduct);
             sizeProducts.add(sizeProduct);
         }
         if (sizeProducts.isEmpty()) {

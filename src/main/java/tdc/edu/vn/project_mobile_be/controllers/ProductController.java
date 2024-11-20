@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -190,14 +191,11 @@ public class ProductController {
 
 
     @DeleteMapping("/product/{productId}")
+    @Transactional
     public ResponseEntity<ResponseData<?>> deleteProduct(@PathVariable("productId") UUID productId) {
-        boolean isCheck = productService.deleteProduct(productId);
-        if (isCheck) {
-            ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Xóa sản phẩm thành công", null);
-            return ResponseEntity.ok(responseData);
-        }
-        ResponseData<?> responseData = new ResponseData<>(HttpStatus.BAD_REQUEST, "Xóa sản phẩm không thành công", null);
-        return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
+        productService.deleteProduct(productId);
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Xóa sản phẩm thành công", null);
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
     @EventListener(ProductListeners.class)
