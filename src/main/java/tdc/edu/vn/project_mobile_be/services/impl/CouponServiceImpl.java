@@ -58,10 +58,17 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
             if (params.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
                 coupon.setCouponPrice(0);
                 coupon.setCouponPerHundred(params.getCouponPerHundred());
+                coupon.setCouponFeeShip(0);
             }
             if (params.getCouponType() == COUPON_PRICE_TYPE) {
                 coupon.setCouponPerHundred(0);
                 coupon.setCouponPrice(params.getCouponPrice());
+                coupon.setCouponFeeShip(0);
+            }
+            if (params.getCouponType() == COUPON_SHIP_TYPE) {
+                coupon.setCouponPerHundred(0);
+                coupon.setCouponPrice(0);
+                coupon.setCouponFeeShip(params.getCouponFeeShip());
             }
         }
         return couponRepository.save(coupon);
@@ -72,24 +79,32 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
         boolean check = false;
         Timestamp expireDateTime = coverToTimestampExpire(params.getCouponExpire());
         Timestamp releaseDateTime = coverToTimestampRelease(params.getCouponRelease());
-        Optional<Coupon> couponOptional = couponRepository.findCouponByCouponId(couponId);
-        if (couponOptional.isEmpty()) {
+
+        Coupon coupon = couponRepository.findCouponByCouponId(couponId);
+        if (coupon == null) {
             throw new EntityNotFoundException("Coupon không tồn tại");
         }
-        Coupon coupon = couponOptional.get();
-
+        log.info("coupon1231231312: {}", coupon);
         if (validateCoupon(params) != check) {
-            coupon = params.toEntity();
-            coupon.setCouponId(UUID.randomUUID());
+            coupon.setCouponName(params.getCouponName());
+            coupon.setCouponCode(params.getCouponCode());
+            coupon.setCouponQuantity(params.getCouponQuantity());
             coupon.setCouponRelease(releaseDateTime);
             coupon.setCouponExpire(expireDateTime);
             if (params.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
                 coupon.setCouponPrice(0);
                 coupon.setCouponPerHundred(params.getCouponPerHundred());
+                coupon.setCouponFeeShip(0);
             }
             if (params.getCouponType() == COUPON_PRICE_TYPE) {
                 coupon.setCouponPerHundred(0);
                 coupon.setCouponPrice(params.getCouponPrice());
+                coupon.setCouponFeeShip(0);
+            }
+            if (params.getCouponType() == COUPON_SHIP_TYPE) {
+                coupon.setCouponPerHundred(0);
+                coupon.setCouponPrice(0);
+                coupon.setCouponFeeShip(params.getCouponFeeShip());
             }
         }
         return couponRepository.save(coupon);
@@ -140,11 +155,10 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
 
     @Override
     public boolean deleteCoupon(UUID couponId) {
-        Optional<Coupon> couponOptional = couponRepository.findCouponByCouponId(couponId);
-        if (couponOptional.isEmpty()) {
-            throw new EntityNotFoundException("Category không tồn tại !");
+        Coupon coupon = couponRepository.findCouponByCouponId(couponId);
+        if (coupon == null) {
+            throw new EntityNotFoundException("Coupon không tồn tại");
         }
-        Coupon coupon = couponOptional.get();
         couponRepository.delete(coupon);
         return true;
     }
