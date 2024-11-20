@@ -238,9 +238,13 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
             throw new EntityNotFoundException("Product image not found");
         }
         ProductImage productImage = productImageOp.get();
-        productImageRepository.deleteById(productImageId);
-        googleCloudStorageService.deleteFile(productImage.getProductImagePath());
-        return true;
+
+        boolean check = productImageRepository.deleteByProductImageId(productImageId);
+        if(check){
+            googleCloudStorageService.deleteFile(productImage.getProductImagePath());
+            return true;
+        }
+        return false;
     }
 
     @Override

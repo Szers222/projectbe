@@ -2,7 +2,10 @@ package tdc.edu.vn.project_mobile_be.entities.product;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
@@ -26,10 +29,12 @@ public class ProductSize {
     @Column(name = "product_size_id", nullable = false, columnDefinition = "BINARY(16)")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID productSizeId;
+
     @Column(name = "product_size_name", nullable = false)
     private String productSizeName;
 
-
+    @Column(name = "product_size_code", nullable = false)
+    private String productSizeCode;
 
 
     @OneToMany(mappedBy = "size", cascade = CascadeType.ALL, orphanRemoval = true)

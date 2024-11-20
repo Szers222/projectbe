@@ -25,6 +25,7 @@ import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.product.*;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
+import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProductId;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CouponService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.PostService;
@@ -155,7 +156,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         if (categories.isEmpty()) {
             throw new EntityNotFoundException("Category không tồn tại !");
         }
-        Set<SizeProduct> sizeProducts = createSizeProducts(params.getSizesProduct(), product);
+        Set<SizeProduct> sizeProducts = updateSizeProducts(params.getSizesProduct(), product);
         if (sizeProducts.isEmpty()) {
             throw new EntityNotFoundException("SizeProduct không tồn tại !");
         }
@@ -177,6 +178,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
         double productSale = solveProductSale(params.getProductPrice(), coupon);
 
+
         int quantity = setQuantityProduct(sizeProducts);
         product.setProductQuantity(quantity);
         product.setProductName(params.getProductName());
@@ -187,7 +189,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         product.setProductSale(productSale);
         product.getImages().addAll(productImages);
         product.getSizeProducts().addAll(sizeProducts);
-        applicationEventPublisher.publishEvent(new ProductListeners(this, product));
+        ProductResponseDTO dto = getProductById(productId);
+        applicationEventPublisher.publishEvent(new ProductListeners(this, dto));
         return productRepository.save(product);
     }
 
@@ -518,6 +521,31 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         return categories;
     }
 
+    private Set<SizeProduct> updateSizeProducts(List<SizeProductRequestParamsDTO> paramsDTOS, Product product) {
+        Set<SizeProduct> sizeProducts = new HashSet<>();
+        for (SizeProductRequestParamsDTO param : paramsDTOS) {
+            ProductSize productSize = productSizeRepository.findByProductSizeId(param.getSizeId());
+            if (productSize == null) {
+                throw new EntityNotFoundException("Size not found for ID: " + param.getSizeId());
+            }
+            SizeProductId sizeProductId = new SizeProductId(product.getProductId(), param.getSizeId());
+            SizeProduct sizeProduct = sizeProductRepository.findById(sizeProductId).orElse(null);
+
+            if (sizeProduct == null) {
+                sizeProduct = new SizeProduct();
+                sizeProduct.setId(sizeProductId);
+            }
+            sizeProduct.setProduct(product);
+            sizeProduct.setSize(productSize);
+
+            sizeProductRepository.save(sizeProduct);
+            sizeProducts.add(sizeProduct);
+        }
+        if (sizeProducts.isEmpty()) {
+            throw new EntityNotFoundException("SizeProducts not found !");
+        }
+        return sizeProducts;
+    }
     private Set<SizeProduct> createSizeProducts(List<SizeProductRequestParamsDTO> paramsDTOS, Product product) {
         Set<SizeProduct> sizeProducts = new HashSet<>();
         for (SizeProductRequestParamsDTO param : paramsDTOS) {
