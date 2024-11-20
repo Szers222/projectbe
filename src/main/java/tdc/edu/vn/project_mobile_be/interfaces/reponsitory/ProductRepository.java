@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -30,6 +31,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
     @Query("SELECT p FROM Product p JOIN  p.sizeProducts sp on p.productId =:productId WHERE sp.size.productSizeId = :sizeId")
     Product findBySizeId(@Param("productId") UUID productId,@Param("sizeId") UUID sizeId);
 
-
+    @Modifying
+    @Query("delete from Product p where p.productId = :productId")
+    void deleteByProductId(@Param("productId") UUID productId);
 
 }

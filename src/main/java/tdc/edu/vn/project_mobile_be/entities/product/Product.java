@@ -70,7 +70,7 @@ public class Product {
     @JsonBackReference
     private Coupon coupon;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonBackReference
@@ -99,7 +99,10 @@ public class Product {
     )
     private Set<Category> categories = new HashSet<>();
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "product")
+    @ToString.Exclude
+    @JsonBackReference
+    @EqualsAndHashCode.Exclude
     private Set<ShipmentProduct> shipmentProducts = new HashSet<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
