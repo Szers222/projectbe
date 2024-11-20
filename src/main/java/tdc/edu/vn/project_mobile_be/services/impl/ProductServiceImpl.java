@@ -327,6 +327,9 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             }
             googleCloudStorageService.deleteFile(productImage.getProductImagePath());
         }
+        product.getSizeProducts().clear();
+        product.getShipmentProducts().clear();
+        productRepository.save(product);
         productRepository.deleteByProductId(productId);
     }
 
