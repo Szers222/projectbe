@@ -165,6 +165,17 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
     }
 
     @Override
+    public CouponResponseDTO getCouponById(UUID couponId) {
+        Coupon coupon = couponRepository.findCouponByCouponId(couponId);
+        if (coupon == null) {
+            throw new EntityNotFoundException("Coupon không tồn tại");
+        }
+        CouponResponseDTO dto = new CouponResponseDTO();
+        dto.toDto(coupon);
+        return dto;
+    }
+
+    @Override
     public Page<CouponResponseDTO> getCoupons(int role, Pageable pageable) {
         List<CouponResponseDTO> responseDTOS = new ArrayList<>();
         if (role == this.ROLE_ADMIN) {

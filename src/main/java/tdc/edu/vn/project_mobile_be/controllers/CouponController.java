@@ -107,4 +107,10 @@ public class CouponController {
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Coupon cập nhật thành công !", updatedCoupon);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
+    @GetMapping({"/coupon/{couponId}", "/coupon/{couponId}/"})
+    public ResponseEntity<ResponseData<CouponResponseDTO>> getCouponById(@PathVariable UUID couponId) {
+        CouponResponseDTO data = couponService.getCouponById(couponId);
+        ResponseData<CouponResponseDTO> responseData = new ResponseData<>(HttpStatus.OK, "Success", data);
+        return ResponseEntity.ok(responseData);
+    }
 }
