@@ -91,6 +91,7 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
             coupon.setCouponQuantity(params.getCouponQuantity());
             coupon.setCouponRelease(releaseDateTime);
             coupon.setCouponExpire(expireDateTime);
+            coupon.setCouponType(params.getCouponType());
             if (params.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
                 coupon.setCouponPrice(0);
                 coupon.setCouponPerHundred(params.getCouponPerHundred());
@@ -161,6 +162,17 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
         }
         couponRepository.delete(coupon);
         return true;
+    }
+
+    @Override
+    public CouponResponseDTO getCouponById(UUID couponId) {
+        Coupon coupon = couponRepository.findCouponByCouponId(couponId);
+        if (coupon == null) {
+            throw new EntityNotFoundException("Coupon không tồn tại");
+        }
+        CouponResponseDTO dto = new CouponResponseDTO();
+        dto.toDto(coupon);
+        return dto;
     }
 
     @Override
