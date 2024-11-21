@@ -9,6 +9,7 @@ import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
+import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 
 import java.util.HashSet;
@@ -47,4 +48,8 @@ public class ProductSize {
     @JsonBackReference
     private Set<CartProduct> cartProducts = new HashSet<>();
 
+    @OneToMany(mappedBy = "productSize")
+    @JsonBackReference
+    @ToString.Exclude
+    private Set<ShipmentProduct> shipmentProducts = new HashSet<>();
 }
