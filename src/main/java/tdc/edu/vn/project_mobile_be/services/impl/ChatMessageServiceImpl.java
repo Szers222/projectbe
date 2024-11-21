@@ -30,6 +30,10 @@ public class ChatMessageServiceImpl implements ChatMessageService {
                         (msg.getSender().equals(receiver) && msg.getReceiver().equals(sender)))
                 .toList();
     }
+    @Override
+    public List<ChatMessage> getMessagesForUser(String receiver) {
+        return chatMessageRepository.findByReceiver(receiver);
+    }
 }
 
 

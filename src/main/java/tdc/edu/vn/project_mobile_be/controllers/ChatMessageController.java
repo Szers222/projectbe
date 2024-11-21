@@ -33,6 +33,12 @@ public class ChatMessageController {
         List<ChatMessage> messages = chatMessageService.getMessagesBetweenUsers(sender, receiver);
         return ResponseEntity.ok(messages);
     }
+
+    @GetMapping("/messages/received")
+    public ResponseEntity<List<ChatMessage>> getMessagesForUser(@RequestParam String receiver) {
+        List<ChatMessage> messages = chatMessageService.getMessagesForUser(receiver);
+        return ResponseEntity.ok(messages);
+    }
 }
 
 

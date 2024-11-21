@@ -8,4 +8,6 @@ public interface ChatMessageService {
     ChatMessage saveMessage(ChatMessage message);
 
     List<ChatMessage> getMessagesBetweenUsers(String sender, String receiver);
+
+    List<ChatMessage> getMessagesForUser(String receiver);
 }
