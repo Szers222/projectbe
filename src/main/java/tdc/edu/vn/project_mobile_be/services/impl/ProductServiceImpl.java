@@ -451,7 +451,6 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
                 SizeProductResponseDTO sizeProductDTO = new SizeProductResponseDTO();
                 sizeProductDTO.toDto(sizeProduct);
                 sizeProductDTO.setProductSizeQuantity(sizeProduct.getQuantity());
-                productSizeResponseDTO.setSizeProductResponseDTOs(sizeProductDTO);
             });
             return productSizeResponseDTO;
         }).collect(Collectors.toList());
