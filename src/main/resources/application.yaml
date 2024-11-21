@@ -88,3 +88,29 @@ logging:
     org:
       springframework:
         web: DEBUG
+        security: DEBUG
+# Cấu hình kết nối MySQL Database
+debezium.datasource:
+  url: jdbc:mysql://localhost:3306/mobileproject
+  user: 'root'
+  password: ''
+
+# Cấu hình kết nối Kafka
+debezium.kafka:
+  bootstrap.servers: localhost:9092
+  topic: your_topic_name
+
+# Cấu hình Debezium server và lịch sử schema
+debezium.database:
+  server.name: my-app-connector
+  history:
+    kafka:
+      bootstrap.servers: localhost:9092
+      topic: schema-changes.inventory
+
+# Các cấu hình khác (optional)
+debezium.transforms:
+  - name: org.apache.kafka.connect.transforms.MaskField
+    parameters:
+      # Example: Add transformation if you want to mask certain fields (optional)
+      fields: password, credit_card_number
