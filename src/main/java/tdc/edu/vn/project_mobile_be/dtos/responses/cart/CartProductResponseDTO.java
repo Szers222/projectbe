@@ -37,6 +37,12 @@ public class CartProductResponseDTO implements IDto<CartProduct> {
     @JsonProperty("productPrice")
     private String cartProductPrice;
 
+    @JsonProperty("productDiscount")
+    private double cartProductDiscount;
+
+    @JsonProperty("productDiscountPrice")
+    private String cartProductDiscountPrice;
+
     @JsonProperty("productTotalPrice")
     private double cartProductTotalPrice;
 
