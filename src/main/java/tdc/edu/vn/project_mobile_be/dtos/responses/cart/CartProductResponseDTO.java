@@ -9,11 +9,18 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.UnsupportedOperation
 import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
+import java.util.UUID;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class CartProductResponseDTO implements IDto<CartProduct> {
 
+    @JsonProperty("productId")
+    private UUID productId;
+
+    @JsonProperty("productSizeId")
+    private UUID productSizeId;
 
     @JsonProperty("productName")
     private String productName;
@@ -29,6 +36,12 @@ public class CartProductResponseDTO implements IDto<CartProduct> {
 
     @JsonProperty("productPrice")
     private String cartProductPrice;
+
+    @JsonProperty("productDiscount")
+    private double cartProductDiscount;
+
+    @JsonProperty("productDiscountPrice")
+    private String cartProductDiscountPrice;
 
     @JsonProperty("productTotalPrice")
     private double cartProductTotalPrice;

@@ -59,9 +59,14 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
 
         Cart cart = cartRepository.findById(order.getCartId())
                 .orElseThrow(() -> new EntityNotFoundException("Cart not found"));
-        Set<Coupon> coupons = getCouponsFromRequest(order);
-        Coupon couponShip = getCouponByType(coupons, COUPON_SHIP_TYPE).orElse(null);
-        Coupon couponDiscount = getCouponByType(coupons, COUPON_PER_HUNDRED_TYPE, COUPON_PRICE_TYPE).orElse(null);
+        Set<Coupon> coupons = new HashSet<>();
+        Coupon couponShip = new Coupon();
+        Coupon couponDiscount = new Coupon();
+        if (order.getOrderCoupon() != null) {
+            coupons = getCouponsFromRequest(order);
+            couponShip = getCouponByType(coupons, COUPON_SHIP_TYPE).orElse(null);
+            couponDiscount = getCouponByType(coupons, COUPON_PER_HUNDRED_TYPE, COUPON_PRICE_TYPE).orElse(null);
+        }
 
         Order orderEntity;
         if (cart.getCartStatus() == CART_STATUS_GUEST) {
@@ -129,6 +134,7 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         orderEntity.setOrderWard(order.getOrderWard());
         orderEntity.setOrderDistrict(order.getUserDistrict());
         orderEntity.setOrderCity(order.getUserCity());
+        orderEntity.getUser().setUserId(null);
         return orderEntity;
     }
 
@@ -142,6 +148,7 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         orderEntity.setOrderWard(cart.getUser().getDetail().getWard());
         orderEntity.setOrderDistrict(cart.getUser().getDetail().getDistrict());
         orderEntity.setOrderCity(cart.getUser().getDetail().getCity());
+        orderEntity.getUser().setUserId(null);
         return orderEntity;
     }
 

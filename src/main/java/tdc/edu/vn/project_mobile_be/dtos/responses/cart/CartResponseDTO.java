@@ -10,6 +10,7 @@ import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
 import java.util.List;
+import java.util.UUID;
 
 
 @Data
@@ -17,11 +18,17 @@ import java.util.List;
 @NoArgsConstructor
 public class CartResponseDTO implements IDto<Cart> {
 
+    @JsonProperty("cartId")
+    private UUID cartId;
+
     @JsonProperty("cartItem")
     List<CartProductResponseDTO> cartProducts;
 
     @JsonProperty("productTotalPrice")
     private String cartProductTotalPrice;
+
+    @JsonProperty("productQuantity")
+    private int cartProductQuantity;
 
 
     @Override

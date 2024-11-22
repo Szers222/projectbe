@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class CartController {
     @Autowired
     private CartService cartService;
@@ -48,7 +49,7 @@ public class CartController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PutMapping(value = {"/cart/{cartId}", "/cart/"})
+    @PutMapping(value = {"/cart/{cartId}", "/cart/{cartId}/"})
     public ResponseEntity<ResponseData<?>> addCart(
             @Valid @RequestBody CartUpdateRequestDTO params,
             @PathVariable UUID cartId,
@@ -65,7 +66,7 @@ public class CartController {
         return ResponseEntity.ok(responseData);
     }
 
-    @DeleteMapping(value = {"/cart/{cartId}", "/cart/"})
+    @DeleteMapping(value = {"/cart/{cartId}", "/cart/{cartId}/"})
     public ResponseEntity<ResponseData<?>> deleteProductInCart(
             @Valid @RequestBody RemoveSizeProductRequestParamsDTO params,
             @PathVariable UUID cartId,

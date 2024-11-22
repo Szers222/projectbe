@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -26,6 +25,7 @@ import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.product.*;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
+import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProductId;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CouponService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.PostService;
@@ -127,8 +127,9 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         Set<SizeProduct> sizeProducts;
         if (params.getSizesProduct() != null) {
             sizeProducts = createSizeProducts(params.getSizesProduct(), savedProduct);
+            savedProduct.getSizeProducts().clear();
             savedProduct.setProductQuantity(PRODUCT_DEFAULT_SIZE);
-            savedProduct.setSizeProducts(sizeProducts);
+            savedProduct.getSizeProducts().addAll(sizeProducts);
         }
 
         return savedProduct;
@@ -145,13 +146,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             }
         }
 
-        Coupon coupon = new Coupon();
-        if (params.getCoupon() != null) {
-            coupon = couponService.updateCouponByProductId(params.getCoupon(), productId);
-            if (coupon == null) {
-                throw new EntityNotFoundException("Coupon không tồn tại !");
-            }
-        }
+
         Optional<Product> optionalProduct = productRepository.findById(productId);
         if (optionalProduct.isEmpty()) {
             throw new EntityNotFoundException("Product không tồn tại !");
@@ -161,7 +156,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         if (categories.isEmpty()) {
             throw new EntityNotFoundException("Category không tồn tại !");
         }
-        Set<SizeProduct> sizeProducts = createSizeProducts(params.getSizesProduct(), product);
+        Set<SizeProduct> sizeProducts = updateSizeProducts(params.getSizesProduct(), product);
         if (sizeProducts.isEmpty()) {
             throw new EntityNotFoundException("SizeProduct không tồn tại !");
         }
@@ -172,49 +167,64 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             throw new EntityNotFoundException("ProductImage không tồn tại !");
         }
 
+        Coupon coupon = new Coupon();
+        if (params.getCoupon() != null) {
+            coupon = couponService.updateCouponByProductId(params.getCoupon(), productId);
+            if (coupon == null) {
+                throw new EntityNotFoundException("Coupon không tồn tại !");
+            }
+            product.setCoupon(coupon);
+        }
+
         double productSale = solveProductSale(params.getProductPrice(), coupon);
+
+
         int quantity = setQuantityProduct(sizeProducts);
         product.setProductQuantity(quantity);
         product.setProductName(params.getProductName());
         product.setProductQuantity(params.getProductQuantity());
         product.setProductYearOfManufacture(params.getProductYearOfManufacture());
-        product.setCoupon(coupon);
         product.setPost(post);
         product.setCategories(categories);
         product.setProductSale(productSale);
-        product.setImages(productImages);
-        product.setSizeProducts(sizeProducts);
-        applicationEventPublisher.publishEvent(new ProductListeners(this, product));
+        product.getImages().addAll(productImages);
+        product.getSizeProducts().addAll(sizeProducts);
+        ProductResponseDTO dto = getProductById(productId);
+        applicationEventPublisher.publishEvent(new ProductListeners(this, dto));
         return productRepository.save(product);
     }
 
     @Override
     @Transactional
-    public Page<ProductResponseDTO> findProductRelate(UUID categoryId, Pageable pageable) {
-        Page<Product> productPage = productRepository.findByIdWithCategories(categoryId, pageable);
-
-        if (productPage.getContent().size() < PRODUCT_RELATE_SIZE || (productPage.isEmpty())) {
-            List<Product> products = new ArrayList<>(productPage.getContent());
-            List<Product> allProducts = productRepository.findAll();
-            for (int i = 0; i < allProducts.size(); i++) {
-                if (products.size() == PRODUCT_RELATE_SIZE) {
+    public List<ProductResponseDTO> findProductRelate(UUID categoryId) {
+        List<Product> productRelate = productRepository.findByIdWithCategories(categoryId);
+        List<Product> result;
+        if (productRelate.size() < PRODUCT_RELATE_SIZE) {
+            result = new ArrayList<>(productRelate);
+            List<Product> products = new ArrayList<>(productRepository.findAll());
+            for (int i = 0; i < products.size(); i++) {
+                if (result.size() == PRODUCT_RELATE_SIZE) {
                     break;
                 }
-                int addRandomProduct = new Random().nextInt(allProducts.size());
-                Product product = allProducts.get(addRandomProduct);
-                System.console().printf("IntproductAdd: %s", addRandomProduct);
-                if (!products.contains(product)) {
-                    products.add(product);
+                int addRandomProduct = new Random().nextInt(products.size());
+                Product product = products.get(addRandomProduct);
+                if (!result.contains(product)) {
+                    result.add(product);
                 }
-                productPage = new PageImpl<>(products, pageable, products.size());
+            }
+        } else {
+            result = new ArrayList<>();
+            for (int i = 0; i < PRODUCT_RELATE_SIZE; i++) {
+                int addRandomProduct = new Random().nextInt(productRelate.size());
+                Product product = productRelate.get(addRandomProduct);
+                if (!result.contains(product)) {
+                    result.add(product);
+                }
             }
         }
-        List<Product> sortProducts = new ArrayList<>(productPage.getContent());
-        sortProducts.sort(Comparator.comparing(Product::getProductPriceSale));
 
-        Page<Product> productPageRandom = new PageImpl<>(sortProducts.subList(PRODUCT_DEFAULT_SIZE, PRODUCT_RELATE_SIZE));
-
-        return productPageRandom.map(product -> {
+        List<ProductResponseDTO> finalResult = new ArrayList<>();
+        result.forEach(product -> {
             List<CategoryResponseDTO> categoryResponseDTOs = getCategoryResponseDTOs(product);
             List<ProductImageResponseDTO> productImageResponseDTOS = getProductImageResponseDTOs(product);
             List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
@@ -223,19 +233,18 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             String productPriceSaleString = formatProductPriceSale(product);
             String productPriceString = formatProductPrice(product);
 
-
             ProductResponseDTO dto = new ProductResponseDTO();
             dto.toDto(product);
             dto.setProductPrice(productPriceString);
-            dto.setProductPriceSale(productPriceSaleString);
             dto.setCategoryResponseDTO(categoryResponseDTOs);
             dto.setProductSizeResponseDTOs(productSizeResponseDTOS);
             dto.setSupplier(productSupplierResponseDTO);
             dto.setPostResponseDTO(postResponseDTO);
             dto.setProductImageResponseDTOs(productImageResponseDTOS);
-            return dto;
+            dto.setProductPriceSale(productPriceSaleString);
+            finalResult.add(dto);
         });
-
+        return finalResult;
     }
 
     @Override
@@ -306,17 +315,22 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
     @Override
     @Transactional
-    public boolean deleteProduct(UUID productId) {
-        Optional<Product> productOptional = productRepository.findById(productId);
-        if (productOptional.isEmpty()) {
-            throw new EntityNotFoundException("Product không tồn tại !");
-        }
-        Product product = productOptional.get();
+    public void deleteProduct(UUID productId) {
+        Product product = productRepository
+                .findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
         for (ProductImage productImage : product.getImages()) {
+            System.console().printf("ProductImage: " + productImage);
+            if (productImage == null) {
+                break;
+            }
             googleCloudStorageService.deleteFile(productImage.getProductImagePath());
         }
-        productRepository.delete(product);
-        return true;
+        product.getSizeProducts().clear();
+        product.getShipmentProducts().clear();
+        productRepository.save(product);
+        productRepository.deleteByProductId(productId);
     }
 
 
@@ -512,6 +526,31 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         return categories;
     }
 
+    private Set<SizeProduct> updateSizeProducts(List<SizeProductRequestParamsDTO> paramsDTOS, Product product) {
+        Set<SizeProduct> sizeProducts = new HashSet<>();
+        for (SizeProductRequestParamsDTO param : paramsDTOS) {
+            ProductSize productSize = productSizeRepository.findByProductSizeId(param.getSizeId());
+            if (productSize == null) {
+                throw new EntityNotFoundException("Size not found for ID: " + param.getSizeId());
+            }
+            SizeProductId sizeProductId = new SizeProductId(product.getProductId(), param.getSizeId());
+            SizeProduct sizeProduct = sizeProductRepository.findById(sizeProductId).orElse(null);
+
+            if (sizeProduct == null) {
+                sizeProduct = new SizeProduct();
+                sizeProduct.setId(sizeProductId);
+            }
+            sizeProduct.setProduct(product);
+            sizeProduct.setSize(productSize);
+
+            sizeProductRepository.save(sizeProduct);
+            sizeProducts.add(sizeProduct);
+        }
+        if (sizeProducts.isEmpty()) {
+            throw new EntityNotFoundException("SizeProducts not found !");
+        }
+        return sizeProducts;
+    }
     private Set<SizeProduct> createSizeProducts(List<SizeProductRequestParamsDTO> paramsDTOS, Product product) {
         Set<SizeProduct> sizeProducts = new HashSet<>();
         for (SizeProductRequestParamsDTO param : paramsDTOS) {
@@ -519,10 +558,14 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             if (productSize == null) {
                 throw new EntityNotFoundException("Size not found for ID: " + param.getSizeId());
             }
-            SizeProduct sizeProduct = param.toEntity();
+
+            SizeProduct sizeProduct = sizeProductRepository.findBySizeIdAndProductId(product.getProductId(), param.getSizeId());
+            log.info("SizeProduct: {}", sizeProduct);
+            if (sizeProduct == null) {
+                sizeProduct = new SizeProduct();
+            }
             sizeProduct.setProduct(product);
             sizeProduct.setSize(productSize);
-            sizeProductRepository.save(sizeProduct);
             sizeProducts.add(sizeProduct);
         }
         if (sizeProducts.isEmpty()) {

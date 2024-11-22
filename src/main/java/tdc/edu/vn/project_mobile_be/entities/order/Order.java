@@ -53,8 +53,6 @@ public class Order {
     @Column(name = "order_name", nullable = false, columnDefinition = "text")
     private String orderName;
 
-
-
     @Column(name = "order_payment",nullable = false,columnDefinition = "int default 0")
     private int orderPayment;
 
@@ -69,10 +67,6 @@ public class Order {
 
     @Column(name = "order_note", nullable = false, columnDefinition = "text")
     private String orderNote;
-
-
-
-
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

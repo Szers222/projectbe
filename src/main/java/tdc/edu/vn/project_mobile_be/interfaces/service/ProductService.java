@@ -2,7 +2,6 @@ package tdc.edu.vn.project_mobile_be.interfaces.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
 import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductRequestParamsDTO;
@@ -11,6 +10,7 @@ import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.interfaces.IService;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ProductService extends IService<Product, UUID> {
@@ -18,7 +18,7 @@ public interface ProductService extends IService<Product, UUID> {
 
     Product createProduct(ProductCreateRequestDTO params, MultipartFile[] file);
 
-    boolean deleteProduct(UUID productId);
+    void deleteProduct(UUID productId);
 
     Product updateProduct(ProductUpdateRequestDTO params, UUID productId, MultipartFile[] file);
 
@@ -27,7 +27,7 @@ public interface ProductService extends IService<Product, UUID> {
 
     ProductResponseDTO getProductById(UUID productId);
 
-    Page<ProductResponseDTO> findProductRelate(UUID productId, Pageable pageable);
+    List<ProductResponseDTO> findProductRelate(UUID productId);
 
 
 }

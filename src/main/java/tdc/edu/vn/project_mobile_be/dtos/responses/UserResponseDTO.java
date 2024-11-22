@@ -5,6 +5,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import tdc.edu.vn.project_mobile_be.dtos.responses.cart.CartResponseDTO;
+import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
@@ -34,9 +36,6 @@ public class UserResponseDTO implements IDto<User> {
     @JsonProperty("userBirthday")
     Timestamp userBirthday;
 
-    @JsonProperty("userAddress")
-    String userAddress;
-
     @JsonProperty("userImagePath")
     String userImagePath;
 
@@ -61,20 +60,27 @@ public class UserResponseDTO implements IDto<User> {
     @JsonProperty("iCard")
     IdCardResponseDTO iCard;
 
+    @JsonProperty("cartId")
+    UUID cartId;
+
     @JsonProperty("createdAt")
     Timestamp createdAt;
 
     @JsonProperty("updatedAt")
     Timestamp updatedAt;
 
+    @JsonProperty("roles")
     Set<RoleResponseDTO> roles;
+
+    @JsonProperty("address")
+    UserAddressResponseDTO address;
 
     @Override
     public User toEntity() {
         return null;
     }
 
-   @Override
+    @Override
     public void toDto(User user) {
         // Sao chép các thuộc tính từ entity sang DTO, ngoại trừ createdAt và updatedAt
         BeanUtils.copyProperties(user, this, "createdAt", "updatedAt", "roles");
@@ -84,7 +90,10 @@ public class UserResponseDTO implements IDto<User> {
             this.iCard = new IdCardResponseDTO();
             this.iCard.toDto(user.getICard());
         }
-
+        if (user.getDetail() != null) {
+            this.address = new UserAddressResponseDTO();
+            this.address.toDto(user.getDetail());
+        }
         // Lấy createdAt và updatedAt từ entity
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();

@@ -8,6 +8,12 @@ spring:
     password: ''
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  rabbitmq:
+    host: localhost
+    port: 5673
+    username: guest
+    password: guest
+
   jpa:
     database: mysql
     show-sql: true
@@ -65,9 +71,9 @@ spring.devtools:
       jackson:
         time-zone: Asia/Ho_Chi_Minh
 redis:
-    host: 192.168.57.128
-    port: 6379
-    password: ''
+  host: 192.168.57.128
+  port: 6379
+  password: ''
 
 
 google:
@@ -76,3 +82,9 @@ google:
       bucket-name: mobileproject
     credentials:
       path: src/main/resources/service-account.json
+
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG

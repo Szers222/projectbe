@@ -16,4 +16,6 @@ public class ShipmentProductId implements Serializable {
     private UUID product_id;
 
     private UUID shipment_id;
+
+    private UUID product_size_id;
 }

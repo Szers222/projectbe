@@ -13,6 +13,7 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundExcept
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateCustomerRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateUserRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.UserResponseDTO;
+import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
@@ -40,18 +41,18 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
     IdCardRepository idCardRepository;
     @Autowired
     private RoleRepository roleRepository;
-    @Autowired
-    PasswordEncoder passwordEncoder;
+//    @Autowired
+//    PasswordEncoder passwordEncoder;
 
 
     @Override
     public User updateUser(User user, UpdateUserRequestDTO request) {
         user = userRepository.findById(user.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        user.setUserPassword(passwordEncoder.encode(request.getUserPassword()));
+//        user.setUserPassword(passwordEncoder.encode(request.getUserPassword()));
         user.setUserPhone(request.getUserPhone());
         user.setUserBirthday(request.getUserBirthday());
-        user.setUserPasswordLevel2(passwordEncoder.encode(request.getUserPasswordLevel2()));
+//        user.setUserPasswordLevel2(passwordEncoder.encode(request.getUserPasswordLevel2()));
         user.setUserImagePath(request.getUserImagePath());
         user.setUserFirstName(request.getUserFirstName());
         user.setUserLastName(request.getUserLastName());
@@ -87,9 +88,16 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
         String email = context.getAuthentication().getName();
 
         User user = userRepository.findByUserEmail(email)
-                .orElseThrow(() -> new RuntimeException("Tai khong ton tai"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         UserResponseDTO responseDTO = new UserResponseDTO();
         responseDTO.toDto(user);
+        Set<Cart> carts = user.getCarts();
+        carts.forEach(cart -> {
+            if (cart.getCartStatus() == 1) {
+                responseDTO.setCartId(cart.getCartId());
+            }
+        });
 
         return responseDTO;
     }
@@ -104,10 +112,10 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
         User user = userRepository.findByUserEmail(email)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
 
-        user.setUserPassword(passwordEncoder.encode(request.getUserPassword()));
+//        user.setUserPassword(passwordEncoder.encode(request.getUserPassword()));
         user.setUserPhone(request.getUserPhone());
         user.setUserBirthday(request.getUserBirthday());
-        user.setUserPasswordLevel2(passwordEncoder.encode(request.getUserPasswordLevel2()));
+//        user.setUserPasswordLevel2(passwordEncoder.encode(request.getUserPasswordLevel2()));
         user.setUserImagePath(request.getUserImagePath());
         user.setUserFirstName(request.getUserFirstName());
         user.setUserLastName(request.getUserLastName());
@@ -117,8 +125,12 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
 
         return userRepository.save(user);
     }
-
-
+    @Override
+    public void deleteUserById(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new RuntimeException("User not fount"));
+        userRepository.delete(user);
+    }
 
     // Get All Users
     @Override
