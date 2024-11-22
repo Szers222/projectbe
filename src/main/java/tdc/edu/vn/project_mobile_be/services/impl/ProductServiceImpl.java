@@ -202,23 +202,21 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Transactional
     public List<ProductResponseDTO> findProductRelate(UUID categoryId) {
         List<Product> productRelate = productRepository.findByIdWithCategories(categoryId);
-        List<Product> result;
+
+        List<Product> result = new ArrayList<>();
         if (productRelate.size() < PRODUCT_RELATE_SIZE) {
-            result = new ArrayList<>(productRelate);
+
             List<Product> products = new ArrayList<>(productRepository.findAll());
-            for (int i = 0; i < products.size(); i++) {
-                if (result.size() == PRODUCT_RELATE_SIZE) {
-                    break;
-                }
+            while (result.size() < PRODUCT_RELATE_SIZE) {
                 int addRandomProduct = new Random().nextInt(products.size());
                 Product product = products.get(addRandomProduct);
                 if (!result.contains(product)) {
                     result.add(product);
                 }
             }
-        } else {
-            result = new ArrayList<>();
-            for (int i = 0; i < PRODUCT_RELATE_SIZE; i++) {
+        }
+        if (productRelate.size() == PRODUCT_RELATE_SIZE || productRelate.size() > PRODUCT_RELATE_SIZE) {
+            while (result.size() < PRODUCT_RELATE_SIZE) {
                 int addRandomProduct = new Random().nextInt(productRelate.size());
                 Product product = productRelate.get(addRandomProduct);
                 if (!result.contains(product)) {
@@ -226,6 +224,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
                 }
             }
         }
+
 
         List<ProductResponseDTO> finalResult = new ArrayList<>();
         result.forEach(product -> {
@@ -325,7 +324,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         for (ProductImage productImage : product.getImages()) {
-            System.console().printf("ProductImage: " + productImage);
+
             if (productImage == null) {
                 break;
             }
@@ -348,14 +347,25 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
 
     @Override
-    public Page<ProductResponseDTO> getProductByCategoryId(UUID categoryId, Pageable pageable) {
-
-        Page<Product> products = productRepository.findByCategoryId(categoryId, pageable);
-        if (products.isEmpty() || products.getSize() == PRODUCT_MIN_SIZE) {
+    public List<ProductResponseDTO> getProductByCategoryId(UUID categoryId) {
+        List<Product> products = productRepository.findByCategoryId(categoryId);
+        Category category = categoryRepository.findByCategoryId(categoryId);
+        if (category == null) {
+            throw new EntityNotFoundException("Category không tồn tại !");
+        }
+        if (products.isEmpty() && category.getChildren().isEmpty()) {
             throw new ListNotFoundException("Không tìm thấy sản phẩm");
         }
 
-        return products.map(product -> {
+        if (category.getChildren() != null) {
+            List<Category> categoryChildren = category.getChildren();
+            categoryChildren.forEach(categoryChild -> {
+                List<Product> productsChild = productRepository.findByCategoryId(categoryChild.getCategoryId());
+                products.addAll(productsChild);
+            });
+        }
+        List<ProductResponseDTO> result = new ArrayList<>();
+        products.forEach(product -> {
             List<CategoryResponseDTO> categoryResponseDTOs = getCategoryResponseDTOs(product);
             List<ProductImageResponseDTO> productImageResponseDTOS = getProductImageResponseDTOs(product);
             List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
@@ -373,9 +383,10 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             dto.setSupplier(productSupplierResponseDTO);
             dto.setPostResponseDTO(postResponseDTO);
             dto.setProductImageResponseDTOs(productImageResponseDTOS);
-            return dto;
-        });
 
+            result.add(dto);
+        });
+        return result;
     }
     @Override
     public ProductResponseDTO getProductById(UUID productId) {
