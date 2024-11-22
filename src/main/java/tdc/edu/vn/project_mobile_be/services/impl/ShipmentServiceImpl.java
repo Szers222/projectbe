@@ -2,8 +2,6 @@ package tdc.edu.vn.project_mobile_be.services.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipment.ShipmentCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipment.ShipmentUpdateRequestDTO;
@@ -12,6 +10,7 @@ import tdc.edu.vn.project_mobile_be.dtos.requests.sizeproduct.SizeProductShipmen
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductSupplierResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.shipment.ShipmentResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.shipmentproduct.ShipmentProductResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.shipmentproduct.SizeProductShipmentResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
@@ -120,49 +119,27 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
 
 
     @Override
-    public ShipmentResponseDTO getShipmentById(UUID shipmentId) {
-        Shipment shipment = shipmentRepository
-                .findById(shipmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
-
-        List<ShipmentProduct> shipmentProducts = shipmentProductRepository.findByShipmentId(shipment.getShipmentId());
-        List<ShipmentProductResponseDTO> shipmentProductResponseDTOs = new ArrayList<>();
-        shipmentProducts.forEach(shipmentProduct -> {
-            List<UUID> sizeProductIds = shipmentProduct.getProduct().getSizeProducts().stream().map(sizeProduct -> sizeProduct.getSize().getProductSizeId()).toList();
-            ShipmentProductResponseDTO shipmentProductResponseDTO = new ShipmentProductResponseDTO();
-            shipmentProductResponseDTO.setShipmentProductPrice(shipmentProduct.getPrice());
-            shipmentProductResponseDTO.setShipmentProductQuantity(shipmentProduct.getQuantity());
-            shipmentProductResponseDTO.setShipmentProductId(shipmentProduct.getProduct().getProductId());
-            shipmentProductResponseDTO.setShipmentProductSizeId(sizeProductIds);
-            shipmentProductResponseDTOs.add(shipmentProductResponseDTO);
-        });
-        ShipmentResponseDTO shipmentResponseDTO = new ShipmentResponseDTO();
-        shipmentResponseDTO.toDto(shipment);
-        shipmentResponseDTO.setShipmentId(shipment.getShipmentId());
-        shipmentResponseDTO.setShipmentShipCost(shipment.getShipmentShipCost());
-        shipmentResponseDTO.setShipmentDate(shipment.getShipmentDate().toLocalDateTime().toLocalDate());
-        ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
-        productSupplierResponseDTO.toDto(shipment.getProductSupplier());
-        shipmentResponseDTO.setProductSupplierResponseDTO(productSupplierResponseDTO);
-        shipmentResponseDTO.setResponseDTOS(shipmentProductResponseDTOs);
-        return shipmentResponseDTO;
-    }
-
-    @Override
-    public Page<ShipmentResponseDTO> getAllShipment(Pageable pageable) {
-        Page<ShipmentResponseDTO> shipmentResponseDTOs = shipmentRepository.findAll(pageable).map(shipment -> {
+    public List<ShipmentResponseDTO> getShipmentById(UUID shipmentId) {
+        List<Shipment> shipments = shipmentRepository.findShipmentById(shipmentId);
+        List<ShipmentResponseDTO> shipmentResponseDTOList = new ArrayList<>();
+        shipments.forEach(shipment -> {
             List<ShipmentProduct> shipmentProducts = shipmentProductRepository.findByShipmentId(shipment.getShipmentId());
+            List<SizeProductShipmentResponseDTO> sizeShipmentProductResponseDTOs = new ArrayList<>();
             List<ShipmentProductResponseDTO> shipmentProductResponseDTOs = new ArrayList<>();
             shipmentProducts.forEach(shipmentProduct -> {
                 List<UUID> sizeProductIds = shipmentProduct.getProduct().getSizeProducts().stream().map(sizeProduct -> sizeProduct.getSize().getProductSizeId()).toList();
+                sizeProductIds.forEach(sizeProductId -> {
+                    SizeProductShipmentResponseDTO sizeProductShipmentResponseDTO = new SizeProductShipmentResponseDTO();
+                    sizeProductShipmentResponseDTO.setSizeId(sizeProductId);
+                    sizeProductShipmentResponseDTO.setProductSizeQuantity(shipmentProduct.getQuantity());
+                    sizeShipmentProductResponseDTOs.add(sizeProductShipmentResponseDTO);
+                });
                 ShipmentProductResponseDTO shipmentProductResponseDTO = new ShipmentProductResponseDTO();
+                shipmentProductResponseDTO.setProductId(shipmentProduct.getProduct().getProductId());
                 shipmentProductResponseDTO.setShipmentProductPrice(shipmentProduct.getPrice());
-                shipmentProductResponseDTO.setShipmentProductQuantity(shipmentProduct.getQuantity());
-                shipmentProductResponseDTO.setShipmentProductId(shipmentProduct.getProduct().getProductId());
-                shipmentProductResponseDTO.setShipmentProductSizeId(sizeProductIds);
+                shipmentProductResponseDTO.setSizesProduct(sizeShipmentProductResponseDTOs);
                 shipmentProductResponseDTOs.add(shipmentProductResponseDTO);
             });
-
             ShipmentResponseDTO shipmentResponseDTO = new ShipmentResponseDTO();
             shipmentResponseDTO.toDto(shipment);
             shipmentResponseDTO.setShipmentId(shipment.getShipmentId());
@@ -172,9 +149,45 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
             productSupplierResponseDTO.toDto(shipment.getProductSupplier());
             shipmentResponseDTO.setProductSupplierResponseDTO(productSupplierResponseDTO);
             shipmentResponseDTO.setResponseDTOS(shipmentProductResponseDTOs);
-            return shipmentResponseDTO;
+            shipmentResponseDTOList.add(shipmentResponseDTO);
         });
-        return shipmentResponseDTOs;
+        return shipmentResponseDTOList;
+    }
+
+    @Override
+    public List<ShipmentResponseDTO> getAllShipment() {
+        List<Shipment> shipments = shipmentRepository.findAll();
+        List<ShipmentResponseDTO> shipmentResponseDTOList = new ArrayList<>();
+        shipments.forEach(shipment -> {
+            List<ShipmentProduct> shipmentProducts = shipmentProductRepository.findByShipmentId(shipment.getShipmentId());
+            List<SizeProductShipmentResponseDTO> sizeShipmentProductResponseDTOs = new ArrayList<>();
+            List<ShipmentProductResponseDTO> shipmentProductResponseDTOs = new ArrayList<>();
+            shipmentProducts.forEach(shipmentProduct -> {
+                List<UUID> sizeProductIds = shipmentProduct.getProduct().getSizeProducts().stream().map(sizeProduct -> sizeProduct.getSize().getProductSizeId()).toList();
+                sizeProductIds.forEach(sizeProductId -> {
+                    SizeProductShipmentResponseDTO sizeProductShipmentResponseDTO = new SizeProductShipmentResponseDTO();
+                    sizeProductShipmentResponseDTO.setSizeId(sizeProductId);
+                    sizeProductShipmentResponseDTO.setProductSizeQuantity(shipmentProduct.getQuantity());
+                    sizeShipmentProductResponseDTOs.add(sizeProductShipmentResponseDTO);
+                });
+                ShipmentProductResponseDTO shipmentProductResponseDTO = new ShipmentProductResponseDTO();
+                shipmentProductResponseDTO.setProductId(shipmentProduct.getProduct().getProductId());
+                shipmentProductResponseDTO.setShipmentProductPrice(shipmentProduct.getPrice());
+                shipmentProductResponseDTO.setSizesProduct(sizeShipmentProductResponseDTOs);
+                shipmentProductResponseDTOs.add(shipmentProductResponseDTO);
+            });
+            ShipmentResponseDTO shipmentResponseDTO = new ShipmentResponseDTO();
+            shipmentResponseDTO.toDto(shipment);
+            shipmentResponseDTO.setShipmentId(shipment.getShipmentId());
+            shipmentResponseDTO.setShipmentShipCost(shipment.getShipmentShipCost());
+            shipmentResponseDTO.setShipmentDate(shipment.getShipmentDate().toLocalDateTime().toLocalDate());
+            ProductSupplierResponseDTO productSupplierResponseDTO = new ProductSupplierResponseDTO();
+            productSupplierResponseDTO.toDto(shipment.getProductSupplier());
+            shipmentResponseDTO.setProductSupplierResponseDTO(productSupplierResponseDTO);
+            shipmentResponseDTO.setResponseDTOS(shipmentProductResponseDTOs);
+            shipmentResponseDTOList.add(shipmentResponseDTO);
+        });
+        return shipmentResponseDTOList;
     }
 
     public boolean validateDiscountAndCost(float discount, double shipCost) {
