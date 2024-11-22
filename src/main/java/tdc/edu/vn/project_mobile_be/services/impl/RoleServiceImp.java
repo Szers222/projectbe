@@ -6,7 +6,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.RoleRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.RoleResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.UpdateRoleRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.role.RoleResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.permissions.Permission;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.PermissionRepository;
@@ -38,6 +39,7 @@ public class RoleServiceImp {
         role = roleRepository.save(role);
         return roleService.roleResponse(role);
     }
+
     public List<RoleResponseDTO> findAll() {
         return roleRepository.findAll()
                 .stream()
@@ -49,5 +51,15 @@ public class RoleServiceImp {
                 .orElseThrow(()-> new RuntimeException("Role not found"));
         roleRepository.delete(role);
     }
+    public RoleResponseDTO updateRole(UUID roleId, UpdateRoleRequestDTO request) {
+        Role role = roleRepository.findById(roleId)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+        Set<Permission> permissions = new HashSet<>(permissionRepository.findAllById(request.getPermissionsId()));
+        role.setPermissions(permissions);
+
+        // Lưu role đã cập nhật
+        return roleService.roleResponse(roleRepository.save(role));
+    }
+
 
 }

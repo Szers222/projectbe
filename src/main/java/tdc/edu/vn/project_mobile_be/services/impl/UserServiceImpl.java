@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateCustomerRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateUserRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.UserResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.user.UserResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;

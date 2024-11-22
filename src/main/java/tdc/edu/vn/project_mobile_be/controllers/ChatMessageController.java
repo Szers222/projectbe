@@ -11,7 +11,7 @@ import tdc.edu.vn.project_mobile_be.interfaces.service.ChatMessageService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/chat")
+@RequestMapping("/api/v1")
 public class ChatMessageController {
     private final ChatMessageService chatMessageService;
 
@@ -26,7 +26,7 @@ public class ChatMessageController {
      * @param receiver Người nhận
      * @return Danh sách tin nhắn
      */
-    @GetMapping("/messages")
+    @GetMapping("/auth/messages")
     public ResponseEntity<List<ChatMessage>> getMessagesBetweenUsers(
             @RequestParam String sender,
             @RequestParam String receiver) {
@@ -34,7 +34,7 @@ public class ChatMessageController {
         return ResponseEntity.ok(messages);
     }
 
-    @GetMapping("/messages/received")
+    @GetMapping("/auth/messages/received")
     public ResponseEntity<List<ChatMessage>> getMessagesForUser(@RequestParam String receiver) {
         List<ChatMessage> messages = chatMessageService.getMessagesForUser(receiver);
         return ResponseEntity.ok(messages);

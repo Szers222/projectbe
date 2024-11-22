@@ -5,15 +5,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import tdc.edu.vn.project_mobile_be.dtos.requests.CreateAddressRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.user.CreateAddressRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.UpdateAddressRequestDTO;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.entities.user.UserAddress;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserAddressRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.UserAddressService;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor

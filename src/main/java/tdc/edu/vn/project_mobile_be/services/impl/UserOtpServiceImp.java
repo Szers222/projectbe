@@ -8,7 +8,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tdc.edu.vn.project_mobile_be.dtos.requests.EmailRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.user.EmailRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.RegisterRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.ResetPasswordRequestDTO;
 import tdc.edu.vn.project_mobile_be.entities.cart.Cart;

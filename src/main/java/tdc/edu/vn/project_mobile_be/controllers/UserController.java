@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateCustomerRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateUserRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.UserResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.user.UserResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.UserService;
