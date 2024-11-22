@@ -327,7 +327,17 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             }
             googleCloudStorageService.deleteFile(productImage.getProductImagePath());
         }
-        productRepository.deleteByProductId(productId);
+
+        product.getSizeProducts().forEach(sizeProduct -> sizeProduct.setProduct(null));
+        product.getSizeProducts().clear();
+
+
+        product.getShipmentProducts().forEach(shipment -> shipment.setProduct(null));
+        product.getShipmentProducts().clear();
+
+        productRepository.saveAndFlush(product);
+
+        productRepository.delete(product);
     }
 
 
@@ -448,7 +458,6 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
                 SizeProductResponseDTO sizeProductDTO = new SizeProductResponseDTO();
                 sizeProductDTO.toDto(sizeProduct);
                 sizeProductDTO.setProductSizeQuantity(sizeProduct.getQuantity());
-                productSizeResponseDTO.setSizeProductResponseDTOs(sizeProductDTO);
             });
             return productSizeResponseDTO;
         }).collect(Collectors.toList());
