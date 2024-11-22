@@ -69,7 +69,7 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
 
     @Override
     public Cart createCartNoUser(CartCreateRequestDTO params, HttpServletRequest request) {
-
+        log.info("Create cart for guest" + request.getCookies());
         UUID guestId = null;
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
