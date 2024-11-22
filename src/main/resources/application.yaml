@@ -4,7 +4,7 @@ spring:
 
   datasource:
     url: jdbc:mysql://localhost:3306/mobileproject
-    username: "root"
+    username: root
     password: ''
     driver-class-name: com.mysql.cj.jdbc.Driver
 
@@ -62,19 +62,18 @@ jwt:
   valid-duration: 60
   refreshable-duration: 7
 
-
 spring.devtools:
   restart:
     enabled: true  # Kích hoạt tự động tải lại
     exclude: static/**,public/** # Loại trừ thư mục static và public
-    spring:
-      jackson:
-        time-zone: Asia/Ho_Chi_Minh
+  spring:
+    jackson:
+      time-zone: Asia/Ho_Chi_Minh
+
 redis:
   host: 192.168.57.128
   port: 6379
   password: ''
-
 
 google:
   cloud:
@@ -88,3 +87,6 @@ logging:
     org:
       springframework:
         web: DEBUG
+        security: DEBUG
+
+

@@ -6,6 +6,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -72,6 +73,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private GoogleCloudStorageService googleCloudStorageService;
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
 
     @Override
@@ -131,7 +134,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             savedProduct.setProductQuantity(PRODUCT_DEFAULT_SIZE);
             savedProduct.getSizeProducts().addAll(sizeProducts);
         }
-
+        ProductResponseDTO dto = getProductById(savedProduct.getProductId());
+        applicationEventPublisher.publishEvent(new ProductListeners(this, dto));
         return savedProduct;
     }
 
@@ -327,10 +331,19 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             }
             googleCloudStorageService.deleteFile(productImage.getProductImagePath());
         }
+
+        product.getSizeProducts().forEach(sizeProduct -> sizeProduct.setProduct(null));
         product.getSizeProducts().clear();
+
+
+        product.getShipmentProducts().forEach(shipment -> shipment.setProduct(null));
         product.getShipmentProducts().clear();
-        productRepository.save(product);
-        productRepository.deleteByProductId(productId);
+
+        productRepository.saveAndFlush(product);
+
+        productRepository.delete(product);
+        messagingTemplate.convertAndSend("/topic/products", productId);
+
     }
 
 
