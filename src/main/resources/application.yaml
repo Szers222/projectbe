@@ -4,7 +4,7 @@ spring:
 
   datasource:
     url: jdbc:mysql://localhost:3306/mobileproject
-    username: "root"
+    username: root
     password: ''
     driver-class-name: com.mysql.cj.jdbc.Driver
 
@@ -62,19 +62,18 @@ jwt:
   valid-duration: 60
   refreshable-duration: 7
 
-
 spring.devtools:
   restart:
     enabled: true  # Kích hoạt tự động tải lại
     exclude: static/**,public/** # Loại trừ thư mục static và public
-    spring:
-      jackson:
-        time-zone: Asia/Ho_Chi_Minh
+  spring:
+    jackson:
+      time-zone: Asia/Ho_Chi_Minh
+
 redis:
   host: 192.168.57.128
   port: 6379
   password: ''
-
 
 google:
   cloud:
@@ -89,28 +88,28 @@ logging:
       springframework:
         web: DEBUG
         security: DEBUG
-# Cấu hình kết nối MySQL Database
-debezium.datasource:
-  url: jdbc:mysql://localhost:3306/mobileproject
-  user: 'root'
-  password: ''
 
-# Cấu hình kết nối Kafka
-debezium.kafka:
-  bootstrap.servers: localhost:9092
-  topic: your_topic_name
+# Cấu hình Kafka
+spring.kafka:
+  bootstrap-servers: localhost:9092
+  consumer:
+    group-id: products-group
+    auto-offset-reset: earliest # Bắt đầu đọc từ đầu nếu không tìm thấy offset
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
-# Cấu hình Debezium server và lịch sử schema
-debezium.database:
-  server.name: my-app-connector
-  history:
-    kafka:
-      bootstrap.servers: localhost:9092
-      topic: schema-changes.inventory
-
-# Các cấu hình khác (optional)
-debezium.transforms:
-  - name: org.apache.kafka.connect.transforms.MaskField
-    parameters:
-      # Example: Add transformation if you want to mask certain fields (optional)
-      fields: password, credit_card_number
+# Cấu hình Debezium
+debezium:
+  datasource:
+    url: jdbc:mysql://localhost:3306/mobileproject
+    user: root
+    password: ''
+  kafka:
+    topic: products  # Topic Kafka để Debezium gửi message đến
+  database:
+    server.name: my-app-connector # Tên duy nhất cho connector
+    history:
+      kafka:
+        bootstrap-servers: localhost:9092
+        topic: dbhistory.mobileproject # Topic Kafka để lưu trữ schema history
+  table.include.list: mobileproject.products # Danh sách các bảng cần theo dõi
