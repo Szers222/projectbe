@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipment.ShipmentCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipment.ShipmentUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipmentproduct.ShipmentProductCreateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.sizeproduct.SizeProductRequestParamsDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.sizeproduct.SizeProductShipmentRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductSupplierResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.shipment.ShipmentResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.shipmentproduct.ShipmentProductResponseDTO;
@@ -199,10 +199,10 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
 
 
         for (ShipmentProductCreateRequestDTO param : requestDTO) {
-            for (SizeProductRequestParamsDTO paramSize : param.getSizesProduct()) {
+            for (SizeProductShipmentRequestParamsDTO paramSize : param.getSizesProduct()) {
                 Product product = productRepository
-                        .findById(paramSize.getProductId())
-                        .orElseThrow(() -> new IllegalArgumentException("Product with ID " + paramSize.getProductId() + " not found"));
+                        .findById(param.getProductId())
+                        .orElseThrow(() -> new IllegalArgumentException("Product with ID " + param.getProductId() + " not found"));
                 ProductSize productSize = productSizeRepository
                         .findById(paramSize.getSizeId())
                         .orElseThrow(() -> new IllegalArgumentException("Size with ID " + paramSize.getSizeId() + " not found"));
@@ -259,12 +259,12 @@ public class ShipmentServiceImpl extends AbService<Shipment, UUID> implements Sh
         Set<ShipmentProduct> shipmentProducts = new HashSet<>();
 
         for (ShipmentProductCreateRequestDTO param : requestDTO) {
-            for (SizeProductRequestParamsDTO paramSize : param.getSizesProduct()) {
+            for (SizeProductShipmentRequestParamsDTO paramSize : param.getSizesProduct()) {
                 Product product = productRepository
-                        .findById(paramSize.getProductId())
-                        .orElseThrow(() -> new IllegalArgumentException("Product with ID " + paramSize.getProductId() + " not found"));
+                        .findById(param.getProductId())
+                        .orElseThrow(() -> new IllegalArgumentException("Product with ID " + param.getProductId() + " not found"));
                 ShipmentProductId shipmentProductId = new ShipmentProductId();
-                shipmentProductId.setProduct_id(paramSize.getProductId());
+                shipmentProductId.setProduct_id(param.getProductId());
                 shipmentProductId.setShipment_id(shipment.getShipmentId());
                 shipmentProductId.setProduct_size_id(paramSize.getSizeId());
 
