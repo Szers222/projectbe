@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.CreateAddressRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.UpdateAddressRequestDTO;
@@ -17,10 +18,10 @@ import tdc.edu.vn.project_mobile_be.interfaces.service.UserAddressService;
 @RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class UserAddressServiceImp {
-
+public class UserAddressServiceImp implements UserAddressService {
+    @Autowired
     UserAddressRepository userAddressRepository;
-    UserAddressService userAddressService;
+    @Autowired
     UserRepository userRepository; // Add this
 
     public UserAddress created(CreateAddressRequestDTO request) {

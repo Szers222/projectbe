@@ -72,7 +72,6 @@ public class UserController {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
     @GetMapping("/users/myInfo")
-    @PreAuthorize("hasAuthority('PERMISSION_GETID')")
     public ResponseEntity<ResponseData<UserResponseDTO>> getMyUsers() {
         UserResponseDTO userResponse = userService.getMyInfo();
         ResponseData<UserResponseDTO> responseData = new ResponseData<>(

@@ -39,11 +39,5 @@ public class RoleController {
         roleServiceImp.delete(id);
         return ApiResponse.<Void>builder().build();
     }
-    @PutMapping("/role/{roleId}")
-    ApiResponse<RoleResponseDTO> update(@PathVariable UUID roleId, @RequestBody UpdateRoleRequestDTO request) {
-        RoleResponseDTO updatedRole = roleServiceImp.updateRole(roleId, request);
-        return ApiResponse.<RoleResponseDTO>builder()
-                .result(updatedRole)
-                .build();
-    }
+
 }

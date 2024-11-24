@@ -8,10 +8,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public enum Shipper {
-    RECEIVE(1),
-    PICKUP(2),
-    DELIVERING(3),
-    DELIVERED_SUCCESS(4),
-    CANCEL_ORDER(5);
-    private int value;
+    RECEIVE("Nhận hàng"),
+    PICKUP("Lấy hàng"),
+    DELIVERING("Giao hàng"),
+    DELIVERED_SUCCESS("Giao hàng thành công"),
+    CANCEL_ORDER("Huỷ hàng"),
+    RETURN_ODER("Trả hàng")
+    ;
+    private String mess;
 }

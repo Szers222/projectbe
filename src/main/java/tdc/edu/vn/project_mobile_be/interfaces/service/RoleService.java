@@ -16,8 +16,4 @@ public interface RoleService {
     @Mapping(target = "permissionsName", source = "permissions")
     RoleResponseDTO roleResponse(Role role);
 
-    void updateRole(@MappingTarget Role role, UpdateRoleRequestDTO request);
-
-
-
 }
