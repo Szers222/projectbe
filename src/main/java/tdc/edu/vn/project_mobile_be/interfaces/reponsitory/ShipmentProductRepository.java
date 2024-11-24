@@ -12,5 +12,11 @@ public interface ShipmentProductRepository extends JpaRepository<ShipmentProduct
 
     @Query("SELECT sp FROM ShipmentProduct sp WHERE sp.shipment.shipmentId = ?1")
     List<ShipmentProduct> findByShipmentId(UUID shipmentId);
+
+    @Query("SELECT sp FROM ShipmentProduct sp WHERE sp.id= ?1")
+    List<ShipmentProduct> findByProductId(ShipmentProductId shipmentProductId);
+
+    @Query("SELECT sp FROM ShipmentProduct sp WHERE sp.product.productId = ?1 AND sp.productSize.productSizeId = ?2")
+    List<ShipmentProduct> findByProductIdAndProductSizeId(UUID productId, UUID productSizeId);
 }
 

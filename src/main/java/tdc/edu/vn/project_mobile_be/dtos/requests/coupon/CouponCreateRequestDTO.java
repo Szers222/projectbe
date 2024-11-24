@@ -4,6 +4,7 @@ package tdc.edu.vn.project_mobile_be.dtos.requests.coupon;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,12 +21,16 @@ public class CouponCreateRequestDTO implements IDto<Coupon> {
     @NotBlank(message = "Tên danh mục không được để trống")
     @JsonProperty("couponName")
     private String couponName;
+
     @NotBlank(message = "Mã giảm giá không được để trống")
     @JsonProperty("couponCode")
     private String couponCode;
-    @NotBlank(message = "Ngày phát hành không được để trống")
+
     @JsonProperty("couponRelease")
     private LocalDate couponRelease;
+
+    @JsonProperty("couponFeeShip")
+    private double couponFeeShip;
 
     @JsonProperty("couponExpire")
     private LocalDate couponExpire;
@@ -33,10 +38,13 @@ public class CouponCreateRequestDTO implements IDto<Coupon> {
     @JsonProperty("couponQuantity")
     @Min(value = 1, message = "Số lượng mã giảm giá phải lớn hơn 0")
     private int couponQuantity;
+
     @JsonProperty("couponPerHundred")
     private float couponPerHundred;
+
     @JsonProperty("couponPrice")
     private double couponPrice;
+
     @JsonProperty("couponType")
     private int couponType;
 

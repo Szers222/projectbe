@@ -10,17 +10,16 @@ import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 @Data
 public class SizeProduct {
     @EmbeddedId
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private SizeProductId id = new SizeProductId();
 
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("product_id")
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "product_id",nullable = false)
     private Product product;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("product_size_id")
-    @JoinColumn(name = "product_size_id")
+    @JoinColumn(name = "product_size_id",nullable = false)
     private ProductSize size;
 
     @Column(name = "sizes_products_quantity", columnDefinition = "int default 0")

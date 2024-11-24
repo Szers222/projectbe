@@ -18,14 +18,11 @@ public class ShipmentProductResponseDTO implements IDto<ShipmentProductResponseD
 
 
     @JsonProperty("productId")
-    private UUID shipmentProductId;
-    @JsonProperty("productSizeId")
-    private List<UUID> shipmentProductSizeId;
-
-    @JsonProperty("shipmentProductQuantity")
-    private int shipmentProductQuantity;
+    private UUID productId;
     @JsonProperty("shipmentProductPrice")
     private double shipmentProductPrice;
+    @JsonProperty("sizesProduct")
+    private List<SizeProductShipmentResponseDTO> sizesProduct;
 
     @Override
     public ShipmentProductResponseDTO toEntity() {

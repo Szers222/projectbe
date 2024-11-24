@@ -10,6 +10,7 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.UnsupportedOperation
 import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -24,13 +25,15 @@ public class CouponResponseDTO implements IDto<Coupon> {
     @JsonProperty("couponCode")
     private String couponCode;
     @JsonProperty("couponPrice")
-    private String couponPrice;
+    private double couponPrice;
     @JsonProperty("couponRelease")
-    private LocalDate couponRelease;
+    private Timestamp couponRelease;
     @JsonProperty("couponExpire")
-    private LocalDate couponExpire;
+    private Timestamp couponExpire;
     @JsonProperty("couponType")
     private int couponType;
+    @JsonProperty("couponFeeShip")
+    private double couponFeeShip;
     @JsonProperty("couponPerHundred")
     private float couponPerHundred;
     @JsonProperty("couponQuantity")

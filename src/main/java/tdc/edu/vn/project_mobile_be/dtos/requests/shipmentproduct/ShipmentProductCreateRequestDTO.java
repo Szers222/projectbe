@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.commond.customexception.UnsupportedOperationException;
+import tdc.edu.vn.project_mobile_be.dtos.requests.sizeproduct.SizeProductShipmentRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
@@ -20,20 +21,16 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ShipmentProductCreateRequestDTO implements IDto<ShipmentProduct> {
 
+    @NotNull(message = "Product không được để trống")
+    @JsonProperty("productId")
+    private UUID productId;
+
     @Min(value = 0, message = "ProductPrice phải lớn hơn hoặc bằng 0")
     @JsonProperty("productPrice")
     private double productPrice;
 
-    @NotNull(message = "ProductId không được để trống")
-    @JsonProperty("productId")
-    private UUID productId;
-
-    @NotNull(message = "ShipmentId không được để trống")
-    @JsonProperty("productQuantity")
-    private int productQuantity;
-
-    @JsonProperty("sizeProduct")
-    private List<UUID> sizeProductId;
+    @JsonProperty("sizesProduct")
+    private List<SizeProductShipmentRequestParamsDTO> sizesProduct;
 
 
     @Override
