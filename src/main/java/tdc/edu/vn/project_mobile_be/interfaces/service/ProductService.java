@@ -23,7 +23,7 @@ public interface ProductService extends IService<Product, UUID> {
     Product updateProduct(ProductUpdateRequestDTO params, UUID productId, MultipartFile[] file);
 
 
-    Page<ProductResponseDTO> getProductByCategoryId(UUID categoryId, Pageable pageable);
+    List<ProductResponseDTO> getProductByCategoryId(UUID categoryId);
 
     ProductResponseDTO getProductById(UUID productId);
 

@@ -1,16 +1,13 @@
 package tdc.edu.vn.project_mobile_be.dtos.requests.product;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@Setter
 public class ProductRequestParamsDTO {
     private int page = 0;
     private int size = 20;

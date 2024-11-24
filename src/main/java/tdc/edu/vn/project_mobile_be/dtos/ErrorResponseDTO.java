@@ -11,9 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class ErrorResponseDTO {
+
+
     @JsonProperty("error")
     private List<String> error;
     @JsonProperty("message")
@@ -22,4 +24,11 @@ public class ErrorResponseDTO {
     private HttpStatus status;
     @JsonProperty("status")
     private int statusCode;
+
+    public ErrorResponseDTO(List<String> error, HttpStatus status) {
+        this.error = error;
+        this.status = status;
+        this.statusCode = status.value();
+    }
+
 }

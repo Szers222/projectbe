@@ -155,7 +155,7 @@ public class ProductController {
     }
 
     @GetMapping("/products/category/{categoryId}")
-    public ResponseEntity<ResponseData<PagedModel<EntityModel<ProductResponseDTO>>>> getProductByCategoryId(
+    public ResponseEntity<ResponseData<List<ProductResponseDTO>>> getProductByCategoryId(
             @PathVariable UUID categoryId,
             @ModelAttribute ProductRequestParamsDTO params,
             PagedResourcesAssembler<ProductResponseDTO> assembler) {
@@ -166,11 +166,10 @@ public class ProductController {
         Sort sortBy = Sort.by(sortDirection, params.getSort());
         Pageable pageable = PageRequest.of(params.getPage(), params.getSize(), sortBy);
 
-        Page<ProductResponseDTO> productDtoPage = productService.getProductByCategoryId(categoryId, pageable);
+        List<ProductResponseDTO> dtoList = productService.getProductByCategoryId(categoryId);
 
-        PagedModel<EntityModel<ProductResponseDTO>> pagedModel = assembler.toModel(productDtoPage);
 
-        ResponseData<PagedModel<EntityModel<ProductResponseDTO>>> responseData = new ResponseData<>(HttpStatus.OK, "Success", pagedModel);
+        ResponseData<List<ProductResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Success", dtoList);
 
         return ResponseEntity.ok(responseData);
     }
