@@ -1,3 +1,4 @@
+
 # Sử dụng image OpenJDK
 FROM openjdk:23-jdk-slim
 
@@ -9,6 +10,8 @@ WORKDIR /app
 
 # Sao chép file JAR của ứng dụng vào thư mục làm việc
 COPY ${JAR_FILE} app.jar
+
+COPY service-account.json /app/service-account.json
 
 # Mở cổng 8080
 EXPOSE 8080

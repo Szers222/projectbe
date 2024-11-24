@@ -1,11 +1,18 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,10 +40,15 @@ import tdc.edu.vn.project_mobile_be.interfaces.service.PostService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductImageService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -75,6 +87,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private ApplicationEventPublisher applicationEventPublisher;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
 
     @Override
@@ -141,6 +155,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
     @Override
     @Transactional
+    @SuppressWarnings("unchecked")
     public Product updateProduct(ProductUpdateRequestDTO params, UUID productId, MultipartFile[] files) {
         Post post = new Post();
         if (params.getPost() != null) {
@@ -195,6 +210,11 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         product.getSizeProducts().addAll(sizeProducts);
         ProductResponseDTO dto = getProductById(productId);
         applicationEventPublisher.publishEvent(new ProductListeners(this, dto));
+
+        redisTemplate.delete(productId.toString());
+
+        redisTemplate.opsForValue().set(productId.toString(), product, 60, TimeUnit.MINUTES);
+
         return productRepository.save(product);
     }
 
@@ -203,25 +223,25 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     public List<ProductResponseDTO> findProductRelate(UUID categoryId) {
         List<Product> productRelate = productRepository.findByIdWithCategories(categoryId);
 
-        List<Product> result = new ArrayList<>();
+        List<Product> result = new ArrayList<>(productRelate);
         if (productRelate.size() < PRODUCT_RELATE_SIZE) {
-
             List<Product> products = new ArrayList<>(productRepository.findAll());
-            while (result.size() < PRODUCT_RELATE_SIZE) {
+            if (products.isEmpty() || products.size() < PRODUCT_RELATE_SIZE - productRelate.size()) {
+                throw new EntityNotFoundException("So luong  san pham khong du");
+            }
+            while (productRelate.size() < PRODUCT_RELATE_SIZE) {
                 int addRandomProduct = new Random().nextInt(products.size());
                 Product product = products.get(addRandomProduct);
-                if (!result.contains(product)) {
-                    result.add(product);
+                if (!productRelate.contains(product)) {
+                    productRelate.add(product);
                 }
             }
         }
-        if (productRelate.size() == PRODUCT_RELATE_SIZE || productRelate.size() > PRODUCT_RELATE_SIZE) {
-            while (result.size() < PRODUCT_RELATE_SIZE) {
-                int addRandomProduct = new Random().nextInt(productRelate.size());
-                Product product = productRelate.get(addRandomProduct);
-                if (!result.contains(product)) {
-                    result.add(product);
-                }
+        while (result.size() < PRODUCT_RELATE_SIZE) {
+            int addRandomProduct = new Random().nextInt(productRelate.size());
+            Product product = productRelate.get(addRandomProduct);
+            if (!result.contains(product)) {
+                result.add(product);
             }
         }
 
@@ -253,6 +273,31 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Override
     @Transactional
     public Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable) {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String filterJson = "";
+        String pageableJson = "";
+        try {
+            filterJson = objectMapper.writeValueAsString(params);
+            pageableJson = objectMapper.writeValueAsString(pageable);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String cacheKey = "findProductsByFilters:" + filterJson + ":" + pageableJson;
+
+        String cachedResult = (String) redisTemplate.opsForValue().get(cacheKey);
+        if (cachedResult != null) {
+            try {
+                List<ProductResponseDTO> dtoList = objectMapper.readValue(cachedResult, new TypeReference<List<ProductResponseDTO>>() {
+                });
+                return new PageImpl<>(dtoList, pageable, dtoList.size());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         Specification<Product> spec = Specification.where(null);  // Khởi tạo Specification rỗng
         // Lọc theo danh mục (category)
         if (params.getCategoryId() != null && categoryRepository.findById(params.getCategoryId()).isPresent()) {
@@ -293,7 +338,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         }
 
         // Chuyển đổi sang DTO
-        return products.map(product -> {
+        Page<ProductResponseDTO> dtoPage = products.map(product -> {
             List<CategoryResponseDTO> categoryResponseDTOs = getCategoryResponseDTOs(product);
             List<ProductImageResponseDTO> productImageResponseDTOS = getProductImageResponseDTOs(product);
             List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
@@ -313,7 +358,15 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             dto.setProductPriceSale(productPriceSaleString);
             return dto;
         });
+        List<ProductResponseDTO> dtoList = dtoPage.getContent();
+        try {
+            String serializedData = objectMapper.writeValueAsString(dtoList);
+            redisTemplate.opsForValue().set(cacheKey, serializedData, 60, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
+        return dtoPage;
     }
 
     @Override
@@ -605,4 +658,20 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         }
         return quantity;
     }
+
+    private Gson getGson() {
+        Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new JsonSerializer<LocalDateTime>() {
+            @Override
+            public JsonElement serialize(LocalDateTime localDateTime, Type type, JsonSerializationContext jsonSerializationContext) {
+                return new JsonPrimitive(DateTimeFormatter.ISO_LOCAL_DATE.format(localDateTime));
+            }
+        }).registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
+            @Override
+            public LocalDateTime deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+                return LocalDateTime.parse(jsonElement.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE);
+            }
+        }).create();
+        return gson;
+    }
 }
+

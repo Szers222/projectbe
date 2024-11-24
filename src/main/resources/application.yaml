@@ -1,11 +1,16 @@
+server:
+  ip: localhost
+password: ''
+
+
 spring:
   application:
     name: project_mobile_be
 
   datasource:
-    url: jdbc:mysql://localhost:3306/mobileproject
+    url: jdbc:mysql://${server.ip}:3306/mobileproject
     username: root
-    password: ''
+    password: ${password}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -65,16 +70,18 @@ spring.devtools:
       time-zone: Asia/Ho_Chi_Minh
 
 redis:
-  host: localhost
+  host: ${server.ip}
   port: 6379
   password: ''
+  cache:
+    type: redis
 
 google:
   cloud:
     storage:
       bucket-name: mobileproject
     credentials:
-      path: src/main/resources/service-account.json
+      path: service-account.json
 
 logging:
   level:

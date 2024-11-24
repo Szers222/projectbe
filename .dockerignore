@@ -1,7 +1,5 @@
-target
 .idea/
 *.iml
 *.iws
-target/
 .sonar/
 .sonar-reports/

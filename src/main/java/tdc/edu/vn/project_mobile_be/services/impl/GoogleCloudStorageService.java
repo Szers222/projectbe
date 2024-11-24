@@ -26,6 +26,7 @@ public class GoogleCloudStorageService {
     @Value("${google.cloud.credentials.path}")
     private String credentialsPath;
 
+
     private Storage storage;
 
     @PostConstruct
