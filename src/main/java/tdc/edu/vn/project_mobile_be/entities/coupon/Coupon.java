@@ -49,6 +49,9 @@ public class Coupon {
     @Column(name = "coupon_price")
     private double couponPrice;
 
+    @Column(name = "coupon_fee_ship")
+    private double couponFeeShip;
+
     @Column(name = "coupon_type")
     private int couponType;
 

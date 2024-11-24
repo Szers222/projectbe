@@ -8,6 +8,7 @@ import tdc.edu.vn.project_mobile_be.dtos.responses.shipment.ShipmentResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
 import tdc.edu.vn.project_mobile_be.interfaces.IService;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ShipmentService extends IService<Shipment, UUID> {
@@ -19,9 +20,9 @@ public interface ShipmentService extends IService<Shipment, UUID> {
 
     boolean deleteShipment(UUID shipmentId);
 
-    ShipmentResponseDTO getShipmentById(UUID shipmentId);
+    List<ShipmentResponseDTO> getShipmentById(UUID shipmentId);
 
     ShipmentResponseDTO getShipmentBySupplier(String supplier);
 
-    Page<ShipmentResponseDTO> getAllShipment(Pageable pageable);
+    List<ShipmentResponseDTO> getAllShipment();
 }

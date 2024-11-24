@@ -1,6 +1,7 @@
 package tdc.edu.vn.project_mobile_be.dtos.requests.productsize;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,10 @@ public class ProductSizeCreateRequestDTO implements IDto<ProductSize> {
     @NotBlank(message = "product-size-name không được để trống")
     @JsonProperty("productSizeName")
     private String productSizeName;
+
+    @NotNull(message = "Product Size Code không được để trống")
+    @Column(name = "product_size_code")
+    private String productSizeCode;
 
     @Override
     public ProductSize toEntity() {

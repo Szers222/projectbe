@@ -3,6 +3,7 @@ package tdc.edu.vn.project_mobile_be.entities.relationship;
 import jakarta.persistence.*;
 import lombok.Data;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
 
 
@@ -23,6 +24,11 @@ public class ShipmentProduct {
     @MapsId("shipment_id")
     @JoinColumn(name = "shipment_id")
     private Shipment shipment;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @MapsId("product_size_id")
+    @JoinColumn(name = "product_size_id")
+    private ProductSize productSize;
 
     @Column(name = "shipments_products_price", nullable = false, columnDefinition = "double default 0")
     private double price;

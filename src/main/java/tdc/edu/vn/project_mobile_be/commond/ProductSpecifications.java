@@ -21,7 +21,19 @@ public class ProductSpecifications implements Specification<Product> {
         return (root, query, cb) -> {
             // Join giữa Product và Category
             Join<Product, Category> categories = root.join("categories", JoinType.INNER);
-            return cb.equal(categories.get("categoryId"), categoryId);
+            assert query != null;
+            Subquery<UUID> subquery = query.subquery(UUID.class);
+            Root<Category> categoryRoot = subquery.from(Category.class);
+            subquery.select(categoryRoot.get("categoryId"));
+
+            subquery.where(
+                    cb.or(
+                            cb.equal(categoryRoot.get("parent").get("categoryId"), categoryId),
+                            cb.equal(categoryRoot.get("categoryId"), categoryId)
+                    )
+            );
+
+            return cb.in(categories.get("categoryId")).value(subquery);
         };
     }
 

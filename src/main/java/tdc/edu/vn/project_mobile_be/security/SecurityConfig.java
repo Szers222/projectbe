@@ -43,7 +43,9 @@ public class SecurityConfig {
             "/ws/**",
             "api/chat/*",
             "api/chat/*/*"
-    };
+            "/api/v1/products/relate",
+            "/ws"
+      };
 
 
 
