@@ -3,7 +3,6 @@ package tdc.edu.vn.project_mobile_be.services.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.gson.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -33,6 +32,7 @@ import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.product.*;
+import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProductId;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
@@ -42,12 +42,9 @@ import tdc.edu.vn.project_mobile_be.interfaces.service.ProductImageService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -67,6 +64,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private final double MAX_PER = 100;
 
     private final ObjectMapper objectMapper;
+    @Autowired
+    private ShipmentProductRepository shipmentProductRepository;
 
     @Autowired
     public ProductServiceImpl(@Lazy ObjectMapper objectMapper) {
@@ -197,11 +196,21 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
         Coupon coupon = new Coupon();
         if (params.getCoupon() != null) {
-            coupon = couponService.updateCouponByProductId(params.getCoupon(), productId);
-            if (coupon == null) {
-                throw new EntityNotFoundException("Coupon không tồn tại !");
+
+            if (product.getCoupon() != null) {
+
+                coupon = couponService.updateCouponByProductId(params.getCoupon(), product.getCoupon().getCouponId());
+            } else {
+
+                coupon = couponService.createCouponForProduct(params.getCoupon());
             }
             product.setCoupon(coupon);
+
+        } else if (product.getCoupon() != null) {
+
+            couponService.deleteCoupon(product.getCoupon().getCouponId());
+
+            product.setCoupon(null);
         }
 
         double productSale = solveProductSale(params.getProductPrice(), coupon);
@@ -281,6 +290,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
     @Override
     @Transactional
+    @SuppressWarnings("unchecked")
     public Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable) {
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -390,26 +400,28 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
                 .findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
+        // Xóa các hình ảnh của sản phẩm
         for (ProductImage productImage : product.getImages()) {
-
-            if (productImage == null) {
-                break;
+            if (productImage != null) {
+                googleCloudStorageService.deleteFile(productImage.getProductImagePath());
             }
-            googleCloudStorageService.deleteFile(productImage.getProductImagePath());
         }
 
+        // Xóa các liên kết với SizeProduct
         product.getSizeProducts().forEach(sizeProduct -> sizeProduct.setProduct(null));
         product.getSizeProducts().clear();
 
+        // Xóa các liên kết với ShipmentProduct trước khi xóa product
+        Set<ShipmentProduct> shipmentProducts = product.getShipmentProducts();
+        shipmentProducts.clear(); // Xóa toàn bộ liên kết ShipmentProduct trước
 
-        product.getShipmentProducts().forEach(shipment -> shipment.setProduct(null));
-        product.getShipmentProducts().clear();
+        productRepository.saveAndFlush(product); // Sau khi đã quản lý tất cả các liên kết
 
-        productRepository.saveAndFlush(product);
+        shipmentProductRepository.deleteAll(shipmentProducts); // Sau đó xóa ShipmentProduct nếu cần
 
+        // Xóa sản phẩm và gửi thông điệp
         productRepository.delete(product);
         messagingTemplate.convertAndSend("/topic/products", productId);
-
     }
 
 
@@ -520,12 +532,11 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     }
 
     public List<CategoryResponseDTO> getCategoryResponseDTOs(Product product) {
-        List<CategoryResponseDTO> categoryResponseDTOs = convertToDTOList(product.getCategories() != null ? new ArrayList<>(product.getCategories()) : Collections.emptyList(), category -> {
+        return convertToDTOList(product.getCategories() != null ? new ArrayList<>(product.getCategories()) : Collections.emptyList(), category -> {
             CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO();
             categoryResponseDTO.toDto(category);
             return categoryResponseDTO;
         });
-        return categoryResponseDTOs;
     }
 
     public List<ProductImageResponseDTO> getProductImageResponseDTOs(Product product) {
@@ -678,19 +689,6 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         return quantity;
     }
 
-    private Gson getGson() {
-        Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new JsonSerializer<LocalDateTime>() {
-            @Override
-            public JsonElement serialize(LocalDateTime localDateTime, Type type, JsonSerializationContext jsonSerializationContext) {
-                return new JsonPrimitive(DateTimeFormatter.ISO_LOCAL_DATE.format(localDateTime));
-            }
-        }).registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
-            @Override
-            public LocalDateTime deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-                return LocalDateTime.parse(jsonElement.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE);
-            }
-        }).create();
-        return gson;
-    }
+
 }
 
