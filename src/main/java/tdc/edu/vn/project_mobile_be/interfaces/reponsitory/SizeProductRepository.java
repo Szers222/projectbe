@@ -20,4 +20,6 @@ public interface SizeProductRepository extends JpaRepository<SizeProduct, SizePr
     @Query("SELECT sp FROM SizeProduct sp WHERE sp.product.productId = ?1 ")
     List<SizeProduct> findByProductId(UUID productId);
 
+
+
 }

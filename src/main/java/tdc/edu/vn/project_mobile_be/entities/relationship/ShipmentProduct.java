@@ -1,7 +1,9 @@
 package tdc.edu.vn.project_mobile_be.entities.relationship;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
@@ -10,7 +12,8 @@ import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
 @Entity
 @Table(name = "shipments_products")
 @Data
-
+@AllArgsConstructor
+@NoArgsConstructor
 public class ShipmentProduct {
     @EmbeddedId
     private ShipmentProductId id = new ShipmentProductId();

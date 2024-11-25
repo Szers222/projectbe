@@ -4,10 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +26,7 @@ import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductRequestParamsDT
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.sizeproduct.SizeProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.category.CategoryResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.coupon.CouponResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.post.PostResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.*;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
@@ -64,6 +65,14 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private final int PRODUCT_MIN_SIZE = 0;
     private final double SOLVE_SALE = 1;
     private final double MAX_PER = 100;
+
+    private final ObjectMapper objectMapper;
+
+    @Autowired
+    public ProductServiceImpl(@Lazy ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+        this.objectMapper.registerModule(new JavaTimeModule());
+    }
 
     @Autowired
     private ProductRepository productRepository;
@@ -346,6 +355,10 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             PostResponseDTO postResponseDTO = getPostResponseDTO(product);
             String productPriceSaleString = formatProductPriceSale(product);
             String productPriceString = formatProductPrice(product);
+            CouponResponseDTO couponResponseDTO = new CouponResponseDTO();
+            if (product.getCoupon() != null) {
+                couponResponseDTO.toDto(product.getCoupon());
+            }
 
             ProductResponseDTO dto = new ProductResponseDTO();
             dto.toDto(product);
@@ -356,6 +369,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             dto.setPostResponseDTO(postResponseDTO);
             dto.setProductImageResponseDTOs(productImageResponseDTOS);
             dto.setProductPriceSale(productPriceSaleString);
+            dto.setCouponResponseDTO(couponResponseDTO);
             return dto;
         });
         List<ProductResponseDTO> dtoList = dtoPage.getContent();
@@ -455,6 +469,10 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         PostResponseDTO postResponseDTO = getPostResponseDTO(product);
         String productPriceSaleString = formatProductPriceSale(product);
         String productPriceString = formatProductPrice(product);
+        CouponResponseDTO couponResponseDTO = new CouponResponseDTO();
+        if (product.getCoupon() != null) {
+            couponResponseDTO.toDto(product.getCoupon());
+        }
 
         ProductResponseDTO productDTO = new ProductResponseDTO();
         productDTO.toDto(product);
@@ -465,6 +483,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         productDTO.setSupplier(productSupplierResponseDTO);
         productDTO.setPostResponseDTO(postResponseDTO);
         productDTO.setProductImageResponseDTOs(productImageResponseDTOS);
+        productDTO.setCouponResponseDTO(couponResponseDTO);
 
         return productDTO;
     }

@@ -27,9 +27,9 @@ public class CouponResponseDTO implements IDto<Coupon> {
     @JsonProperty("couponPrice")
     private double couponPrice;
     @JsonProperty("couponRelease")
-    private Timestamp couponRelease;
+    private LocalDate couponRelease;
     @JsonProperty("couponExpire")
-    private Timestamp couponExpire;
+    private LocalDate couponExpire;
     @JsonProperty("couponType")
     private int couponType;
     @JsonProperty("couponFeeShip")

@@ -20,7 +20,7 @@ public interface ShipmentService extends IService<Shipment, UUID> {
 
     boolean deleteShipment(UUID shipmentId);
 
-    List<ShipmentResponseDTO> getShipmentById(UUID shipmentId);
+    ShipmentResponseDTO getShipmentById(UUID shipmentId);
 
     ShipmentResponseDTO getShipmentBySupplier(String supplier);
 
