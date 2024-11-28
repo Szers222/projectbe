@@ -18,10 +18,7 @@ import tdc.edu.vn.project_mobile_be.interfaces.service.CouponService;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -36,9 +33,45 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
     private final int ROLE_ADMIN = 0;
     private final int ROLE_USER = 1;
 
-
     @Override
     public Coupon createCoupon(CouponCreateRequestDTO params) {
+        boolean check = false;
+        Timestamp expireDateTime;
+
+        if (params.getCouponExpire() == null) {
+            expireDateTime = null;
+        } else {
+            expireDateTime = coverToTimestampExpire(params.getCouponExpire());
+        }
+
+        Timestamp releaseDateTime = coverToTimestampRelease(params.getCouponRelease());
+        Coupon coupon = new Coupon();
+        if (validateCoupon(params) != check) {
+            coupon = params.toEntity();
+            coupon.setCouponId(UUID.randomUUID());
+            coupon.setCouponRelease(releaseDateTime);
+            coupon.setCouponExpire(expireDateTime);
+            if (params.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
+                coupon.setCouponPrice(0);
+                coupon.setCouponPerHundred(params.getCouponPerHundred());
+                coupon.setCouponFeeShip(0);
+            }
+            if (params.getCouponType() == COUPON_PRICE_TYPE) {
+                coupon.setCouponPerHundred(0);
+                coupon.setCouponPrice(params.getCouponPrice());
+                coupon.setCouponFeeShip(0);
+            }
+            if (params.getCouponType() == COUPON_SHIP_TYPE) {
+                coupon.setCouponPerHundred(0);
+                coupon.setCouponPrice(0);
+                coupon.setCouponFeeShip(params.getCouponFeeShip());
+            }
+        }
+        return couponRepository.save(coupon);
+    }
+
+    @Override
+    public Coupon createCouponForProduct(CouponUpdateRequestDTO params) {
         boolean check = false;
         Timestamp expireDateTime;
 
@@ -110,6 +143,7 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
         }
         return couponRepository.save(coupon);
     }
+
     @Override
     public Coupon updateCouponByProductId(CouponUpdateRequestDTO couponDTO, UUID productId) {
         Optional<Coupon> couponOptional = couponRepository.findCouponByProductId(productId);
@@ -122,17 +156,26 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
             Timestamp expireDateTime = coverToTimestampExpire(couponDTO.getCouponExpire());
             Timestamp releaseDateTime = coverToTimestampRelease(couponDTO.getCouponRelease());
             if (validateCoupon(couponDTO) != check) {
-                coupon = couponDTO.toEntity();
-                coupon.setCouponId(UUID.randomUUID());
+                coupon.setCouponName(couponDTO.getCouponName());
+                coupon.setCouponCode(couponDTO.getCouponCode());
+                coupon.setCouponQuantity(couponDTO.getCouponQuantity());
                 coupon.setCouponRelease(releaseDateTime);
                 coupon.setCouponExpire(expireDateTime);
+                coupon.setCouponType(couponDTO.getCouponType());
                 if (couponDTO.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
                     coupon.setCouponPrice(0);
                     coupon.setCouponPerHundred(couponDTO.getCouponPerHundred());
+                    coupon.setCouponFeeShip(0);
                 }
                 if (couponDTO.getCouponType() == COUPON_PRICE_TYPE) {
                     coupon.setCouponPerHundred(0);
                     coupon.setCouponPrice(couponDTO.getCouponPrice());
+                    coupon.setCouponFeeShip(0);
+                }
+                if (couponDTO.getCouponType() == COUPON_SHIP_TYPE) {
+                    coupon.setCouponPerHundred(0);
+                    coupon.setCouponPrice(0);
+                    coupon.setCouponFeeShip(couponDTO.getCouponFeeShip());
                 }
             }
         } else {
@@ -142,15 +185,17 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
     }
 
     @Override
-    public List<CouponResponseDTO> getCouponByType(int type) {
+    public List<CouponResponseDTO> getCouponByType(int... type) {
         List<CouponResponseDTO> responseDTOS = new ArrayList<>();
-        couponRepository.findCouponByType(type).forEach(coupon -> {
-            if (coupon.getCouponExpire().after(Timestamp.valueOf(LocalDate.now().atStartOfDay()))) {
-                CouponResponseDTO dto = new CouponResponseDTO();
-                dto.toDto(coupon);
-                responseDTOS.add(dto);
-            }
-        });
+        for (int i : type) {
+            couponRepository.findCouponByType(i).forEach(coupon -> {
+                if (coupon.getCouponExpire().after(Timestamp.valueOf(LocalDate.now().atStartOfDay()))) {
+                    CouponResponseDTO dto = new CouponResponseDTO();
+                    dto.toDto(coupon);
+                    responseDTOS.add(dto);
+                }
+            });
+        }
         return responseDTOS;
     }
 
@@ -172,6 +217,7 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
         }
         CouponResponseDTO dto = new CouponResponseDTO();
         dto.toDto(coupon);
+        dto.setCouponExpire(coupon.getCouponExpire());
         return dto;
     }
 
@@ -197,7 +243,14 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
         return result;
     }
 
-
+    /**
+     * Validates the given coupon parameters based on various business rules.
+     *
+     * @param params a CouponCreateRequestDTO object containing the coupon details to be validated
+     * @return true if the coupon parameters are valid according to the business rules
+     * @throws NumberErrorException           if any numeric or date business rules are violated
+     * @throws CouponPricePerHundredException if the coupon price and percentage rules are violated
+     */
     public boolean validateCoupon(CouponCreateRequestDTO params) {
         if (params.getCouponPerHundred() < 0 || params.getCouponPerHundred() > 100) {
             throw new NumberErrorException("CouponPerHundred phải nằm trong khoảng từ 0 đến 100");
@@ -209,8 +262,8 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
         if (params.getCouponPerHundred() != 0 && couponPrice != 0) {
             throw new CouponPricePerHundredException("CouponPerHundred và CouponPrice không thể cùng tồn tại");
         }
-        if (params.getCouponPerHundred() == 0 && params.getCouponPrice() == 0) {
-            throw new CouponPricePerHundredException("CouponPerHundred hoặc CouponPrice phải tồn tại");
+        if (params.getCouponPerHundred() == 0 && params.getCouponPrice() == 0 && params.getCouponFeeShip() == 0) {
+            throw new CouponPricePerHundredException("CouponPerHundred hoặc CouponPrice hoặc CouponFeeShip phải tồn tại");
         }
         if (params.getCouponExpire().isBefore(params.getCouponRelease()) || params.getCouponExpire().isEqual(params.getCouponRelease())) {
             throw new NumberErrorException("CouponExpire phải sau CouponRelease và không thể trùng nhau");
@@ -221,14 +274,8 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
         if (params.getCouponExpire().isBefore(LocalDate.now())) {
             throw new NumberErrorException("CouponExpire không thể trước ngày hiện tại");
         }
-
-//        if(params.getCouponRelease().isBefore(LocalDate.now())){
-//            throw new CouponPricePerHundredException("CouponRelease không thể trước ngày hiện tại");
-//        }
-
         return true;
     }
-
 
     public boolean validateCoupon(CouponUpdateRequestDTO params) throws NumberErrorException {
         if (params.getCouponPerHundred() < 0 || params.getCouponPerHundred() > 100) {
@@ -241,32 +288,21 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
         if (params.getCouponPerHundred() != 0 && couponPrice != 0) {
             throw new CouponPricePerHundredException("CouponPerHundred và CouponPrice không thể cùng tồn tại");
         }
-        if (params.getCouponPerHundred() == 0 && params.getCouponPrice() == 0) {
-            throw new CouponPricePerHundredException("CouponPerHundred hoặc CouponPrice phải tồn tại");
+        if (params.getCouponPerHundred() == 0 && params.getCouponPrice() == 0 && params.getCouponFeeShip() == 0) {
+            throw new CouponPricePerHundredException("CouponPerHundred hoặc CouponPrice hoặc CouponFeeShip phải tồn tại");
         }
         if (params.getCouponExpire().isBefore(params.getCouponRelease()) || params.getCouponExpire().isEqual(params.getCouponRelease())) {
             throw new NumberErrorException("CouponExpire phải sau CouponRelease và không thể trùng nhau");
         }
-        if (params.getCouponExpire().isEqual(LocalDate.now())) {
-            throw new NumberErrorException("CouponExpire không thể trùng với ngày hiện tại");
-        }
         if (params.getCouponExpire().isBefore(LocalDate.now())) {
             throw new NumberErrorException("CouponExpire không thể trước ngày hiện tại");
         }
-
-//        if(params.getCouponRelease().isBefore(LocalDate.now())){
-//            throw new CouponPricePerHundredException("CouponRelease không thể trước ngày hiện tại");
-//        }
-
         return true;
     }
 
+    // Updated Methods
     public Timestamp coverToTimestampRelease(LocalDate date) {
-        if (date == null) {
-            return Timestamp.valueOf(LocalDate.now().atStartOfDay());
-        } else {
-            return Timestamp.valueOf(date.atStartOfDay());
-        }
+        return Timestamp.valueOf(Objects.requireNonNullElseGet(date, LocalDate::now).atStartOfDay());
     }
 
     public Timestamp coverToTimestampExpire(LocalDate date) {

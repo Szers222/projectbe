@@ -83,9 +83,9 @@ public class ShipmentController {
     }
 
     @GetMapping("/shipment/{shipmentId}")
-    public ResponseEntity<ResponseData<List<ShipmentResponseDTO>>> getShipmentById(@PathVariable UUID shipmentId) {
-        List<ShipmentResponseDTO> shipment = shipmentService.getShipmentById(shipmentId);
-        ResponseData<List<ShipmentResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Success", shipment);
+    public ResponseEntity<ResponseData<ShipmentResponseDTO>> getShipmentById(@PathVariable UUID shipmentId) {
+        ShipmentResponseDTO shipment = shipmentService.getShipmentById(shipmentId);
+        ResponseData<ShipmentResponseDTO> responseData = new ResponseData<>(HttpStatus.OK, "Success", shipment);
         return ResponseEntity.ok(responseData);
     }
 

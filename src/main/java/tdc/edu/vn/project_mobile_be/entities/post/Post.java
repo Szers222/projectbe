@@ -69,6 +69,6 @@ public class Post {
     @JoinColumn(name = "user_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference
+    @JsonBackReference(value = "user-post")
     private User user;
 }

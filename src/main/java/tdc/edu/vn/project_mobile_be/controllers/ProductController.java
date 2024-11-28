@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -61,6 +62,12 @@ public class ProductController {
     @Autowired
     private SimpMessagingTemplate template;
 
+    private final ObjectMapper objectMapper;
+
+    @Autowired
+    public ProductController(@Lazy ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Operation(summary = "Get all products by Category", description = "Retrieve all products by category with pagination support")
     @ApiResponses(value = {
@@ -105,7 +112,7 @@ public class ProductController {
             throw new MultipleFieldsNullOrEmptyException(errorMessages);
         }
 
-        ObjectMapper objectMapper = new ObjectMapper();
+
         ProductCreateRequestDTO params = objectMapper.readValue(paramsJson, ProductCreateRequestDTO.class);
 
         Product product = productService.createProduct(params, files);
@@ -125,7 +132,6 @@ public class ProductController {
                     .collect(Collectors.toList());
             throw new MultipleFieldsNullOrEmptyException(errorMessages);
         }
-        ObjectMapper objectMapper = new ObjectMapper();
         ProductUpdateRequestDTO params = objectMapper.readValue(paramsJson, ProductUpdateRequestDTO.class);
 
         Product product = productService.updateProduct(params, productId, files);

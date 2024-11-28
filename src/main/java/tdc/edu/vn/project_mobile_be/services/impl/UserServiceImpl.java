@@ -98,7 +98,6 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
                 responseDTO.setCartId(cart.getCartId());
             }
         });
-
         return responseDTO;
     }
 

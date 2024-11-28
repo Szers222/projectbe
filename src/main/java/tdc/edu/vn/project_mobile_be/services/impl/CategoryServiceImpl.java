@@ -17,7 +17,6 @@ import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.CategoryStatusReposit
 import tdc.edu.vn.project_mobile_be.interfaces.service.CategoryService;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -167,20 +166,13 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
 
 
     @Override
-    public boolean deleteCategory(UUID categoryId) {
+    public void deleteCategory(UUID categoryId) {
         Optional<Category> categoryOptional = categoryRepository.findById(categoryId);
         if (categoryOptional.isEmpty()) {
             throw new EntityNotFoundException("Category không tồn tại !");
         }
         Category category = categoryOptional.get();
-        CategoryStatus status = categoryStatusRepository.findByCategoryStatusType(this.CATEGORY_STATUS_DELETE);
-        if (status == null) {
-            throw new EntityNotFoundException("Trạng thái không tồn tại !");
-        }
-        category.setCategoryStatus(status);
-        category.setDeletionDate(LocalDate.now().plusDays(this.CATEGORY_DELETE_AFTER_DAYS));
-        categoryRepository.save(category);
-        return true;
+        categoryRepository.delete(category);
     }
 
 

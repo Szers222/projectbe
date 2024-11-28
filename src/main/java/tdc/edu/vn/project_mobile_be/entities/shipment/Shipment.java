@@ -37,7 +37,7 @@ public class Shipment {
     private float shipmentDiscount;
 
     @Column(name = "shipment_ship_cost", columnDefinition = "FLOAT DEFAULT 0")
-    private float shipmentShipCost;
+    private double shipmentShipCost;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")

@@ -9,5 +9,5 @@ import java.util.UUID;
 
 public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
     @Query("SELECT s FROM Shipment s WHERE s.shipmentId = ?1")
-    List<Shipment> findShipmentById(UUID shipmentId);
+    Shipment findShipmentById(UUID shipmentId);
 }

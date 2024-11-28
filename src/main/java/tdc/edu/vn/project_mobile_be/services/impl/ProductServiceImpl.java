@@ -1,11 +1,17 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,12 +25,14 @@ import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductRequestParamsDT
 import tdc.edu.vn.project_mobile_be.dtos.requests.product.ProductUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.sizeproduct.SizeProductRequestParamsDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.category.CategoryResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.coupon.CouponResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.post.PostResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.*;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.product.*;
+import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProductId;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
@@ -33,10 +41,12 @@ import tdc.edu.vn.project_mobile_be.interfaces.service.PostService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductImageService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -52,6 +62,16 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private final int PRODUCT_MIN_SIZE = 0;
     private final double SOLVE_SALE = 1;
     private final double MAX_PER = 100;
+
+    private final ObjectMapper objectMapper;
+    @Autowired
+    private ShipmentProductRepository shipmentProductRepository;
+
+    @Autowired
+    public ProductServiceImpl(@Lazy ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+        this.objectMapper.registerModule(new JavaTimeModule());
+    }
 
     @Autowired
     private ProductRepository productRepository;
@@ -75,6 +95,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private ApplicationEventPublisher applicationEventPublisher;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
 
     @Override
@@ -141,6 +163,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
     @Override
     @Transactional
+    @SuppressWarnings("unchecked")
     public Product updateProduct(ProductUpdateRequestDTO params, UUID productId, MultipartFile[] files) {
         Post post = new Post();
         if (params.getPost() != null) {
@@ -173,11 +196,21 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
         Coupon coupon = new Coupon();
         if (params.getCoupon() != null) {
-            coupon = couponService.updateCouponByProductId(params.getCoupon(), productId);
-            if (coupon == null) {
-                throw new EntityNotFoundException("Coupon không tồn tại !");
+
+            if (product.getCoupon() != null) {
+
+                coupon = couponService.updateCouponByProductId(params.getCoupon(), productId);
+            } else {
+
+                coupon = couponService.createCouponForProduct(params.getCoupon());
             }
             product.setCoupon(coupon);
+
+        } else if (product.getCoupon() != null) {
+
+            couponService.deleteCoupon(product.getCoupon().getCouponId());
+
+            product.setCoupon(null);
         }
 
         double productSale = solveProductSale(params.getProductPrice(), coupon);
@@ -195,6 +228,11 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         product.getSizeProducts().addAll(sizeProducts);
         ProductResponseDTO dto = getProductById(productId);
         applicationEventPublisher.publishEvent(new ProductListeners(this, dto));
+
+        redisTemplate.delete(productId.toString());
+
+        redisTemplate.opsForValue().set(productId.toString(), product, 60, TimeUnit.MINUTES);
+
         return productRepository.save(product);
     }
 
@@ -203,25 +241,25 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     public List<ProductResponseDTO> findProductRelate(UUID categoryId) {
         List<Product> productRelate = productRepository.findByIdWithCategories(categoryId);
 
-        List<Product> result = new ArrayList<>();
+        List<Product> result = new ArrayList<>(productRelate);
         if (productRelate.size() < PRODUCT_RELATE_SIZE) {
-
             List<Product> products = new ArrayList<>(productRepository.findAll());
-            while (result.size() < PRODUCT_RELATE_SIZE) {
+            if (products.isEmpty() || products.size() < PRODUCT_RELATE_SIZE - productRelate.size()) {
+                throw new EntityNotFoundException("So luong  san pham khong du");
+            }
+            while (productRelate.size() < PRODUCT_RELATE_SIZE) {
                 int addRandomProduct = new Random().nextInt(products.size());
                 Product product = products.get(addRandomProduct);
-                if (!result.contains(product)) {
-                    result.add(product);
+                if (!productRelate.contains(product)) {
+                    productRelate.add(product);
                 }
             }
         }
-        if (productRelate.size() == PRODUCT_RELATE_SIZE || productRelate.size() > PRODUCT_RELATE_SIZE) {
-            while (result.size() < PRODUCT_RELATE_SIZE) {
-                int addRandomProduct = new Random().nextInt(productRelate.size());
-                Product product = productRelate.get(addRandomProduct);
-                if (!result.contains(product)) {
-                    result.add(product);
-                }
+        while (result.size() < PRODUCT_RELATE_SIZE) {
+            int addRandomProduct = new Random().nextInt(productRelate.size());
+            Product product = productRelate.get(addRandomProduct);
+            if (!result.contains(product)) {
+                result.add(product);
             }
         }
 
@@ -252,7 +290,34 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
     @Override
     @Transactional
+    @SuppressWarnings("unchecked")
     public Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable) {
+
+        String filterJson = "";
+        String pageableJson = "";
+        try {
+            filterJson = objectMapper.writeValueAsString(params);
+            pageableJson = objectMapper.writeValueAsString(pageable);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String cacheKey = "findProductsByFilters:" + filterJson + ":" + pageableJson;
+
+        String cachedResult = (String) redisTemplate.opsForValue().get(cacheKey);
+        if (cachedResult != null) {
+            try {
+                List<ProductResponseDTO> dtoList = objectMapper.readValue(cachedResult, new TypeReference<>() {
+                });
+                if (dtoList != null) {
+                    return new PageImpl<>(dtoList, pageable, dtoList.size());
+                }
+            } catch (IOException e) {
+                // Log the exception and continue to the next step to fetch the data from DB
+                e.printStackTrace();
+            }
+        }
+
         Specification<Product> spec = Specification.where(null);  // Khởi tạo Specification rỗng
         // Lọc theo danh mục (category)
         if (params.getCategoryId() != null && categoryRepository.findById(params.getCategoryId()).isPresent()) {
@@ -293,7 +358,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         }
 
         // Chuyển đổi sang DTO
-        return products.map(product -> {
+        Page<ProductResponseDTO> dtoPage = products.map(product -> {
             List<CategoryResponseDTO> categoryResponseDTOs = getCategoryResponseDTOs(product);
             List<ProductImageResponseDTO> productImageResponseDTOS = getProductImageResponseDTOs(product);
             List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
@@ -301,6 +366,10 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             PostResponseDTO postResponseDTO = getPostResponseDTO(product);
             String productPriceSaleString = formatProductPriceSale(product);
             String productPriceString = formatProductPrice(product);
+            CouponResponseDTO couponResponseDTO = new CouponResponseDTO();
+            if (product.getCoupon() != null) {
+                couponResponseDTO.toDto(product.getCoupon());
+            }
 
             ProductResponseDTO dto = new ProductResponseDTO();
             dto.toDto(product);
@@ -311,9 +380,18 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             dto.setPostResponseDTO(postResponseDTO);
             dto.setProductImageResponseDTOs(productImageResponseDTOS);
             dto.setProductPriceSale(productPriceSaleString);
+            dto.setCouponResponseDTO(couponResponseDTO);
             return dto;
         });
+        List<ProductResponseDTO> dtoList = dtoPage.getContent();
+        try {
+            String serializedData = objectMapper.writeValueAsString(dtoList);
+            redisTemplate.opsForValue().set(cacheKey, serializedData, 60, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
+        return dtoPage;
     }
 
     @Override
@@ -323,26 +401,28 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
                 .findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
+        // Xóa các hình ảnh của sản phẩm
         for (ProductImage productImage : product.getImages()) {
-
-            if (productImage == null) {
-                break;
+            if (productImage != null) {
+                googleCloudStorageService.deleteFile(productImage.getProductImagePath());
             }
-            googleCloudStorageService.deleteFile(productImage.getProductImagePath());
         }
 
+        // Xóa các liên kết với SizeProduct
         product.getSizeProducts().forEach(sizeProduct -> sizeProduct.setProduct(null));
         product.getSizeProducts().clear();
 
+        // Xóa các liên kết với ShipmentProduct trước khi xóa product
+        Set<ShipmentProduct> shipmentProducts = product.getShipmentProducts();
+        shipmentProducts.clear(); // Xóa toàn bộ liên kết ShipmentProduct trước
 
-        product.getShipmentProducts().forEach(shipment -> shipment.setProduct(null));
-        product.getShipmentProducts().clear();
+        productRepository.saveAndFlush(product); // Sau khi đã quản lý tất cả các liên kết
 
-        productRepository.saveAndFlush(product);
+        shipmentProductRepository.deleteAll(shipmentProducts); // Sau đó xóa ShipmentProduct nếu cần
 
+        // Xóa sản phẩm và gửi thông điệp
         productRepository.delete(product);
         messagingTemplate.convertAndSend("/topic/products", productId);
-
     }
 
 
@@ -402,6 +482,10 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         PostResponseDTO postResponseDTO = getPostResponseDTO(product);
         String productPriceSaleString = formatProductPriceSale(product);
         String productPriceString = formatProductPrice(product);
+        CouponResponseDTO couponResponseDTO = new CouponResponseDTO();
+        if (product.getCoupon() != null) {
+            couponResponseDTO.toDto(product.getCoupon());
+        }
 
         ProductResponseDTO productDTO = new ProductResponseDTO();
         productDTO.toDto(product);
@@ -412,6 +496,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         productDTO.setSupplier(productSupplierResponseDTO);
         productDTO.setPostResponseDTO(postResponseDTO);
         productDTO.setProductImageResponseDTOs(productImageResponseDTOS);
+        productDTO.setCouponResponseDTO(couponResponseDTO);
 
         return productDTO;
     }
@@ -448,12 +533,11 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     }
 
     public List<CategoryResponseDTO> getCategoryResponseDTOs(Product product) {
-        List<CategoryResponseDTO> categoryResponseDTOs = convertToDTOList(product.getCategories() != null ? new ArrayList<>(product.getCategories()) : Collections.emptyList(), category -> {
+        return convertToDTOList(product.getCategories() != null ? new ArrayList<>(product.getCategories()) : Collections.emptyList(), category -> {
             CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO();
             categoryResponseDTO.toDto(category);
             return categoryResponseDTO;
         });
-        return categoryResponseDTOs;
     }
 
     public List<ProductImageResponseDTO> getProductImageResponseDTOs(Product product) {
@@ -605,4 +689,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         }
         return quantity;
     }
+
+
 }
+

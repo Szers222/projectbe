@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import tdc.edu.vn.project_mobile_be.dtos.responses.category.CategoryResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.coupon.CouponResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.post.PostResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
@@ -52,6 +53,8 @@ public class ProductResponseDTO implements IDto<Product> {
     private List<ProductSizeResponseDTO> productSizeResponseDTOs;
     @JsonProperty("post")
     private PostResponseDTO postResponseDTO;
+    @JsonProperty("coupon")
+    private CouponResponseDTO couponResponseDTO;
 
     @Override
     public Product toEntity() {
