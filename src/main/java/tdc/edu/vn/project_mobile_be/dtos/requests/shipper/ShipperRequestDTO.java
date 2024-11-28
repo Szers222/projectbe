@@ -1,4 +1,4 @@
-package tdc.edu.vn.project_mobile_be.dtos.responses;
+package tdc.edu.vn.project_mobile_be.dtos.requests.shipper;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,6 +8,6 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class IntrospectResponseDTO {
-    boolean valid;
+public class ShipperRequestDTO {
+    String oder;
 }

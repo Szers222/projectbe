@@ -1,12 +1,12 @@
-package tdc.edu.vn.project_mobile_be.dtos.responses;
+package tdc.edu.vn.project_mobile_be.dtos.responses.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import tdc.edu.vn.project_mobile_be.dtos.responses.cart.CartResponseDTO;
-import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
+import tdc.edu.vn.project_mobile_be.dtos.responses.idcard.IdCardResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.role.RoleResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 

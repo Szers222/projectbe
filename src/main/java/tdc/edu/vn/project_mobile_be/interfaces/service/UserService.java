@@ -4,7 +4,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateCustomerRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateUserRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.UserResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.user.UserResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.IService;
 

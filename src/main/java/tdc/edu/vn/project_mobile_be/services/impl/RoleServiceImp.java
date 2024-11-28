@@ -7,8 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.RoleRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.PermissionResponseDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.RoleResponseDTO;
+
+import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.UpdateRoleRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.permisstion.PermissionResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.role.RoleResponseDTO;
+
 import tdc.edu.vn.project_mobile_be.entities.permissions.Permission;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.PermissionRepository;

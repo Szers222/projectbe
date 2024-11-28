@@ -14,8 +14,8 @@ import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.AuthenticationRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.IntrospectRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.LogoutRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.RefreshRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.AuthenticationResponseDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.IntrospectResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.jwt.AuthenticationResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.jwt.IntrospectResponseDTO;
 import tdc.edu.vn.project_mobile_be.services.impl.AuthenticationServiceImp;
 
 import java.text.ParseException;
