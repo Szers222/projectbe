@@ -23,4 +23,11 @@ public interface ProductImageRepository extends JpaRepository<ProductImage, UUID
     @Query("delete from ProductImage p where p.product.productId = :productId")
     void deleteByProductId(@Param("productId") UUID productId);
 
+    @Modifying
+    @Query("delete from ProductImage p where p.productImageId in :productImageId")
+    void deleteByProductImageId(@Param("productImageId") List<UUID> productImageId);
+
+    @Query("delete from ProductImage p where p.productImageId = :productImageId")
+    boolean deleteByProductImageId(@Param("productImageId") UUID productImageId);
+
 }

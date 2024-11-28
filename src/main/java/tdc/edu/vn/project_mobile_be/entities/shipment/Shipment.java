@@ -3,9 +3,7 @@ package tdc.edu.vn.project_mobile_be.entities.shipment;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -39,7 +37,7 @@ public class Shipment {
     private float shipmentDiscount;
 
     @Column(name = "shipment_ship_cost", columnDefinition = "FLOAT DEFAULT 0")
-    private float shipmentShipCost;
+    private double shipmentShipCost;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
@@ -51,9 +49,13 @@ public class Shipment {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "supplier_id")
+    @JsonBackReference
+    @ToString.Exclude
     private ProductSupplier productSupplier;
 
     @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<ShipmentProduct> shipmentProducts = new HashSet<>();
 }

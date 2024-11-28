@@ -71,7 +71,7 @@ public class CouponController {
 
     // Endpoint to get coupons by type
     @GetMapping({"/coupons/type/{type}", "/coupons/type/{type}/"})
-    public ResponseEntity<ResponseData<List<CouponResponseDTO>>> getCouponByType(@PathVariable int type) {
+    public ResponseEntity<ResponseData<List<CouponResponseDTO>>> getCouponByType(@PathVariable int ...type) {
         List<CouponResponseDTO> data = couponService.getCouponByType(type);
         ResponseData<List<CouponResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Success", data);
         return ResponseEntity.ok(responseData);
@@ -106,5 +106,11 @@ public class CouponController {
         Coupon updatedCoupon = couponService.updateCoupon(params, couponId);
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Coupon cập nhật thành công !", updatedCoupon);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+    @GetMapping({"/coupon/{couponId}", "/coupon/{couponId}/"})
+    public ResponseEntity<ResponseData<CouponResponseDTO>> getCouponById(@PathVariable UUID couponId) {
+        CouponResponseDTO data = couponService.getCouponById(couponId);
+        ResponseData<CouponResponseDTO> responseData = new ResponseData<>(HttpStatus.OK, "Success", data);
+        return ResponseEntity.ok(responseData);
     }
 }

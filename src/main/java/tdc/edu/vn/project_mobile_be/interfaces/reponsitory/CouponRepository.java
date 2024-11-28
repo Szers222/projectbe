@@ -13,7 +13,7 @@ import java.util.UUID;
 @Repository
 public interface CouponRepository extends JpaRepository<Coupon, UUID> {
     @Query("SELECT c FROM Coupon c WHERE c.couponId = :couponId")
-    Optional<Coupon> findCouponByCouponId(@Param("couponId") UUID couponId);
+    Coupon findCouponByCouponId(@Param("couponId") UUID couponId);
 
     @Query("SELECT c FROM Coupon c where c.couponExpire > current_date")
     List<Coupon> findCouponByCouponExpire();
@@ -23,4 +23,7 @@ public interface CouponRepository extends JpaRepository<Coupon, UUID> {
 
     @Query("SELECT c FROM Coupon c WHERE c.couponType = :type")
     List<Coupon> findCouponByType(@Param("type") int type);
+
+    @Query("SELECT c FROM Coupon c WHERE c.couponCode = :code")
+    Optional<Coupon> findCouponByCode(@Param("code") String code);
 }

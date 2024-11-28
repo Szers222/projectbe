@@ -18,7 +18,7 @@ public interface CategoryService extends IService<Category, UUID> {
 
     List<CategoryResponseDTO> getCategories(int role, Pageable pageable);
 
-    boolean deleteCategory(UUID id);
+    void deleteCategory(UUID id);
 
     Category updateCategory(CategoryUpdateRequestDTO category,UUID id);
 

@@ -2,13 +2,6 @@ package tdc.edu.vn.project_mobile_be.controllers;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -78,19 +71,14 @@ public class ShipmentController {
     }
 
     @GetMapping({"/shipments", "/shipments"})
-    public ResponseEntity<ResponseData<PagedModel<EntityModel<ShipmentResponseDTO>>>> getShipments(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "20") int size,
-            PagedResourcesAssembler<ShipmentResponseDTO> assembler
+    public ResponseEntity<ResponseData<List<ShipmentResponseDTO>>> getShipments(
     ) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("shipmentDate").descending());
-        Page<ShipmentResponseDTO> shipments = shipmentService.getAllShipment(pageable);
+        List<ShipmentResponseDTO> shipments = shipmentService.getAllShipment();
         if (shipments.isEmpty()) {
-            ResponseData<PagedModel<EntityModel<ShipmentResponseDTO>>> responseData = new ResponseData<>(HttpStatus.NOT_FOUND, "Không Tìm Thấy Lô Hàng", null);
+            ResponseData<List<ShipmentResponseDTO>> responseData = new ResponseData<>(HttpStatus.NOT_FOUND, "Không Tìm Thấy Lô Hàng", null);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseData);
         }
-        PagedModel<EntityModel<ShipmentResponseDTO>> pagedModel = assembler.toModel(shipments);
-        ResponseData<PagedModel<EntityModel<ShipmentResponseDTO>>> responseData = new ResponseData<>(HttpStatus.OK, "Success", pagedModel);
+        ResponseData<List<ShipmentResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Success", shipments);
         return ResponseEntity.ok(responseData);
     }
 

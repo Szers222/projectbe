@@ -49,6 +49,9 @@ public class Coupon {
     @Column(name = "coupon_price")
     private double couponPrice;
 
+    @Column(name = "coupon_fee_ship")
+    private double couponFeeShip;
+
     @Column(name = "coupon_type")
     private int couponType;
 
@@ -59,7 +62,7 @@ public class Coupon {
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "coupon")
+    @OneToOne(mappedBy = "coupon")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonBackReference
@@ -69,6 +72,6 @@ public class Coupon {
     @ManyToMany(mappedBy = "coupons")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference
+    @JsonBackReference(value = "order-coupon")
     private Set<Order> order = new HashSet<>();
 }

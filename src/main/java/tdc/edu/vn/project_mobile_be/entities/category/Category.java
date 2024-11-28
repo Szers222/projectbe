@@ -73,7 +73,7 @@ public class Category {
     private List<Category> children;
 
     // ManyToMany - Product - Category
-    @ManyToMany(mappedBy = "categories" , cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "categories")
     @ToString.Exclude
     @JsonBackReference
     @EqualsAndHashCode.Exclude

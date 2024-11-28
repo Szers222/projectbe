@@ -7,9 +7,11 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -60,6 +62,12 @@ public class ProductController {
     @Autowired
     private SimpMessagingTemplate template;
 
+    private final ObjectMapper objectMapper;
+
+    @Autowired
+    public ProductController(@Lazy ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Operation(summary = "Get all products by Category", description = "Retrieve all products by category with pagination support")
     @ApiResponses(value = {
@@ -104,7 +112,7 @@ public class ProductController {
             throw new MultipleFieldsNullOrEmptyException(errorMessages);
         }
 
-        ObjectMapper objectMapper = new ObjectMapper();
+
         ProductCreateRequestDTO params = objectMapper.readValue(paramsJson, ProductCreateRequestDTO.class);
 
         Product product = productService.createProduct(params, files);
@@ -124,7 +132,6 @@ public class ProductController {
                     .collect(Collectors.toList());
             throw new MultipleFieldsNullOrEmptyException(errorMessages);
         }
-        ObjectMapper objectMapper = new ObjectMapper();
         ProductUpdateRequestDTO params = objectMapper.readValue(paramsJson, ProductUpdateRequestDTO.class);
 
         Product product = productService.updateProduct(params, productId, files);
@@ -154,7 +161,7 @@ public class ProductController {
     }
 
     @GetMapping("/products/category/{categoryId}")
-    public ResponseEntity<ResponseData<PagedModel<EntityModel<ProductResponseDTO>>>> getProductByCategoryId(
+    public ResponseEntity<ResponseData<List<ProductResponseDTO>>> getProductByCategoryId(
             @PathVariable UUID categoryId,
             @ModelAttribute ProductRequestParamsDTO params,
             PagedResourcesAssembler<ProductResponseDTO> assembler) {
@@ -165,11 +172,10 @@ public class ProductController {
         Sort sortBy = Sort.by(sortDirection, params.getSort());
         Pageable pageable = PageRequest.of(params.getPage(), params.getSize(), sortBy);
 
-        Page<ProductResponseDTO> productDtoPage = productService.getProductByCategoryId(categoryId, pageable);
+        List<ProductResponseDTO> dtoList = productService.getProductByCategoryId(categoryId);
 
-        PagedModel<EntityModel<ProductResponseDTO>> pagedModel = assembler.toModel(productDtoPage);
 
-        ResponseData<PagedModel<EntityModel<ProductResponseDTO>>> responseData = new ResponseData<>(HttpStatus.OK, "Success", pagedModel);
+        ResponseData<List<ProductResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Success", dtoList);
 
         return ResponseEntity.ok(responseData);
     }
@@ -190,20 +196,17 @@ public class ProductController {
 
 
     @DeleteMapping("/product/{productId}")
+    @Transactional
     public ResponseEntity<ResponseData<?>> deleteProduct(@PathVariable("productId") UUID productId) {
-        boolean isCheck = productService.deleteProduct(productId);
-        if (isCheck) {
-            ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Xóa sản phẩm thành công", null);
-            return ResponseEntity.ok(responseData);
-        }
-        ResponseData<?> responseData = new ResponseData<>(HttpStatus.BAD_REQUEST, "Xóa sản phẩm không thành công", null);
-        return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
+        productService.deleteProduct(productId);
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Xóa sản phẩm thành công", null);
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
     @EventListener(ProductListeners.class)
     @SendTo("/topic/products")
     public void handleProductUpdated(ProductListeners event) {
-        Product product = event.getProduct();
+        ProductResponseDTO product = event.getProduct();
         this.template.convertAndSend("/topic/products", product);
     }
 
