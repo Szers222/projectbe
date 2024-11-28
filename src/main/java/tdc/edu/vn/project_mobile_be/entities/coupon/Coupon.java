@@ -72,6 +72,6 @@ public class Coupon {
     @ManyToMany(mappedBy = "coupons")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference
+    @JsonBackReference(value = "order-coupon")
     private Set<Order> order = new HashSet<>();
 }

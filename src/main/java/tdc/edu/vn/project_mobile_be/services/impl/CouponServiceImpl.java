@@ -185,15 +185,17 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
     }
 
     @Override
-    public List<CouponResponseDTO> getCouponByType(int type) {
+    public List<CouponResponseDTO> getCouponByType(int... type) {
         List<CouponResponseDTO> responseDTOS = new ArrayList<>();
-        couponRepository.findCouponByType(type).forEach(coupon -> {
-            if (coupon.getCouponExpire().after(Timestamp.valueOf(LocalDate.now().atStartOfDay()))) {
-                CouponResponseDTO dto = new CouponResponseDTO();
-                dto.toDto(coupon);
-                responseDTOS.add(dto);
-            }
-        });
+        for (int i : type) {
+            couponRepository.findCouponByType(i).forEach(coupon -> {
+                if (coupon.getCouponExpire().after(Timestamp.valueOf(LocalDate.now().atStartOfDay()))) {
+                    CouponResponseDTO dto = new CouponResponseDTO();
+                    dto.toDto(coupon);
+                    responseDTOS.add(dto);
+                }
+            });
+        }
         return responseDTOS;
     }
 
@@ -241,6 +243,14 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
         return result;
     }
 
+    /**
+     * Validates the given coupon parameters based on various business rules.
+     *
+     * @param params a CouponCreateRequestDTO object containing the coupon details to be validated
+     * @return true if the coupon parameters are valid according to the business rules
+     * @throws NumberErrorException           if any numeric or date business rules are violated
+     * @throws CouponPricePerHundredException if the coupon price and percentage rules are violated
+     */
     public boolean validateCoupon(CouponCreateRequestDTO params) {
         if (params.getCouponPerHundred() < 0 || params.getCouponPerHundred() > 100) {
             throw new NumberErrorException("CouponPerHundred phải nằm trong khoảng từ 0 đến 100");
@@ -252,8 +262,8 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
         if (params.getCouponPerHundred() != 0 && couponPrice != 0) {
             throw new CouponPricePerHundredException("CouponPerHundred và CouponPrice không thể cùng tồn tại");
         }
-        if (params.getCouponPerHundred() == 0 && params.getCouponPrice() == 0) {
-            throw new CouponPricePerHundredException("CouponPerHundred hoặc CouponPrice phải tồn tại");
+        if (params.getCouponPerHundred() == 0 && params.getCouponPrice() == 0 && params.getCouponFeeShip() == 0) {
+            throw new CouponPricePerHundredException("CouponPerHundred hoặc CouponPrice hoặc CouponFeeShip phải tồn tại");
         }
         if (params.getCouponExpire().isBefore(params.getCouponRelease()) || params.getCouponExpire().isEqual(params.getCouponRelease())) {
             throw new NumberErrorException("CouponExpire phải sau CouponRelease và không thể trùng nhau");
@@ -278,14 +288,11 @@ public class CouponServiceImpl extends AbService<Coupon, UUID> implements Coupon
         if (params.getCouponPerHundred() != 0 && couponPrice != 0) {
             throw new CouponPricePerHundredException("CouponPerHundred và CouponPrice không thể cùng tồn tại");
         }
-        if (params.getCouponPerHundred() == 0 && params.getCouponPrice() == 0) {
-            throw new CouponPricePerHundredException("CouponPerHundred hoặc CouponPrice phải tồn tại");
+        if (params.getCouponPerHundred() == 0 && params.getCouponPrice() == 0 && params.getCouponFeeShip() == 0) {
+            throw new CouponPricePerHundredException("CouponPerHundred hoặc CouponPrice hoặc CouponFeeShip phải tồn tại");
         }
         if (params.getCouponExpire().isBefore(params.getCouponRelease()) || params.getCouponExpire().isEqual(params.getCouponRelease())) {
             throw new NumberErrorException("CouponExpire phải sau CouponRelease và không thể trùng nhau");
-        }
-        if (params.getCouponExpire().isEqual(LocalDate.now())) {
-            throw new NumberErrorException("CouponExpire không thể trùng với ngày hiện tại");
         }
         if (params.getCouponExpire().isBefore(LocalDate.now())) {
             throw new NumberErrorException("CouponExpire không thể trước ngày hiện tại");

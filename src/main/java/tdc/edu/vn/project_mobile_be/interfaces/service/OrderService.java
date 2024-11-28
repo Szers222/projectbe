@@ -1,6 +1,7 @@
 package tdc.edu.vn.project_mobile_be.interfaces.service;
 
 import tdc.edu.vn.project_mobile_be.dtos.requests.order.OrderChangeStatusDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.order.OrderCreateRequestByUserDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.order.OrderCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.cart.CartResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.order.OrderResponseDTO;
@@ -12,13 +13,15 @@ import java.util.UUID;
 
 public interface OrderService extends IService<Order, UUID> {
 
-    Order createOrder(OrderCreateRequestDTO order);
+    Order createOrderByGuest(OrderCreateRequestDTO order);
 
     Order orderChangeStatus(OrderChangeStatusDTO orderChangeStatusDTO);
 
 
     List<OrderResponseDTO> getOrderByUserId(UUID userId);
 
-    List<CartResponseDTO> getCartByOrderId(UUID orderId);
+    OrderResponseDTO getOrderByCart(UUID cartId);
+
+    Order createOrderByUser(OrderCreateRequestByUserDTO orderCreateRequestDTO);
 
 }

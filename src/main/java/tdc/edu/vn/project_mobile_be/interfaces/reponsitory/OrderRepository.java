@@ -11,4 +11,7 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     @Query("SELECT o FROM Order o join fetch o.cart c join fetch c.user u where u.userId = ?1")
     List<Order> findOrderByUserId(UUID userId);
+
+    @Query("SELECT o FROM Order o join fetch o.cart c where c.cartId = ?1")
+    Order findOrderByCartId(UUID cartId);
 }

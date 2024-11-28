@@ -1,6 +1,7 @@
 package tdc.edu.vn.project_mobile_be.entities.product;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -41,6 +42,7 @@ public class ProductSize {
     @OneToMany(mappedBy = "size", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @JsonBackReference
+    @JsonManagedReference(value = "product-size")
     private Set<SizeProduct> sizeProducts = new HashSet<>();
 
     @OneToMany(mappedBy = "productSize", cascade = CascadeType.ALL, orphanRemoval = true)

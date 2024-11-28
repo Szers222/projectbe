@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
@@ -7,6 +8,7 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.ListNotFoundExceptio
 import tdc.edu.vn.project_mobile_be.commond.customexception.NumberErrorException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.ParamNullException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.order.OrderChangeStatusDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.order.OrderCreateRequestByUserDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.order.OrderCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.cart.CartProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.cart.CartResponseDTO;
@@ -14,11 +16,11 @@ import tdc.edu.vn.project_mobile_be.dtos.responses.order.OrderResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
+import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
 import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
-import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.CartProductRepository;
-import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.CartRepository;
-import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.CouponRepository;
-import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.OrderRepository;
+import tdc.edu.vn.project_mobile_be.entities.user.User;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
+import tdc.edu.vn.project_mobile_be.interfaces.service.CartService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.OrderService;
 
 import java.math.RoundingMode;
@@ -33,13 +35,20 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
     @Autowired
     private CouponRepository couponRepository;
     @Autowired
-    private OrderRepository repository;
+    private OrderRepository orderRepository;
     @Autowired
     private CartProductRepository cartProductRepository;
+    @Autowired
+    private CartService cartService;
+    @Autowired
+    private CartRepository repository;
+    @Autowired
+    private UserRepository userRepository;
 
     private final int CART_STATUS_WISH_LIST = 0;
     private final int CART_STATUS_USER = 1;
     private final int CART_STATUS_GUEST = 2;
+    private final int CART_STATUS_PROCESS = 3;
     private final int COUPON_PER_HUNDRED_TYPE = 0;
     private final int COUPON_PRICE_TYPE = 1;
     private final int COUPON_SHIP_TYPE = 2;
@@ -54,7 +63,8 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
 
 
     @Override
-    public Order createOrder(OrderCreateRequestDTO order) {
+    @Transactional
+    public Order createOrderByGuest(OrderCreateRequestDTO order) {
         validateOrderRequest(order);
 
         Cart cart = cartRepository.findById(order.getCartId())
@@ -68,24 +78,89 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
             couponDiscount = getCouponByType(coupons, COUPON_PER_HUNDRED_TYPE, COUPON_PRICE_TYPE).orElse(null);
         }
 
-        Order orderEntity;
+        Order orderEntity = new Order();
         if (cart.getCartStatus() == CART_STATUS_GUEST) {
             orderEntity = populateOrderForGuest(order, cart, coupons, couponShip, couponDiscount);
-        } else if (cart.getCartStatus() == CART_STATUS_USER) {
-            orderEntity = populateOrderForUser(order, cart, coupons, couponShip, couponDiscount);
-        } else {
-            throw new EntityNotFoundException("Unsupported cart status");
         }
 
-        return repository.save(orderEntity);
+        return orderRepository.save(orderEntity);
+    }
+
+    @Override
+    @Transactional
+    public Order createOrderByUser(OrderCreateRequestByUserDTO request) {
+
+
+        if (request == null || request.getUserId() == null) {
+            throw new ParamNullException("Order or CartId is null");
+        }
+
+        Order order = request.toEntity();
+
+        Cart currentCart = cartRepository.findByUserId(request.getUserId(), CART_STATUS_USER).orElseThrow(() -> new EntityNotFoundException("Cart not found"));
+        if (currentCart.getCartProducts().isEmpty()) {
+            throw new EntityNotFoundException("Cart is empty");
+        }
+        Set<Coupon> coupons = new HashSet<>();
+        if (request.getOrderCoupon() != null) {
+            for (UUID couponCode : request.getOrderCoupon()) {
+                Coupon coupon = couponRepository.findCouponByCouponId(couponCode);
+                if (coupon == null) {
+                    throw new EntityNotFoundException("Coupon not found");
+                }
+                coupons.add(coupon);
+            }
+        }
+
+        String fullName = currentCart.getUser().getUserFirstName() + " " + currentCart.getUser().getUserLastName();
+
+
+        order.setOrderNote(request.getOrderNote());
+        order.setOrderStatus(ORDER_STATUS_CHECK);
+        order.setOrderPayment(request.getOrderPayment());
+        order.setCart(currentCart);
+        order.setOrderEmail(currentCart.getUser().getUserEmail());
+        order.setOrderPhone(currentCart.getUser().getUserPhone());
+        order.setOrderCity(currentCart.getUser().getDetail().getCity());
+        order.setOrderDistrict(currentCart.getUser().getDetail().getDistrict());
+        order.setOrderWard(currentCart.getUser().getDetail().getWard());
+        order.setOrderAddress(currentCart.getUser().getDetail().getAddressName());
+        order.setOrderFeeShip(SHIP_FEE);
+        order.setTotalPrice(request.getTotalPrice());
+        order.setOrderName(fullName);
+        order.setCoupons(coupons);
+        Order savedOrder = orderRepository.save(order);
+
+
+        return savedOrder;
     }
 
     @Override
     public Order orderChangeStatus(OrderChangeStatusDTO orderChangeStatusDTO) {
-        Order order = repository.findById(orderChangeStatusDTO.getOrderId())
+        System.console().printf("OrderChangeStatusDTO: %s", orderChangeStatusDTO);
+        Order order = orderRepository.findById(orderChangeStatusDTO.getOrderId())
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+        if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_CANCEL) {
+            Cart cart = order.getCart();
+            cart.setCartStatus(CART_STATUS_USER);
+            User user = cart.getUser();
+            user.setCancelCount(user.getCancelCount() + 1);
+            cartRepository.save(cart);
+            userRepository.save(user);
+            orderRepository.delete(order);
+            return null;
+        } else if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_PROCESS) {
+            Cart current = order.getCart();
+            current.setCartStatus(CART_STATUS_PROCESS);
+            cartRepository.save(current);
+            Cart newCart = new Cart();
+            newCart.setCartId(UUID.randomUUID());
+            newCart.setCartStatus(CART_STATUS_USER);
+            newCart.setUser(order.getCart().getUser());
+            cartRepository.save(newCart);
+        }
         order.setOrderStatus(orderChangeStatusDTO.getStatus());
-        return repository.save(order);
+        return orderRepository.save(order);
     }
 
     @Override
@@ -93,7 +168,7 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         if(userId == null){
             throw new ParamNullException("UserId is null");
         }
-        List<Order> orders = repository.findOrderByUserId(userId);
+        List<Order> orders = orderRepository.findOrderByUserId(userId);
         List<CartResponseDTO> cartResponseDTOS = new ArrayList<>();
 
         orders.forEach(order -> {
@@ -119,10 +194,32 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         return orderResponseDTOS;
     }
 
+
     @Override
-    public List<CartResponseDTO> getCartByOrderId(UUID orderId) {
-        return List.of();
+    public OrderResponseDTO getOrderByCart(UUID cartId) {
+        if (cartId == null) {
+            throw new ParamNullException("CartId is null");
+        }
+        Order order = orderRepository.findOrderByCartId(cartId);
+        if (order == null) {
+            throw new EntityNotFoundException("Order not found");
+        }
+        CartResponseDTO dto = buildCartResponse(cartId);
+        OrderResponseDTO orderResponseDTO = new OrderResponseDTO();
+        orderResponseDTO.toDto(order);
+        orderResponseDTO.setItems(Collections.singletonList(dto));
+        orderResponseDTO.setOrderDate(order.getCreatedAt().toString());
+        orderResponseDTO.setOrderTotal(order.getTotalPrice());
+        orderResponseDTO.setOrderAddress(order.getOrderAddress() + ", " + order.getOrderWard() + ", " + order.getOrderDistrict() + ", " + order.getOrderCity());
+        orderResponseDTO.setOrderId(order.getOrderId());
+        orderResponseDTO.setOrderStatus(order.getOrderStatus());
+        orderResponseDTO.setOrderPayment(order.getOrderPayment());
+        orderResponseDTO.setUserEmail(order.getOrderEmail());
+        orderResponseDTO.setUserName(order.getOrderName());
+        orderResponseDTO.setUserPhone(order.getOrderPhone());
+        return orderResponseDTO;
     }
+
 
     private Order populateOrderForGuest(OrderCreateRequestDTO order, Cart cart, Set<Coupon> coupons,
                                         Coupon couponShip, Coupon couponDiscount) {
@@ -134,23 +231,9 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         orderEntity.setOrderWard(order.getOrderWard());
         orderEntity.setOrderDistrict(order.getUserDistrict());
         orderEntity.setOrderCity(order.getUserCity());
-        orderEntity.getUser().setUserId(null);
         return orderEntity;
     }
 
-    private Order populateOrderForUser(OrderCreateRequestDTO order, Cart cart, Set<Coupon> coupons,
-                                       Coupon couponShip, Coupon couponDiscount) {
-        Order orderEntity = populateBaseOrderEntity(order, cart, coupons, couponShip, couponDiscount);
-        orderEntity.setOrderName(cart.getUser().getUserFirstName() + " " + cart.getUser().getUserLastName());
-        orderEntity.setOrderPhone(cart.getUser().getUserPhone());
-        orderEntity.setOrderEmail(cart.getUser().getUserEmail());
-        orderEntity.setOrderAddress(cart.getUser().getUserAddress());
-        orderEntity.setOrderWard(cart.getUser().getDetail().getWard());
-        orderEntity.setOrderDistrict(cart.getUser().getDetail().getDistrict());
-        orderEntity.setOrderCity(cart.getUser().getDetail().getCity());
-        orderEntity.getUser().setUserId(null);
-        return orderEntity;
-    }
 
     private Order populateBaseOrderEntity(OrderCreateRequestDTO order, Cart cart, Set<Coupon> coupons,
                                           Coupon couponShip, Coupon couponDiscount) {
@@ -193,9 +276,11 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
     private Set<Coupon> getCouponsFromRequest(OrderCreateRequestDTO order) {
         Set<Coupon> coupons = new HashSet<>();
         if (order.getOrderCoupon() != null) {
-            for (String couponCode : order.getOrderCoupon()) {
-                Coupon coupon = couponRepository.findCouponByCode(couponCode)
-                        .orElseThrow(() -> new EntityNotFoundException("Coupon not found"));
+            for (UUID couponCode : order.getOrderCoupon()) {
+                Coupon coupon = couponRepository.findCouponByCouponId(couponCode);
+                if (coupon == null) {
+                    throw new EntityNotFoundException("Coupon not found");
+                }
                 coupons.add(coupon);
             }
         }
@@ -216,14 +301,18 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
             int quantity = item.getQuantity();
             String productPrice = formatProductPrice(item.getProduct().getProductPrice());
             double totalPrice = item.getProduct().getProductPrice() * quantity;
-
+            Set<ProductImage> productImage = item.getProduct().getImages();
+            productImage.forEach(image -> {
+                if (image.getProductImageIndex() == 1) {
+                    dto.setProductImage(image.getProductImagePath());
+                }
+            });
             dto.setProductName(productName);
             dto.setProductSize(sizeName);
             dto.setCartProductQuantity(quantity);
             dto.setCartProductPrice(productPrice);
             dto.setCartProductTotalPrice(totalPrice);
             dtos.add(dto);
-
             return totalPrice;
         }).sum();
 

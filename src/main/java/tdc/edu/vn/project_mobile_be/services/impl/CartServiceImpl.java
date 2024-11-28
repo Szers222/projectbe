@@ -83,7 +83,7 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
             throw new EntityNotFoundException("Guest not found");
         }
         final UUID finalGuestId = guestId;
-        Cart cartSaved = cartRepository.findByUserId(guestId)
+        Cart cartSaved = cartRepository.findByUserId(guestId, CART_STATUS_GUEST)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
                     UUID cartId = UUID.randomUUID();
@@ -116,6 +116,7 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         if (params == null) {
             throw new ParamNullException("Params not found");
         }
+
         if (cartId == null) {
             throw new ParamNullException("Cart not found");
         }
@@ -160,7 +161,17 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         if (userId == null) {
             throw new ParamNullException("User ID cannot be null.");
         }
-        Cart cart = cartRepository.findByUserId(userId)
+        Cart cart = cartRepository.findByUserId(userId, CART_STATUS_USER)
+                .orElseThrow(() -> new EntityNotFoundException("Cart for the user not found."));
+        return buildCartResponse(cart.getCartId());
+    }
+
+    @Override
+    public CartResponseDTO findCartWishlistByIdUser(UUID userId) {
+        if (userId == null) {
+            throw new ParamNullException("User ID cannot be null.");
+        }
+        Cart cart = cartRepository.findByUserId(userId, CART_STATUS_WISH_LIST)
                 .orElseThrow(() -> new EntityNotFoundException("Cart for the user not found."));
         return buildCartResponse(cart.getCartId());
     }
@@ -190,9 +201,14 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
             int quantity = item.getQuantity();
             double productPrice = item.getProduct().getProductPrice();
             String productPriceString = formatProductPrice(productPrice);
-            double totalPrice = item.getProduct().getProductPrice() * quantity;
             double productSale = item.getProduct().getProductSale();
             String productPriceSaleString = formatProductPrice(productPrice - (productPrice * productSale / 100));
+            double totalPrice = 0;
+            if (productSale != 0) {
+                totalPrice = item.getProduct().getProductPrice() * quantity - (item.getProduct().getProductPrice() * quantity * productSale / 100);
+            } else {
+                totalPrice = item.getProduct().getProductPrice() * quantity;
+            }
 
             dto.setProductId(item.getProduct().getProductId());
             dto.setProductSizeId(item.getProductSize().getProductSizeId());

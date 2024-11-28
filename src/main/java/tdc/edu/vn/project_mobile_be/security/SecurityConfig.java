@@ -41,6 +41,7 @@ public class SecurityConfig {
             "/api/v1/shipment/*",
             "/api/v1/products/relate",
             "/api/v1/products",
+            "/api/v1/products/filters?",
             "/ws"
     };
 

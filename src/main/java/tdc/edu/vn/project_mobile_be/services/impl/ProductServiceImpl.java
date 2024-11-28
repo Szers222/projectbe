@@ -199,7 +199,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
             if (product.getCoupon() != null) {
 
-                coupon = couponService.updateCouponByProductId(params.getCoupon(), product.getCoupon().getCouponId());
+                coupon = couponService.updateCouponByProductId(params.getCoupon(), productId);
             } else {
 
                 coupon = couponService.createCouponForProduct(params.getCoupon());
@@ -293,8 +293,6 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @SuppressWarnings("unchecked")
     public Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable) {
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
         String filterJson = "";
         String pageableJson = "";
         try {
@@ -309,10 +307,13 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         String cachedResult = (String) redisTemplate.opsForValue().get(cacheKey);
         if (cachedResult != null) {
             try {
-                List<ProductResponseDTO> dtoList = objectMapper.readValue(cachedResult, new TypeReference<List<ProductResponseDTO>>() {
+                List<ProductResponseDTO> dtoList = objectMapper.readValue(cachedResult, new TypeReference<>() {
                 });
-                return new PageImpl<>(dtoList, pageable, dtoList.size());
+                if (dtoList != null) {
+                    return new PageImpl<>(dtoList, pageable, dtoList.size());
+                }
             } catch (IOException e) {
+                // Log the exception and continue to the next step to fetch the data from DB
                 e.printStackTrace();
             }
         }

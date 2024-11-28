@@ -21,6 +21,8 @@ public interface CartService extends IService<Cart, UUID> {
 
     CartResponseDTO findCartByIdUser(UUID userId);
 
+    CartResponseDTO findCartWishlistByIdUser(UUID userId);
+
     CartResponseDTO findCartByIdGuest(UUID guestId);
 
     void deleteProductInCart(RemoveSizeProductRequestParamsDTO params, UUID cartId);

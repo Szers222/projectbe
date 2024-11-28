@@ -24,7 +24,7 @@ public interface CouponService extends IService<Coupon, UUID> {
 
     Coupon updateCouponByProductId(CouponUpdateRequestDTO couponDTO, UUID productId);
 
-    List<CouponResponseDTO> getCouponByType (int type);
+    List<CouponResponseDTO> getCouponByType (int ...type);
 
     CouponResponseDTO getCouponById(UUID couponId);
 }

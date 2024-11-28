@@ -1,10 +1,9 @@
 package tdc.edu.vn.project_mobile_be.entities.order;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -74,14 +73,17 @@ public class Order {
             joinColumns = @JoinColumn(name = "order_id"),
             inverseJoinColumns = @JoinColumn(name = "coupon_id")
     )
+    @JsonManagedReference(value = "order-coupon")
     private Set<Coupon> coupons = new HashSet<>();
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user = new User();
+    private User user;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne
     @JoinColumn(name = "cart_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Cart cart;
 
     @CreationTimestamp

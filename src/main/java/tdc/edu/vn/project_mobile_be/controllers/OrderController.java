@@ -7,17 +7,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
+import tdc.edu.vn.project_mobile_be.dtos.requests.order.OrderChangeStatusDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.order.OrderCreateRequestByUserDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.order.OrderCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.order.OrderResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.interfaces.service.OrderService;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -26,7 +27,7 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @PostMapping({"/order", "/order/"})
+    @PostMapping({"/order/guest", "/order/guest/"})
     public ResponseEntity<ResponseData<?>> createOrder(
             @Valid @RequestBody OrderCreateRequestDTO orderCreateRequestDTO,
             BindingResult bindingResult
@@ -37,8 +38,47 @@ public class OrderController {
                     .collect(Collectors.toList());
             throw new MultipleFieldsNullOrEmptyException(errorMessages);
         }
-        Order orderCreated = orderService.createOrder(orderCreateRequestDTO);
+        Order orderCreated = orderService.createOrderByGuest(orderCreateRequestDTO);
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Order created successfully!", orderCreated);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping({"/order/user", "/order/user/"})
+    public ResponseEntity<ResponseData<?>> createOrderByUser(
+            @Valid @RequestBody OrderCreateRequestByUserDTO orderCreateRequestDTO,
+            BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            List<String> errorMessages = bindingResult.getFieldErrors().stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
+            throw new MultipleFieldsNullOrEmptyException(errorMessages);
+        }
+        Order orderCreated = orderService.createOrderByUser(orderCreateRequestDTO);
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Order created successfully!", orderCreated);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @GetMapping({"/order/cart/{cartId}", "/order/cart/{cartId}/"})
+    public ResponseEntity<ResponseData<OrderResponseDTO>> getOrderByCart(@PathVariable UUID cartId) {
+        OrderResponseDTO order = orderService.getOrderByCart(cartId);
+        ResponseData<OrderResponseDTO> responseData = new ResponseData<>(HttpStatus.OK, "Order found!", order);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PutMapping({"/order/change", "/order/change"})
+    public ResponseEntity<ResponseData<?>> changeOrderStatus(
+            @RequestBody OrderChangeStatusDTO orderChangeStatusDTO,
+            BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            List<String> errorMessages = bindingResult.getFieldErrors().stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
+            throw new MultipleFieldsNullOrEmptyException(errorMessages);
+        }
+        Order order = orderService.orderChangeStatus(orderChangeStatusDTO);
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Order status changed!", order);
         return ResponseEntity.ok(responseData);
     }
 

@@ -15,43 +15,22 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderCreateRequestDTO implements IDto<Order> {
+public class OrderCreateRequestByUserDTO implements IDto<Order> {
 
     @NotNull(message = "Cart id is required")
-    @JsonProperty("cart")
-    private UUID cartId;
-
-    @JsonProperty("userName")
-    private String userName;
-
-    @JsonProperty("userPhone")
-    private String userPhone;
-
-    @JsonProperty("userEmail")
-    private String userEmail;
-
-    @JsonProperty("userAddress")
-    private String userAddress;
-
-    @JsonProperty("userDistrict")
-    private String userDistrict;
-
-    @JsonProperty("userCity")
-    private String userCity;
-
-    @JsonProperty("userWard")
-    private String orderWard;
+    @JsonProperty("user")
+    private UUID userId;
 
     @JsonProperty("orderCoupon")
     private List<UUID> orderCoupon;
 
     @JsonProperty("orderNote")
     private String orderNote;
-
+    @JsonProperty("totalPrice")
+    private double totalPrice;
     @NotNull(message = "Order payment is required")
     @JsonProperty("orderPayment")
     private int orderPayment;
-
 
 
     @Override
@@ -59,7 +38,7 @@ public class OrderCreateRequestDTO implements IDto<Order> {
         Order order = new Order();
         BeanUtils.copyProperties(
                 this, order,
-                "cartId","userWard","orderPayment","userCity","userDistrict","userAddress","userPhone","userName");
+                "cartId", "userWard", "orderPayment", "userCity", "userDistrict", "userAddress", "userPhone", "userName");
         return order;
     }
 

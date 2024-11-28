@@ -2,6 +2,7 @@ package tdc.edu.vn.project_mobile_be.entities.cart;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
@@ -44,10 +45,13 @@ public class Cart {
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference
+    @JsonManagedReference(value = "cart-product")
     private Set<CartProduct> cartProducts = new HashSet<>();
 
-    @OneToOne(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "cart")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JsonBackReference
     private Order order;
 
 }
