@@ -1,7 +1,8 @@
-package tdc.edu.vn.project_mobile_be.dtos.responses;
+package tdc.edu.vn.project_mobile_be.dtos.responses.role;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import tdc.edu.vn.project_mobile_be.dtos.responses.permisstion.PermissionResponseDTO;
 
 import java.util.Set;
 import java.util.UUID;

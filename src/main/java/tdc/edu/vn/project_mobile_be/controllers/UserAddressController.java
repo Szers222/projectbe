@@ -7,16 +7,11 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tdc.edu.vn.project_mobile_be.commond.ApiResponse;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
-import tdc.edu.vn.project_mobile_be.dtos.requests.CreateAddressRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.user.CreateAddressRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.UpdateAddressRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.RoleRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.RoleResponseDTO;
-import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.entities.user.UserAddress;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserAddressRepository;
-import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
 import tdc.edu.vn.project_mobile_be.services.impl.UserAddressServiceImp;
 
 import java.util.UUID;

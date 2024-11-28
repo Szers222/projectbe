@@ -23,8 +23,8 @@ import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.AuthenticationRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.IntrospectRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.LogoutRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.RefreshRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.AuthenticationResponseDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.IntrospectResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.jwt.AuthenticationResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.jwt.IntrospectResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 import tdc.edu.vn.project_mobile_be.entities.token.InvalidatedToken;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
@@ -33,8 +33,6 @@ import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.RoleRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
 
 import java.text.ParseException;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service

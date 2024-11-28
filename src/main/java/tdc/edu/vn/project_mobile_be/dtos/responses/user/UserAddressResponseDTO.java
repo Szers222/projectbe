@@ -1,4 +1,4 @@
-package tdc.edu.vn.project_mobile_be.dtos.responses;
+package tdc.edu.vn.project_mobile_be.dtos.responses.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
