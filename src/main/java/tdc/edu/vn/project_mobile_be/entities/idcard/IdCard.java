@@ -27,16 +27,16 @@ public class IdCard {
     private UUID cardId;
 
     @Column(name = "card_number", length = 15, nullable = false)
-    private String idCardNumber;
+    private String idCardNumber = "";
 
     @Column(name = "card_image_front_path", length = 255)
-    private String imageFrontPath;
+    private String imageFrontPath = "";
 
     @Column(name = "card_back_path", length = 255)
-    private String imageBackPath;
+    private String imageBackPath = "";
 
     @Column(name = "card_date", length = 10)
-    private String idCardDate;
+    private String idCardDate = "";
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")

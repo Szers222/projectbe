@@ -1,4 +1,4 @@
-package tdc.edu.vn.project_mobile_be.dtos.requests;
+package tdc.edu.vn.project_mobile_be.dtos.requests.otp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -35,9 +35,6 @@ public class RegisterRequestDTO {
     @JsonFormat(pattern = "yyyy-MM-dd")
     Timestamp userBirthday;
 
-    @NotEmpty(message = "Khong de trong dia chi")
-    @JsonProperty("userAddress")
-    String userAddress;
 
     @NotEmpty(message = "Họ không được để trống")
     @JsonProperty("userLastName")
@@ -52,8 +49,6 @@ public class RegisterRequestDTO {
     @JsonProperty("role")
     int role;
 
-    @JsonProperty("idCard")
-    IdCard idCard;
 
     // Method to convert DTO to Entity
     public User toEntity() {

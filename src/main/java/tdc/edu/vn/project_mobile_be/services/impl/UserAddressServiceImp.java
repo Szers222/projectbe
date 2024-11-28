@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.CreateAddressRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.UpdateAddressRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateAddressRequestDTO;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.entities.user.UserAddress;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserAddressRepository;
