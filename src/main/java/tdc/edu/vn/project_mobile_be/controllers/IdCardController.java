@@ -3,98 +3,53 @@ package tdc.edu.vn.project_mobile_be.controllers;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
-import tdc.edu.vn.project_mobile_be.commond.customexception.ValidateException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.idcard.CreateIdCardRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.idcard.IdCardResponseDTO;
+import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import tdc.edu.vn.project_mobile_be.interfaces.service.IdCardService;
 
-import java.util.List;
 import java.util.UUID;
 
-@RestController
-@RequestMapping("/api/v1")
-public class IdCardController {
 
+@RequestMapping("/api/v1")
+@RestController
+public class IdCardController {
 
     @Autowired
     private IdCardService idCardService;
 
-    //Them du lieu idCard
-    @PostMapping("/idcard")
-    public ResponseEntity<ResponseData<?>> createIdCard(
-            @RequestBody @Valid CreateIdCardRequestDTO params,
-             BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            throw new ValidateException(bindingResult.getFieldError().getDefaultMessage());
-        }
-
-        IdCardResponseDTO createdIdCard = idCardService.createIdCard(params);
-        ResponseData<IdCardResponseDTO> responseData =
-                new ResponseData<>(HttpStatus.CREATED,
-                        "Thêm mới thành công",
-                        createdIdCard);
-        return new ResponseEntity<>(responseData, HttpStatus.CREATED);
+    @PostMapping(value = "/auth/idcard", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseData<IdCard>> uploadIdCardImages(
+            @ModelAttribute @Valid CreateIdCardRequestDTO idCardRequestDTO) {
+        // Gọi service để upload ảnh và tạo mới IdCard
+        IdCard createdIdCard = idCardService.uploadIdCardImages(idCardRequestDTO);
+        return ResponseEntity.ok(
+                new ResponseData<>(HttpStatus.CREATED
+                        , "IdCard đã được tạo mới thành công"
+                        , createdIdCard)
+        );
     }
-
-    //Lay tat ca danh sach IdCard
-    @GetMapping("/idcard")
-    public ResponseEntity<ResponseData<List<IdCardResponseDTO>>> getAllIdCards() {
-        //Lay tat ca danh sach IdCard
-        List<IdCardResponseDTO> idCards = idCardService.getAllIdCards();
-        ResponseData<List<IdCardResponseDTO>> responseData =
-                new ResponseData<>(
-                        HttpStatus.OK, //Trang thai HTTP 200 OK
-                        "Lấy tất cả thành công", //Messger
-                        idCards  //Danh sach cac idCard
-                );
-        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    @PutMapping(value = "/auth/idcard/{cardId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseData<IdCard>> updateIdCard(
+            @PathVariable UUID cardId,
+            @ModelAttribute @Valid CreateIdCardRequestDTO idCardRequestDTO) {
+        IdCard updatedIdCard = idCardService.updateIdCard(cardId, idCardRequestDTO);
+        return ResponseEntity.ok(
+                new ResponseData<>(HttpStatus.OK, "IdCard đã được cập nhật thành công", updatedIdCard)
+        );
     }
-    //Xoa du lieu theo CardId
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseData<String>> deleteIdCard(
-            @PathVariable("id") UUID cardId){
+    @DeleteMapping(value = "/auth/idcard/{cardId}")
+    public ResponseEntity<ResponseData<String>> deleteIdCard(@PathVariable UUID cardId) {
         idCardService.deleteIdCard(cardId);
-        ResponseData<String> responseData = new ResponseData<>(
-                HttpStatus.OK,//Trang thai HTTP 200 OK
-                "Xóa thành công", //Messger
-                "Thẻ ID với ID: " + cardId + " đã được xóa." // cardId
+        return ResponseEntity.ok(
+                new ResponseData<>(HttpStatus.OK, "IdCard đã được xóa thành công", null)
         );
-        return new ResponseEntity<>(responseData,HttpStatus.OK);
     }
-
-    //Cap nhat
-    @PutMapping("/{id}")
-    public ResponseEntity<ResponseData<IdCardResponseDTO>> updateIdCard(
-            @PathVariable("id") UUID cardId,
-            @RequestBody CreateIdCardRequestDTO idCardRequestDTO
-            ) {
-        IdCardResponseDTO updateIdCard = idCardService.
-                updateIdCard(cardId, idCardRequestDTO);
-        ResponseData<IdCardResponseDTO> responseData = new ResponseData<>(
-                HttpStatus.OK, //Trang thai Http 200 OK
-                "Cap nhat thanh cong", //Messger
-                updateIdCard // UpdateIdCard
-        );
-        return new ResponseEntity<>(responseData,HttpStatus.OK);
-
-    }
-//    //Lay ID
-//    @GetMapping("/{id}")
-//    public ResponseEntity<ResponseData<IdCardResponseDTO>> getIdCardById
-//    (@PathVariable("id") UUID cardId) {
-//        IdCardResponseDTO idCardResponseDTO = idCardService.getIdCardById(cardId);
-//        ResponseData<IdCardResponseDTO> responseData =
-//                new ResponseData<>(
-//                        HttpStatus.OK, //Trang thai Http 200 OK
-//                        "Lay du lieu thanh cong", //Messger
-//                        idCardResponseDTO // UpdateIdCard
-//                );
-//        return new ResponseEntity<>(responseData,HttpStatus.OK);
-//    }
 
 
 }
+
+

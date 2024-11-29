@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.controllers;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -7,10 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateCustomerRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateUserRequestDTO;
@@ -81,9 +84,12 @@ public class UserController {
         );
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
-    @PutMapping("/customer/myInfo")
-    public ResponseEntity<ResponseData<?>> updateMyInfo(@RequestBody UpdateCustomerRequestDTO request) {
-        User user = userService.updateMyInfo(request);
+    @PutMapping(value = "/customer/myInfo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseData<?>> updateMyInfo(
+            @RequestPart(value = "image", required = false) MultipartFile userImagePath,
+            @RequestPart("request") UpdateCustomerRequestDTO request) {
+
+        User user = userService.updateMyInfo(request, userImagePath);
         ResponseData<?> responseData = new ResponseData<>(
                 HttpStatus.OK,
                 "Thông tin người dùng đã được cập nhật thành công",
@@ -91,6 +97,8 @@ public class UserController {
         );
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
+
+
     @DeleteMapping("/users/{id}")
     public ResponseEntity<ResponseData<?>> deleteUser(@PathVariable UUID id) {
         userService.deleteUserById(id);

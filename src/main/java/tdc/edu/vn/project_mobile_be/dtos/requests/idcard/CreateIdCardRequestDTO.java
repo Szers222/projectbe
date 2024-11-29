@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import org.springframework.beans.BeanUtils;
 
@@ -21,30 +22,18 @@ public class CreateIdCardRequestDTO {
     @NotBlank(message = "Số CMND không được để trống")
     @JsonProperty("idCardNumber")
     @NotNull(message = "Không được để null")
-    private String idCardNumber;  // Số CMND/ID Card Number
+    private String idCardNumber;
 
-    @NotEmpty(message = "Không được để trống")
-    @NotBlank(message = "Ảnh mặt trước không được để trống")
-    @JsonProperty("imageFrontPath")
-    @NotNull(message = "Không được để null")
-    private String imageFrontPath;  // Đường dẫn ảnh mặt trước
+    @JsonProperty("imageFront")
+    private MultipartFile imageFront;
 
-    @NotEmpty(message = "Không được để trống")
-    @NotBlank(message = "Ảnh mặt sau không được để trống")
-    @JsonProperty("imageBackPath")
-    @NotNull(message = "Không được để null")
-    private String imageBackPath;  // Đường dẫn ảnh mặt sau
+    @JsonProperty("imageBack")
+    private MultipartFile imageBack;
 
     @NotBlank(message = "Ngày cấp không được để trống")
-    @JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @JsonProperty("idCardDate")
     @NotNull(message = "Không được để null")
-    private String idCardDate;  // Ngày cấp ID Card
-
-
-    public IdCard toEntity() {
-        IdCard idCard = new IdCard();
-        BeanUtils.copyProperties(this, idCard);
-        return idCard;
-    }
+    private String idCardDate;
 }
+
