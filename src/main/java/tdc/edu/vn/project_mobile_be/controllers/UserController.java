@@ -87,9 +87,10 @@ public class UserController {
     @PutMapping(value = "/customer/myInfo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseData<?>> updateMyInfo(
             @RequestPart(value = "image", required = false) MultipartFile userImagePath,
-            @RequestPart("request") UpdateCustomerRequestDTO request) {
-
+            @RequestPart("request") @Valid UpdateCustomerRequestDTO request
+    ) {
         User user = userService.updateMyInfo(request, userImagePath);
+
         ResponseData<?> responseData = new ResponseData<>(
                 HttpStatus.OK,
                 "Thông tin người dùng đã được cập nhật thành công",
@@ -97,6 +98,7 @@ public class UserController {
         );
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
+
 
 
     @DeleteMapping("/users/{id}")
