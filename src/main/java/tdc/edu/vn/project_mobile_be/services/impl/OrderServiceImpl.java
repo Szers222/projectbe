@@ -56,10 +56,15 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
     private final int PRODUCT_MIN_PRICE = 0;
 
     private final int ORDER_STATUS_CHECK = 0;
-    private final int ORDER_STATUS_PROCESS = 1;
-    private final int ORDER_STATUS_SHIP = 2;
-    private final int ORDER_STATUS_COMPLETE = 3;
-    private final int ORDER_STATUS_CANCEL = 4;
+    private final int ORDER_STATUS_PROCESSING = 1;
+    private final int ORDER_STATUS_PROCESSED = 2;
+    private final int ORDER_STATUS_SHIP = 3;
+    private final int ORDER_STATUS_DELIVERED = 4;
+    private final int ORDER_STATUS_COMPLETE = 5;
+    private final int ORDER_STATUS_CANCEL = 6;
+
+
+
 
 
     @Override
@@ -136,41 +141,26 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
     }
 
     @Override
-    public Order orderChangeStatus(OrderChangeStatusDTO orderChangeStatusDTO) {
-        System.console().printf("OrderChangeStatusDTO: %s", orderChangeStatusDTO);
-        Order order = orderRepository.findById(orderChangeStatusDTO.getOrderId())
-                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
-        if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_CANCEL) {
-            Cart cart = order.getCart();
-            cart.setCartStatus(CART_STATUS_USER);
-            User user = cart.getUser();
-            user.setCancelCount(user.getCancelCount() + 1);
-            cartRepository.save(cart);
-            userRepository.save(user);
-            orderRepository.delete(order);
-            return null;
-        } else if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_PROCESS) {
-            Cart current = order.getCart();
-            current.setCartStatus(CART_STATUS_PROCESS);
-            cartRepository.save(current);
-            Cart newCart = new Cart();
-            newCart.setCartId(UUID.randomUUID());
-            newCart.setCartStatus(CART_STATUS_USER);
-            newCart.setUser(order.getCart().getUser());
-            cartRepository.save(newCart);
+    public List<OrderResponseDTO> getOrderByShipperId(UUID shipperId) {
+        if (shipperId != null) {
+            throw new ParamNullException("ShipperId is null");
         }
-        order.setOrderStatus(orderChangeStatusDTO.getStatus());
-        return orderRepository.save(order);
+        List<Order> orders = orderRepository.findOrderByShipperId(shipperId);
+        return getOrderResponseDTOS(orders);
+
     }
 
     @Override
     public List<OrderResponseDTO> getOrderByUserId(UUID userId) {
-        if(userId == null){
+        if (userId == null) {
             throw new ParamNullException("UserId is null");
         }
         List<Order> orders = orderRepository.findOrderByUserId(userId);
-        List<CartResponseDTO> cartResponseDTOS = new ArrayList<>();
+        return getOrderResponseDTOS(orders);
+    }
 
+    private List<OrderResponseDTO> getOrderResponseDTOS(List<Order> orders) {
+        List<CartResponseDTO> cartResponseDTOS = new ArrayList<>();
         orders.forEach(order -> {
             CartResponseDTO dto = buildCartResponse(order.getCart().getCartId());
             cartResponseDTOS.add(dto);
@@ -192,6 +182,36 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
             orderResponseDTOS.add(dto);
         });
         return orderResponseDTOS;
+    }
+
+
+
+    @Override
+    public Order orderChangeStatus(OrderChangeStatusDTO orderChangeStatusDTO) {
+        System.console().printf("OrderChangeStatusDTO: %s", orderChangeStatusDTO);
+        Order order = orderRepository.findById(orderChangeStatusDTO.getOrderId())
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+        if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_CANCEL) {
+            Cart cart = order.getCart();
+            cart.setCartStatus(CART_STATUS_USER);
+            User user = cart.getUser();
+            user.setCancelCount(user.getCancelCount() + 1);
+            cartRepository.save(cart);
+            userRepository.save(user);
+            orderRepository.delete(order);
+            return null;
+        } else if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_PROCESSING) {
+            Cart current = order.getCart();
+            current.setCartStatus(CART_STATUS_PROCESS);
+            cartRepository.save(current);
+            Cart newCart = new Cart();
+            newCart.setCartId(UUID.randomUUID());
+            newCart.setCartStatus(CART_STATUS_USER);
+            newCart.setUser(order.getCart().getUser());
+            cartRepository.save(newCart);
+        }
+        order.setOrderStatus(orderChangeStatusDTO.getStatus());
+        return orderRepository.save(order);
     }
 
 
@@ -339,6 +359,10 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         return format.format(price);
     }
 
-
+    @Override
+    public List<OrderResponseDTO> getOrderByStatus(int status) {
+        List<Order> orders = orderRepository.findOrderByStatus(status);
+        return getOrderResponseDTOS(orders);
+    }
 
 }

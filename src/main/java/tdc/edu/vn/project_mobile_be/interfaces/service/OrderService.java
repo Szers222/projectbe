@@ -24,4 +24,7 @@ public interface OrderService extends IService<Order, UUID> {
 
     Order createOrderByUser(OrderCreateRequestByUserDTO orderCreateRequestDTO);
 
+    List<OrderResponseDTO> getOrderByShipperId(UUID shipperId);
+
+    List<OrderResponseDTO> getOrderByStatus(int status);
 }

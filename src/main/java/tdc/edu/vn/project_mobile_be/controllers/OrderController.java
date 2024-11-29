@@ -13,6 +13,7 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOr
 import tdc.edu.vn.project_mobile_be.dtos.requests.order.OrderChangeStatusDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.order.OrderCreateRequestByUserDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.order.OrderCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.order.OrderStatusDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.order.OrderResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.interfaces.service.OrderService;
@@ -82,4 +83,25 @@ public class OrderController {
         return ResponseEntity.ok(responseData);
     }
 
+    @GetMapping({"/order/user/{userId}", "/order/user/{userId}/"})
+    public ResponseEntity<ResponseData<List<OrderResponseDTO>>> getOrderByUserId(@PathVariable UUID userId) {
+        List<OrderResponseDTO> orders = orderService.getOrderByUserId(userId);
+        ResponseData<List<OrderResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Orders found!", orders);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @GetMapping({"/order/shipper/{shipperId}", "/order/user/{shipperId}/"})
+    public ResponseEntity<ResponseData<List<OrderResponseDTO>>> getOrderByShipperId(@PathVariable UUID shipperId) {
+        List<OrderResponseDTO> orders = orderService.getOrderByShipperId(shipperId);
+        ResponseData<List<OrderResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Orders found!", orders);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @GetMapping({"/orders/status", "/orders/status/"})
+    public ResponseEntity<ResponseData<List<OrderResponseDTO>>> getOrderByStatus(@RequestParam int status) {
+        OrderStatusDTO orderStatusDTO = new OrderStatusDTO(status);
+        List<OrderResponseDTO> orders = orderService.getOrderByStatus(orderStatusDTO.getStatus());
+        ResponseData<List<OrderResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Orders found!", orders);
+        return ResponseEntity.ok(responseData);
+    }
 }

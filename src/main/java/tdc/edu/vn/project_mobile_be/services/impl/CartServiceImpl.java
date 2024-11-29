@@ -33,6 +33,7 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
     private final int CART_STATUS_WISH_LIST = 0;
     private final int CART_STATUS_USER = 1;
     private final int CART_STATUS_GUEST = 2;
+    private final int CART_STATUS_PROCESS = 3;
 
     @Autowired
     private CartRepository cartRepository;
