@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.BeanUtils;
+import tdc.edu.vn.project_mobile_be.dtos.requests.user.CreateAddressRequestDTO;
 import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 
@@ -44,10 +45,9 @@ public class RegisterRequestDTO {
     @JsonProperty("userFirstName")
     String userFirstName;
 
-    @Min(value = 1)
-    @Max(value = 2)
-    @JsonProperty("role")
-    int role;
+    @NotNull(message = "Thông tin địa chỉ không được để trống")
+    @JsonProperty("address")
+    CreateAddressRequestDTO address;
 
 
     // Method to convert DTO to Entity

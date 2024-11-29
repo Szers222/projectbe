@@ -11,10 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 import tdc.edu.vn.project_mobile_be.dtos.requests.otp.EmailRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.otp.RegisterRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.otp.ResetPasswordRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.user.CreateAddressRequestDTO;
 import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
+import tdc.edu.vn.project_mobile_be.entities.user.UserAddress;
 import tdc.edu.vn.project_mobile_be.entities.user.UserOtp;
 import tdc.edu.vn.project_mobile_be.enums.UserRole;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ForgotPasswordRepository;
@@ -199,6 +201,18 @@ public class UserOtpServiceImp implements UserOtpService {
             if (existingUser.getICard() == null) {
                 IdCard emptyIdCard = new IdCard();
                 existingUser.setICard(emptyIdCard);
+            }
+            // Tạo địa chỉ cho User từ CreateAddressRequestDTO
+            CreateAddressRequestDTO addressRequest = request.getAddress();
+            if (existingUser.getDetail() == null) {
+                UserAddress userAddress = UserAddress.builder()
+                        .addressName(addressRequest.getUserAddress())
+                        .ward(addressRequest.getWard())
+                        .district(addressRequest.getDistrict())
+                        .city(addressRequest.getCity())
+                        .user(existingUser)
+                        .build();
+                existingUser.setDetail(userAddress);
             }
             return registerRepository.save(existingUser);
         }
