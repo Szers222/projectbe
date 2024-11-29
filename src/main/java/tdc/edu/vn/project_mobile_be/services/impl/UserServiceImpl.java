@@ -103,7 +103,7 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
             if (cart.getCartStatus() == 1) {
                 responseDTO.setCartId(cart.getCartId());
             }
-            if (cart.getCartStatus() == 2) {
+            if (cart.getCartStatus() == 0) {
                 responseDTO.setWishlistId(cart.getCartId());
             }
         });
