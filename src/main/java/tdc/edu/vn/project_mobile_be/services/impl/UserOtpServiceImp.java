@@ -202,7 +202,6 @@ public class UserOtpServiceImp implements UserOtpService {
                 IdCard emptyIdCard = new IdCard();
                 existingUser.setICard(emptyIdCard);
             }
-            // Tạo địa chỉ cho User từ CreateAddressRequestDTO
             CreateAddressRequestDTO addressRequest = request.getAddress();
             if (existingUser.getDetail() == null) {
                 UserAddress userAddress = UserAddress.builder()
@@ -214,6 +213,7 @@ public class UserOtpServiceImp implements UserOtpService {
                         .build();
                 existingUser.setDetail(userAddress);
             }
+
             return registerRepository.save(existingUser);
         }
         return existingUser;
