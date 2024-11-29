@@ -7,9 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
-import tdc.edu.vn.project_mobile_be.dtos.requests.user.EmailRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.RegisterRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.ResetPasswordRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.otp.EmailRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.otp.RegisterRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.otp.ResetPasswordRequestDTO;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.service.UserOtpService;
 

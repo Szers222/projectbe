@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateCustomerRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateUserRequestDTO;
@@ -22,6 +23,7 @@ import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.RoleRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.UserService;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,23 +43,27 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
     IdCardRepository idCardRepository;
     @Autowired
     private RoleRepository roleRepository;
-//    @Autowired
-//    PasswordEncoder passwordEncoder;
+    @Autowired
+    PasswordEncoder passwordEncoder;
+    @Autowired
+    GoogleCloudStorageService googleCloudStorageService;
+
 
 
     @Override
     public User updateUser(User user, UpdateUserRequestDTO request) {
         user = userRepository.findById(user.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
-//        user.setUserPassword(passwordEncoder.encode(request.getUserPassword()));
+        user.setUserPassword(passwordEncoder.encode(request.getUserPassword()));
         user.setUserPhone(request.getUserPhone());
         user.setUserBirthday(request.getUserBirthday());
-//        user.setUserPasswordLevel2(passwordEncoder.encode(request.getUserPasswordLevel2()));
+        user.setUserPasswordLevel2(passwordEncoder.encode(request.getUserPasswordLevel2()));
         user.setUserImagePath(request.getUserImagePath());
         user.setUserFirstName(request.getUserFirstName());
         user.setUserLastName(request.getUserLastName());
         user.setUserWrongPassword(request.getUserWrongPassword());
-        IdCard idCard = idCardRepository.findByCardId(request.getIdCards());
+        IdCard idCard = idCardRepository.findByCardId(request.getIdCards())
+                .orElseThrow(() -> new EntityNotFoundException("IdCard not found"));
         user.setICard(idCard);
         if (request.getRoles() != null && !request.getRoles().isEmpty()) {
             Set<Role> roles = new HashSet<>();
@@ -97,12 +103,16 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
             if (cart.getCartStatus() == 1) {
                 responseDTO.setCartId(cart.getCartId());
             }
+            if (cart.getCartStatus() == 2) {
+                responseDTO.setWishlistId(cart.getCartId());
+            }
         });
+
         return responseDTO;
     }
 
     @Override
-    public User updateMyInfo(UpdateCustomerRequestDTO request) {
+    public User updateMyInfo(UpdateCustomerRequestDTO request, MultipartFile userImagePath) {
         // Lấy email người dùng hiện tại từ SecurityContext
         var context = SecurityContextHolder.getContext();
         String email = context.getAuthentication().getName();
@@ -111,19 +121,34 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
         User user = userRepository.findByUserEmail(email)
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
 
-//        user.setUserPassword(passwordEncoder.encode(request.getUserPassword()));
+        // Cập nhật thông tin từ JSON
+        user.setUserPassword(passwordEncoder.encode(request.getUserPassword()));
         user.setUserPhone(request.getUserPhone());
         user.setUserBirthday(request.getUserBirthday());
-//        user.setUserPasswordLevel2(passwordEncoder.encode(request.getUserPasswordLevel2()));
-        user.setUserImagePath(request.getUserImagePath());
+        user.setUserPasswordLevel2(passwordEncoder.encode(request.getUserPasswordLevel2()));
         user.setUserFirstName(request.getUserFirstName());
         user.setUserLastName(request.getUserLastName());
         user.setUserWrongPassword(request.getUserWrongPassword());
-        IdCard idCard = idCardRepository.findByCardId(request.getIdCards());
-        user.setICard(idCard);
+
+        // Upload ảnh nếu có
+        try {
+            if (userImagePath != null && !userImagePath.isEmpty()) {
+                // Xóa ảnh cũ nếu đã có
+                if (user.getUserImagePath() != null) {
+                    googleCloudStorageService.deleteFile(user.getUserImagePath());
+                }
+
+                // Upload ảnh mới
+                String newImagePath = googleCloudStorageService.uploadFile(userImagePath);
+                user.setUserImagePath(newImagePath);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Lỗi khi upload ảnh: " + e.getMessage());
+        }
 
         return userRepository.save(user);
     }
+
     @Override
     public void deleteUserById(UUID userId) {
         User user = userRepository.findById(userId)

@@ -52,10 +52,12 @@ public class PermissionServiceImp implements PermissionService {
     @Override
     public PermissionResponseDTO toPermissionResponse(Permission permission) {
         if (permission != null) {
-            PermissionResponseDTO responseDTO = new PermissionResponseDTO();
-            responseDTO.setPermissionName(permission.getPermissionName());
-            return responseDTO;
+            return PermissionResponseDTO.builder()
+                    .permissionId(permission.getPermissionId())
+                    .permissionName(permission.getPermissionName())
+                    .build();
         }
         return null;
     }
+
 }

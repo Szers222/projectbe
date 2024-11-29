@@ -8,12 +8,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tdc.edu.vn.project_mobile_be.dtos.requests.user.EmailRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.RegisterRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.ResetPasswordRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.otp.EmailRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.otp.RegisterRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.otp.ResetPasswordRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.user.CreateAddressRequestDTO;
 import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
+import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
+import tdc.edu.vn.project_mobile_be.entities.user.UserAddress;
 import tdc.edu.vn.project_mobile_be.entities.user.UserOtp;
 import tdc.edu.vn.project_mobile_be.enums.UserRole;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ForgotPasswordRepository;
@@ -189,17 +192,31 @@ public class UserOtpServiceImp implements UserOtpService {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
             String encodedPassword = passwordEncoder.encode(request.getUserPassword());
             existingUser.setUserPassword(encodedPassword);
-            
-            UserRole chosRole = UserRole.fromValue(request.getRole());
-            Role role = roleRepository.findByRoleName(chosRole.name())
-                    .orElseThrow(()-> new RuntimeException("Khoong tim thay role"));
-            if (!existingUser.getRoles().contains(role)) {
-                existingUser.getRoles().add(role);
+
+            Role defaultRole = roleRepository.findByRoleName("USER")
+                    .orElseThrow(() -> new RuntimeException("Role 'USER' không tồn tại"));
+            if (!existingUser.getRoles().contains(defaultRole)) {
+                existingUser.getRoles().add(defaultRole);
             }
+            if (existingUser.getICard() == null) {
+                IdCard emptyIdCard = new IdCard();
+                existingUser.setICard(emptyIdCard);
+            }
+            CreateAddressRequestDTO addressRequest = request.getAddress();
+            if (existingUser.getDetail() == null) {
+                UserAddress userAddress = UserAddress.builder()
+                        .addressName(addressRequest.getUserAddress())
+                        .ward(addressRequest.getWard())
+                        .district(addressRequest.getDistrict())
+                        .city(addressRequest.getCity())
+                        .user(existingUser)
+                        .build();
+                existingUser.setDetail(userAddress);
+            }
+
             return registerRepository.save(existingUser);
         }
         return existingUser;
-
     }
 
     @Override

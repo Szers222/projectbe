@@ -2,18 +2,14 @@ package tdc.edu.vn.project_mobile_be.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.idcard.CreateIdCardRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.idcard.IdCardResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.IdCardRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.IdCardService;
 
-import java.lang.module.ResolutionException;
-import java.util.List;
-import java.util.Optional;
+import java.io.IOException;
+
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -21,88 +17,102 @@ public class IdCardServiceImpl implements IdCardService {
     @Autowired
     private IdCardRepository idCardRepository;
 
-    /**
-     * Create IdCard
-     *
-     * @param idCardRequestDTO
-     * @return IdCardResponseDTO
-     */
-    @Override
-    public IdCardResponseDTO createIdCard(CreateIdCardRequestDTO idCardRequestDTO) {
-        // Create IdCard tu DTO
-        IdCard idCard = new IdCard();
-        idCard.setCardId(UUID.randomUUID());
-        idCard.setIdCardNumber(idCardRequestDTO.getIdCardNumber());
-        idCard.setImageFrontPath(idCardRequestDTO.getImageFrontPath());
-        idCard.setImageBackPath(idCardRequestDTO.getImageBackPath());
-        idCard.setIdCardDate(idCardRequestDTO.getIdCardDate());
-        // Lưu thẻ ID mới vào repository
-        IdCard savedIdCard = idCardRepository.save(idCard);
-        // Chuyển đổi thẻ ID đã lưu thành DTO và trả về
-        IdCardResponseDTO idCardResponseDTO = new IdCardResponseDTO();
-        idCardResponseDTO.toDto(savedIdCard);
-        return idCardResponseDTO;
-    }
+    @Autowired
+    private GoogleCloudStorageService googleCloudStorageService;
 
-    // Get ALl
     @Override
-    public List<IdCardResponseDTO> getAllIdCards() {
-        List<IdCard> idCards = idCardRepository.findAll();  // Lấy tất cả các IdCard từ repository
-        if (idCards.isEmpty()) {
-            throw new EntityNotFoundException("Không tìm thấy thẻ ID nào.");
+    public IdCard uploadIdCardImages(CreateIdCardRequestDTO idCardRequestDTO) {
+        // Kiểm tra nếu idCardNumber đã tồn tại
+        if (idCardRepository.existsByIdCardNumber(idCardRequestDTO.getIdCardNumber())) {
+            throw new IllegalArgumentException("IdCardNumber đã tồn tại: " + idCardRequestDTO.getIdCardNumber());
         }
 
-        return idCards.stream().map(idCard -> {
-            IdCardResponseDTO responseDTO = new IdCardResponseDTO();
-            responseDTO.toDto(idCard); // Chuyển đổi IdCard thành DTO
-            return responseDTO;
-        }).collect(Collectors.toList());
-    }
-
-    //Delete
-    @Override
-    public void deleteIdCard(UUID cardId){
-        Optional<IdCard> idCardOptional = idCardRepository.findById(cardId);
-        if(idCardOptional.isPresent()){
-            idCardRepository.delete(idCardOptional.get());
-        }
-        else {
-            throw new ResolutionException("Khong tim thay id " + cardId);
+        try {
+            // Tạo một thực thể IdCard mới
+            IdCard idCard = new IdCard();
+            idCard.setCardId(UUID.randomUUID());
+            idCard.setIdCardNumber(idCardRequestDTO.getIdCardNumber());
+            idCard.setIdCardDate(idCardRequestDTO.getIdCardDate());
+            // Upload ảnh mặt trước
+            if (idCardRequestDTO.getImageFront() != null && !idCardRequestDTO.getImageFront().isEmpty()) {
+                String frontUrl = googleCloudStorageService.uploadFile(idCardRequestDTO.getImageFront());
+                idCard.setImageFrontPath(frontUrl);
+            }
+            // Upload ảnh mặt sau
+            if (idCardRequestDTO.getImageBack() != null && !idCardRequestDTO.getImageBack().isEmpty()) {
+                String backUrl = googleCloudStorageService.uploadFile(idCardRequestDTO.getImageBack());
+                idCard.setImageBackPath(backUrl);
+            }
+            // Lưu IdCard vào cơ sở dữ liệu
+            return idCardRepository.save(idCard);
+        } catch (IOException e) {
+            throw new RuntimeException("Lỗi khi upload ảnh: " + e.getMessage());
         }
     }
     //Update
     @Override
-    public IdCardResponseDTO updateIdCard(UUID cardId, CreateIdCardRequestDTO idCardRequestDTO) {
-        IdCard existingIdCard = idCardRepository.findById(cardId)
-                .orElseThrow(() -> new RuntimeException(
-                        "Không tìm thấy thẻ ID với ID: "
-                        + cardId));
-        // Cap nhat thong tin
-        existingIdCard.setIdCardNumber(idCardRequestDTO.getIdCardNumber());
-        existingIdCard.setImageFrontPath(idCardRequestDTO.getImageFrontPath());
-        existingIdCard.setImageBackPath(idCardRequestDTO.getImageBackPath());
-        existingIdCard.setIdCardDate(idCardRequestDTO.getIdCardDate());
+    public IdCard updateIdCard(UUID cardId, CreateIdCardRequestDTO idCardRequestDTO) {
+        // Tìm IdCard cần cập nhật
+        IdCard idCard = idCardRepository.findByCardId(cardId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy IdCard với ID: " + cardId));
 
-        // Luu lai thong tin
-        IdCard updateIdCard = idCardRepository.save(existingIdCard);
+        try {
+            // Xử lý ảnh mặt trước
+            if (idCardRequestDTO.getImageFront() != null && !idCardRequestDTO.getImageFront().isEmpty()) {
+                // Xóa ảnh cũ trên Google Cloud Storage nếu có
+                if (idCard.getImageFrontPath() != null) {
+                    googleCloudStorageService.deleteFile(idCard.getImageFrontPath());
+                }
+                // Upload ảnh mới và cập nhật đường dẫn
+                String frontUrl = googleCloudStorageService.uploadFile(idCardRequestDTO.getImageFront());
+                idCard.setImageFrontPath(frontUrl);
+            }
 
-        //Chuyen doi entity sang DTO
-        IdCardResponseDTO responseDTO = new IdCardResponseDTO();
-        responseDTO.toDto(updateIdCard);
-        return responseDTO;
+            // Xử lý ảnh mặt sau
+            if (idCardRequestDTO.getImageBack() != null && !idCardRequestDTO.getImageBack().isEmpty()) {
+                // Xóa ảnh cũ trên Google Cloud Storage nếu có
+                if (idCard.getImageBackPath() != null) {
+                    googleCloudStorageService.deleteFile(idCard.getImageBackPath());
+                }
+                // Upload ảnh mới và cập nhật đường dẫn
+                String backUrl = googleCloudStorageService.uploadFile(idCardRequestDTO.getImageBack());
+                idCard.setImageBackPath(backUrl);
+            }
 
+            // Cập nhật thông tin khác
+            idCard.setIdCardNumber(idCardRequestDTO.getIdCardNumber());
+            idCard.setIdCardDate(idCardRequestDTO.getIdCardDate());
+
+            // Lưu thay đổi vào cơ sở dữ liệu
+            return idCardRepository.save(idCard);
+        } catch (IOException e) {
+            throw new RuntimeException("Lỗi khi upload ảnh: " + e.getMessage());
+        }
     }
-//    //Lay id
-//    @Override
-//    public IdCardResponseDTO getIdCardById(UUID cardId){
-//        IdCard idCard = idCardRepository.findById(cardId).
-//                orElseThrow(() ->
-//                        new RuntimeException("Khong tim thay ID " + cardId));
-//        //Chuyen doi entity sang DTO
-//        IdCardResponseDTO responseDTO = new IdCardResponseDTO();
-//        responseDTO.toDto(idCard);
-//        return responseDTO;
-//
-//    }
+    @Override
+    public void deleteIdCard(UUID cardId) {
+        // Tìm IdCard cần xóa
+        IdCard idCard = idCardRepository.findByCardId(cardId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy IdCard với ID: " + cardId));
 
+        // Xóa ảnh trên Google Cloud Storage
+        if (idCard.getImageFrontPath() != null) {
+            googleCloudStorageService.deleteFile(idCard.getImageFrontPath());
+        }
+        if (idCard.getImageBackPath() != null) {
+            googleCloudStorageService.deleteFile(idCard.getImageBackPath());
+        }
+
+        // Xóa IdCard trong cơ sở dữ liệu
+        idCardRepository.delete(idCard);
+    }
+
+
+
+    @Override
+    public boolean existsByIdCardNumber(String idCardNumber) {
+        return idCardRepository.existsByIdCardNumber(idCardNumber);
+    }
 }
+
+

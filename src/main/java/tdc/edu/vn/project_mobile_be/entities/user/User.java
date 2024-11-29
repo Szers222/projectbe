@@ -46,9 +46,6 @@ public class User {
     @Column(name = "user_birthday", columnDefinition = "TIMESTAMP")
     private Timestamp userBirthday;
 
-    @Column(name = "user_address", columnDefinition = "TEXT", nullable = true)
-    private String userAddress;
-
     @Column(name = "user_image_path", columnDefinition = "VARCHAR(255)")
     private String userImagePath;
 
@@ -84,10 +81,9 @@ public class User {
     private int userStatus;
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "card_id", nullable = true)
-    @JsonBackReference
+    @JsonManagedReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-
     private IdCard iCard;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
