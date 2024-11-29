@@ -1,10 +1,9 @@
-package tdc.edu.vn.project_mobile_be.dtos.requests;
+package tdc.edu.vn.project_mobile_be.dtos.requests.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import tdc.edu.vn.project_mobile_be.entities.user.User;
 
 import javax.validation.constraints.NotNull;
 import java.util.UUID;

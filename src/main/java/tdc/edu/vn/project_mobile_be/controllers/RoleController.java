@@ -7,7 +7,8 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 import tdc.edu.vn.project_mobile_be.commond.ApiResponse;
 import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.RoleRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.responses.RoleResponseDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.jwt.UpdateRoleRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.role.RoleResponseDTO;
 import tdc.edu.vn.project_mobile_be.services.impl.RoleServiceImp;
 
 import java.util.List;
@@ -38,4 +39,5 @@ public class RoleController {
         roleServiceImp.delete(id);
         return ApiResponse.<Void>builder().build();
     }
+    
 }

@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
-import tdc.edu.vn.project_mobile_be.dtos.requests.EmailRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.user.EmailRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.RegisterRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.ResetPasswordRequestDTO;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
@@ -53,23 +53,41 @@ public class UserOtpController {
     public ResponseEntity<String> forgotPassword(@RequestParam String email) {
         try {
             userOtpService.forgotPassword(email);
-            return new ResponseEntity<>("Xac thuc email",HttpStatus.OK);
-        } catch (RuntimeException e){
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Xác thực email", HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @PostMapping("/verifyPass")
+    public ResponseEntity<String> verifyOtp(
+            @RequestParam("email") String email,
+            @RequestParam("otp") String otp) {
+        try {
+            userOtpService.verifyOtp(email, otp);
+            return new ResponseEntity<>("OTP hợp lệ", HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @PostMapping("/reset")
     public ResponseEntity<ResponseData<?>> resetPassword(
             @RequestParam("email") String email,
-            @RequestParam("otp") String otp,
-            @RequestBody @Valid ResetPasswordRequestDTO resetPasswordRequest){
-        User user = userOtpService.resetPassword(email,otp,resetPasswordRequest);
-        ResponseData<?> responseData = new ResponseData<>(
-                HttpStatus.CREATED
-                ,"Tao password moi thanh cong"
-                ,user);
-        return ResponseEntity.ok(responseData);
+            @RequestBody @Valid ResetPasswordRequestDTO resetPasswordRequest) {
+        try {
+            User user = userOtpService.resetPassword(email, resetPasswordRequest);
+            ResponseData<?> responseData = new ResponseData<>(
+                    HttpStatus.CREATED,
+                    "Tạo mật khẩu mới thành công",
+                    user);
+            return ResponseEntity.ok(responseData);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(new ResponseData<>(
+                    HttpStatus.BAD_REQUEST,
+                    e.getMessage(),
+                    null), HttpStatus.BAD_REQUEST);
+        }
     }
-
 
 }

@@ -8,7 +8,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tdc.edu.vn.project_mobile_be.dtos.requests.EmailRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.user.EmailRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.RegisterRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.ResetPasswordRequestDTO;
 import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
@@ -127,40 +127,45 @@ public class UserOtpServiceImp implements UserOtpService {
         if (user != null && user.getUserStatus() == 1) {
             forgotPasswordRepository.save(user);
             UserOtp userOtp = insertOtp(user);
-            sendVerificationEmail(user.getUserEmail(),userOtp.getOtp());
-        }
-        else {
+            sendVerificationEmail(user.getUserEmail(), userOtp.getOtp());
+        } else {
             throw new RuntimeException("Tài khoản không hợp lệ");
         }
     }
 
     @Override
-    public User resetPassword(String email, String otp, ResetPasswordRequestDTO request) {
+    public void verifyOtp(String email, String otp) {
         User user = forgotPasswordRepository.findByUserEmail(email);
-        if (user == null && user.getUserStatus() != 1) {
-            throw new RuntimeException("Tai khoan khong hop le");
+        if (user == null || user.getUserStatus() != 1) {
+            throw new RuntimeException("Tài khoản không hợp lệ");
         }
-        if (user.getUserStatus() == 1) {
-            UserOtp userOtp = userOtpRepository.findByUser(user);
-            if (userOtp == null){
-                throw new RuntimeException("OTP khong ton tai");
-            }
-            if (otp.equals(userOtp.getOtp())) {
-                if (Duration.between(userOtp.getOtpTime(), LocalDateTime.now()).compareTo(OTP_EXPIRATION_DURATION) <= 0)
-                {
-                    if (!request.getUserPassword().equals(request.getConfirmPassword())){
-                        throw new RuntimeException("Mật khẩu và xác nhận mật khẩu không khớp");
-                    }
-                    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-                    String encodePassword = passwordEncoder.encode(request.getUserPassword());
-                    user.setUserPassword(encodePassword);
-                    forgotPasswordRepository.save(user);
-                } else {
-                    throw new RuntimeException("OTP khong ton tai");
-                }
-            }
 
+        UserOtp userOtp = userOtpRepository.findByUser(user);
+        if (userOtp == null || !otp.equals(userOtp.getOtp())) {
+            throw new RuntimeException("OTP không hợp lệ");
         }
+
+        if (Duration.between(userOtp.getOtpTime(), LocalDateTime.now()).compareTo(OTP_EXPIRATION_DURATION) > 0) {
+            throw new RuntimeException("OTP đã hết hạn");
+        }
+    }
+
+    @Override
+    public User resetPassword(String email, ResetPasswordRequestDTO request) {
+        User user = forgotPasswordRepository.findByUserEmail(email);
+        if (user == null || user.getUserStatus() != 1) {
+            throw new RuntimeException("Tài khoản không hợp lệ");
+        }
+
+        if (!request.getUserPassword().equals(request.getConfirmPassword())) {
+            throw new RuntimeException("Mật khẩu và xác nhận mật khẩu không khớp");
+        }
+
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        String encodePassword = passwordEncoder.encode(request.getUserPassword());
+        user.setUserPassword(encodePassword);
+        forgotPasswordRepository.save(user);
+
         return user;
     }
 
