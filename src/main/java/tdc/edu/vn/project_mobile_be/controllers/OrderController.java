@@ -82,4 +82,10 @@ public class OrderController {
         return ResponseEntity.ok(responseData);
     }
 
+    @GetMapping({"/order/user/{userId}", "/order/user/{userId}/"})
+    public ResponseEntity<ResponseData<List<OrderResponseDTO>>> getOrderByUserId(@PathVariable UUID userId) {
+        List<OrderResponseDTO> orders = orderService.getOrderByUserId(userId);
+        ResponseData<List<OrderResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Orders found!", orders);
+        return ResponseEntity.ok(responseData);
+    }
 }

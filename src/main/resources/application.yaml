@@ -12,7 +12,10 @@ spring:
     username: root
     password: ${password}
     driver-class-name: com.mysql.cj.jdbc.Driver
-
+  cloud:
+    config:
+      import-check:
+        enabled: false
   jpa:
     database: mysql
     show-sql: true
