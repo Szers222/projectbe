@@ -93,4 +93,12 @@ logging:
         web: DEBUG
         security: DEBUG
 
-
+payment:
+  vnPay:
+    url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+    tmnCode: 6LD3JKMX
+    secretKey: E4NTQV04NGOUHWW0QJ01AYN9LTVO2OYQ
+    returnUrl: http://localhost:8080/api/v1/payment/vn-pay-callback
+    version: 2.1.0
+    command: pay
+    orderType: other
