@@ -1,14 +1,11 @@
 package tdc.edu.vn.project_mobile_be.dtos.requests.coupon;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.sql.Timestamp;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@Setter
 public class CouponRequestParamsDTO {
     private int page = 0;
     private int size = 20;

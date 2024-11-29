@@ -1,11 +1,16 @@
+server:
+  ip: localhost
+password: ''
+
+
 spring:
   application:
     name: project_mobile_be
 
   datasource:
-    url: jdbc:mysql://localhost:3306/mobileproject
-    username: "root"
-    password: ''
+    url: jdbc:mysql://${server.ip}:3306/mobileproject
+    username: root
+    password: ${password}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -56,29 +61,33 @@ jwt:
   valid-duration: 60
   refreshable-duration: 7
 
-
 spring.devtools:
   restart:
     enabled: true  # Kích hoạt tự động tải lại
     exclude: static/**,public/** # Loại trừ thư mục static và public
-    spring:
-      jackson:
-        time-zone: Asia/Ho_Chi_Minh
+  spring:
+    jackson:
+      time-zone: Asia/Ho_Chi_Minh
+
 redis:
-  host: 192.168.57.128
+  host: ${server.ip}
   port: 6379
   password: ''
-
+  cache:
+    type: redis
 
 google:
   cloud:
     storage:
       bucket-name: mobileproject
     credentials:
-      path: src/main/resources/service-account.json
+      path: service-account.json
 
 logging:
   level:
     org:
       springframework:
         web: DEBUG
+        security: DEBUG
+
+

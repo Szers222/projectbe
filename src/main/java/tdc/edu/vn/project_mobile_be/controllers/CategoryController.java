@@ -62,13 +62,20 @@ public class CategoryController {
 
     @DeleteMapping({"/category/{categoryId}", "/category/{categoryId}/"})
     public ResponseEntity<ResponseData<?>> deleteCategory(@PathVariable UUID categoryId) {
-        boolean isDeleted = categoryService.deleteCategory(categoryId);
-        if (isDeleted) {
+        try {
+            // Validate and parse the UUID
+            categoryService.deleteCategory(categoryId);
             ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Category đã được xóa !", null);
             return new ResponseEntity<>(responseData, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            // Handle invalid UUID string
+            ResponseData<?> responseData = new ResponseData<>(HttpStatus.BAD_REQUEST, "Invalid UUID string: " + categoryId, null);
+            return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            // Handle general exceptions
+            ResponseData<?> responseData = new ResponseData<>(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while deleting the category.", null);
+            return new ResponseEntity<>(responseData, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        ResponseData<?> responseData = new ResponseData<>(HttpStatus.BAD_REQUEST, "Category không tồn tại !", null);
-        return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
     }
 
     @PutMapping({"/category/{categoryId}", "/category/"})

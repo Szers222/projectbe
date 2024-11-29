@@ -1,6 +1,7 @@
 package tdc.edu.vn.project_mobile_be.entities.product;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
 import jakarta.persistence.*;
@@ -63,14 +64,14 @@ public class Product {
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp updatedAt;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL,orphanRemoval = true)
     @JoinColumn(name = "coupon_id", referencedColumnName = "coupon_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonBackReference
     private Coupon coupon;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JsonBackReference
@@ -100,6 +101,9 @@ public class Product {
     private Set<Category> categories = new HashSet<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @JsonBackReference
+    @EqualsAndHashCode.Exclude
     private Set<ShipmentProduct> shipmentProducts = new HashSet<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -109,9 +113,9 @@ public class Product {
     private Set<CartProduct> cartProducts = new HashSet<>();
 
 
-    @OneToMany(mappedBy = "product", orphanRemoval = true)
+    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
-    @JsonBackReference
+    @JsonManagedReference(value = "size-product")
     @EqualsAndHashCode.Exclude
     private Set<SizeProduct> sizeProducts = new HashSet<>();
 

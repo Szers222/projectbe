@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.entities.relationship;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
@@ -22,6 +23,7 @@ public class CartProduct {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("cart_id")
+    @JsonBackReference(value = "cart-product")
     @JoinColumn(name = "cart_id")
     private Cart cart;
 

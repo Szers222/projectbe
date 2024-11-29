@@ -17,6 +17,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ProductImageResponseDTO implements IDto<ProductImage> {
 
+    @JsonProperty("productImageId")
+    private UUID productImageId;
     @JsonProperty("productImagePath")
     private String productImagePath;
     @JsonProperty("productImageAlt")

@@ -49,6 +49,9 @@ public class User {
     @Column(name = "user_image_path", columnDefinition = "VARCHAR(255)")
     private String userImagePath;
 
+    @Column(name = "cancel_count", columnDefinition = "int default 0")
+    private int cancelCount;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
@@ -84,17 +87,19 @@ public class User {
     private IdCard iCard;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonBackReference
+    @JsonManagedReference(value = "user-post")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<Post> post;
+
+
 
     @OneToMany(mappedBy = "user")
     private Set<OneTimePassword> oneTimePasswords = new HashSet<>();
     @ManyToMany(fetch = FetchType.EAGER)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonManagedReference
+    @JsonManagedReference(value = "user-role")
     @JoinTable(
             name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),

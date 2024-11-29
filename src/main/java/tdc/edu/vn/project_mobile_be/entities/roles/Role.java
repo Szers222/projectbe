@@ -44,7 +44,7 @@ public class Role {
     @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference
+    @JsonBackReference(value = "user-role")
     private Set<User> users;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL )

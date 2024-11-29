@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Component
@@ -24,15 +25,15 @@ public class GuestAuthenticationFilter extends AnonymousAuthenticationFilter {
     @Override
     protected Authentication createAuthentication(HttpServletRequest request) {
         UUID guestId = UUID.randomUUID();
-
+        System.console().printf("Request12313" + request.getCookies());
         // Tạo cookie chứa guestId
         Cookie guestIdCookie = new Cookie("guestId", guestId.toString());
-        guestIdCookie.setPath("/"); // Đảm bảo cookie có hiệu lực trên toàn bộ ứng dụng
-        guestIdCookie.setHttpOnly(true); // Đảm bảo cookie chỉ được truy cập qua HTTP, tránh JavaScript
-        guestIdCookie.setMaxAge(24 * 60 * 60); // Đặt thời hạn tồn tại của cookie, ví dụ 1 ngày
+        guestIdCookie.setPath("/");
+        guestIdCookie.setHttpOnly(true);
+        guestIdCookie.setMaxAge(24 * 60 * 60);
 
         // Thêm cookie vào response
-        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+        HttpServletResponse response = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse();
         if (response != null) {
             response.addCookie(guestIdCookie);
         }
