@@ -5,10 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -31,9 +29,6 @@ public class UpdateCustomerRequestDTO {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     Timestamp userBirthday;
 
-    @JsonProperty("userAddress")
-    String userAddress;
-
     @NotEmpty(message = "Họ không được để trống")
     @JsonProperty("userLastName")
     String userLastName;
@@ -47,9 +42,6 @@ public class UpdateCustomerRequestDTO {
 
     @JsonProperty("userPasswordLevel2")
     String userPasswordLevel2;
-
-    @NotNull(message = "IdCard không được để trống")
-    @JsonProperty("idCards")
-    UUID idCards;
 }
+
 
