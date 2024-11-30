@@ -31,10 +31,10 @@ public class CartController {
     private CartService cartService;
 
 
-    @PostMapping(value = {"/cart/guest", "/cart/guest/"})
+    @PostMapping(value = {"/cart/create_guest/{guestId}", "/cart/create_guest/{guestId}/"})
     public ResponseEntity<ResponseData<?>> createCart(
             @Valid @RequestBody CartCreateRequestDTO params,
-            HttpServletRequest request,
+            @PathVariable UUID guestId,
             BindingResult bindingResult
     ) {
         if (bindingResult.hasErrors()) {
@@ -43,7 +43,7 @@ public class CartController {
                     .collect(Collectors.toList());
             throw new MultipleFieldsNullOrEmptyException(errorMessages);
         }
-        Cart cartCreated = cartService.createCartNoUser(params, request);
+        Cart cartCreated = cartService.createCartNoUser(params, guestId);
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Cart tạo thành công !", cartCreated);
         return ResponseEntity.ok(responseData);
     }
