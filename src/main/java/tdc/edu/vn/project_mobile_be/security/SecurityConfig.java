@@ -30,7 +30,9 @@ public class SecurityConfig {
             "/api/v1/products/relate",
             "/api/v1/products",
             "/api/v1/products/filters?",
-            "/ws"
+            "/ws",
+            "/api/paypment/create-order",
+            "/v2/create"
     };
 
 

@@ -71,21 +71,17 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
     @Transactional
     public Order createOrderByGuest(OrderCreateRequestDTO order) {
         validateOrderRequest(order);
-
         Cart cart = cartRepository.findById(order.getCartId())
                 .orElseThrow(() -> new EntityNotFoundException("Cart not found"));
         Set<Coupon> coupons = new HashSet<>();
         Coupon couponShip = new Coupon();
-        Coupon couponDiscount = new Coupon();
         if (order.getOrderCoupon() != null) {
             coupons = getCouponsFromRequest(order);
             couponShip = getCouponByType(coupons, COUPON_SHIP_TYPE).orElse(null);
-            couponDiscount = getCouponByType(coupons, COUPON_PER_HUNDRED_TYPE, COUPON_PRICE_TYPE).orElse(null);
         }
-
         Order orderEntity = new Order();
         if (cart.getCartStatus() == CART_STATUS_GUEST) {
-            orderEntity = populateOrderForGuest(order, cart, coupons, couponShip, couponDiscount);
+            orderEntity = populateOrderForGuest(order, cart, coupons, couponShip);
         }
 
         return orderRepository.save(orderEntity);
@@ -242,8 +238,8 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
 
 
     private Order populateOrderForGuest(OrderCreateRequestDTO order, Cart cart, Set<Coupon> coupons,
-                                        Coupon couponShip, Coupon couponDiscount) {
-        Order orderEntity = populateBaseOrderEntity(order, cart, coupons, couponShip, couponDiscount);
+                                        Coupon couponShip) {
+        Order orderEntity = populateBaseOrderEntity(order, cart, coupons, couponShip);
         orderEntity.setOrderName(order.getUserName());
         orderEntity.setOrderPhone(order.getUserPhone());
         orderEntity.setOrderEmail(order.getUserEmail());
@@ -257,7 +253,7 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
 
 
     private Order populateBaseOrderEntity(OrderCreateRequestDTO order, Cart cart, Set<Coupon> coupons,
-                                          Coupon couponShip, Coupon couponDiscount) {
+                                          Coupon couponShip) {
         Order orderEntity = order.toEntity();
         orderEntity.setOrderPayment(order.getOrderPayment());
         orderEntity.setOrderNote(order.getOrderNote());
@@ -267,18 +263,7 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         double shipFee = couponShip != null ? SHIP_FEE - couponShip.getCouponPrice() : SHIP_FEE;
         orderEntity.setOrderFeeShip(shipFee);
 
-        double totalPrice = cart.getCartProducts().stream()
-                .mapToDouble(cp -> cp.getProduct().getProductPrice() * cp.getProduct().getProductQuantity())
-                .sum();
-
-        if (couponDiscount != null) {
-            if (couponDiscount.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
-                totalPrice -= totalPrice * couponDiscount.getCouponPerHundred();
-            } else if (couponDiscount.getCouponType() == COUPON_PRICE_TYPE) {
-                totalPrice -= couponDiscount.getCouponPrice();
-            }
-        }
-        orderEntity.setTotalPrice(totalPrice);
+        orderEntity.setTotalPrice(order.getTotalPrice());
         return orderEntity;
     }
 

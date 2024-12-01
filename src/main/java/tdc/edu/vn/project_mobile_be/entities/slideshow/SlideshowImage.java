@@ -1,15 +1,17 @@
 package tdc.edu.vn.project_mobile_be.entities.slideshow;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
+import tdc.edu.vn.project_mobile_be.entities.product.Product;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -34,6 +36,13 @@ public class SlideshowImage {
 
     @Column(name = "slideshow_image_alt", length = 255, columnDefinition = "VARCHAR(255)")
     private String slideShowImageImageAlt;
+
+    @ManyToMany(mappedBy = "slideshowImages")
+    @ToString.Exclude
+    @JsonBackReference
+    @EqualsAndHashCode.Exclude
+    private Set<Product> products = new HashSet<>();
+
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")

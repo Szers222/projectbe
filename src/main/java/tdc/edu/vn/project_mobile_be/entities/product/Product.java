@@ -13,6 +13,7 @@ import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
 import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
+import tdc.edu.vn.project_mobile_be.entities.slideshow.SlideshowImage;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
@@ -99,6 +100,15 @@ public class Product {
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
     private Set<Category> categories = new HashSet<>();
+
+    @ManyToMany
+    @JsonBackReference
+    @JoinTable(
+            name = "products_slideshow_images",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "slideshow_image_id")
+    )
+    Set<SlideshowImage> slideshowImages = new HashSet<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude

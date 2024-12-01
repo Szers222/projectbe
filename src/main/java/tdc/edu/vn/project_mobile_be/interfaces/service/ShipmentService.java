@@ -1,7 +1,5 @@
 package tdc.edu.vn.project_mobile_be.interfaces.service;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipment.ShipmentCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.shipment.ShipmentUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.shipment.ShipmentResponseDTO;
