@@ -1,4 +1,4 @@
-package tdc.edu.vn.project_mobile_be.configs.payment;
+package tdc.edu.vn.project_mobile_be.services.impl;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -8,26 +8,23 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
+import tdc.edu.vn.project_mobile_be.configs.payment.CreateOrder;
 import tdc.edu.vn.project_mobile_be.configs.payment.vn.zalopay.crypto.HMACUtil;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class CreateOrder {
+public class ZaloPayService {
     private static Map<String, String> config = new HashMap<String, String>() {{
         put("app_id", "2554");
-        put("key1", "sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn");
-        put("key2", "trMrHtvjo6myautxDUiAcYsVtaeQ8nhf");
+        put("key1", "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL");
+        put("key2", "kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz");
         put("endpoint", "https://sb-openapi.zalopay.vn/v2/create");
     }};
 
     public static String getCurrentTimeString(String format) {
-        Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT+7"));
-        SimpleDateFormat fmt = new SimpleDateFormat(format);
-        fmt.setCalendar(cal);
-        return fmt.format(cal.getTimeInMillis());
+        return CreateOrder.getCurrentTimeString(format);
     }
 
     public static void main(String[] args) throws Exception {
@@ -43,9 +40,9 @@ public class CreateOrder {
 
         Map<String, Object> order = new HashMap<String, Object>() {{
             put("app_id", config.get("app_id"));
-            put("app_trans_id", getCurrentTimeString("yyMMdd") + "_" + random_id); // translation missing: vi.docs.shared.sample_code.comments.app_trans_id
-            put("app_time", System.currentTimeMillis()); // miliseconds
+            put("app_trans_id", getCurrentTimeString("yyMMdd") + "_" + random_id);
             put("app_user", "user123");
+            put("app_time", System.currentTimeMillis());
             put("amount", 50000);
             put("description", "Lazada - Payment for the order #" + random_id);
             put("bank_code", "zalopayapp");
@@ -61,6 +58,7 @@ public class CreateOrder {
         CloseableHttpClient client = HttpClients.createDefault();
         HttpPost post = new HttpPost(config.get("endpoint"));
 
+
         List<NameValuePair> params = new ArrayList<>();
         for (Map.Entry<String, Object> e : order.entrySet()) {
             params.add(new BasicNameValuePair(e.getKey(), e.getValue().toString()));
@@ -70,6 +68,7 @@ public class CreateOrder {
         post.setEntity(new UrlEncodedFormEntity(params));
 
         CloseableHttpResponse res = client.execute(post);
+
         BufferedReader rd = new BufferedReader(new InputStreamReader(res.getEntity().getContent()));
         StringBuilder resultJsonStr = new StringBuilder();
         String line;

@@ -26,8 +26,10 @@ public class OrderCreateRequestByUserDTO implements IDto<Order> {
 
     @JsonProperty("orderNote")
     private String orderNote;
+
     @JsonProperty("totalPrice")
     private double totalPrice;
+
     @NotNull(message = "Order payment is required")
     @JsonProperty("orderPayment")
     private int orderPayment;

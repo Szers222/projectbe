@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package vn.zalopay.crypto;
+package tdc.edu.vn.project_mobile_be.configs.payment.vn.zalopay.crypto;
 
 
 import java.io.UnsupportedEncodingException;
