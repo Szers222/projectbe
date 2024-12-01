@@ -1,5 +1,7 @@
 package tdc.edu.vn.project_mobile_be.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +39,8 @@ public class UserController {
     UserService userService;
     @Autowired
     UserRepository userRepository;
+    private final ObjectMapper objectMapper;
+
     // Get All Users
     @GetMapping("/users")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -87,8 +91,10 @@ public class UserController {
     @PutMapping(value = "/customer/myInfo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseData<?>> updateMyInfo(
             @RequestPart(value = "image", required = false) MultipartFile userImagePath,
-            @RequestPart("request") @Valid UpdateCustomerRequestDTO request
-    ) {
+            @RequestPart(value = "request", required = true) String requestJson
+    ) throws JsonProcessingException {
+        UpdateCustomerRequestDTO request = objectMapper.readValue(requestJson, UpdateCustomerRequestDTO.class);
+
         User user = userService.updateMyInfo(request, userImagePath);
 
         ResponseData<?> responseData = new ResponseData<>(
@@ -98,7 +104,6 @@ public class UserController {
         );
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
-
 
 
     @DeleteMapping("/users/{id}")

@@ -119,15 +119,12 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
                 .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
 
         // Cập nhật thông tin từ JSON
-        user.setUserPassword(passwordEncoder.encode(request.getUserPassword()));
         user.setUserPhone(request.getUserPhone());
         user.setUserBirthday(request.getUserBirthday());
-        user.setUserPasswordLevel2(passwordEncoder.encode(request.getUserPasswordLevel2()));
         user.setUserFirstName(request.getUserFirstName());
         user.setUserLastName(request.getUserLastName());
-        user.setUserWrongPassword(request.getUserWrongPassword());
 
-        // Upload ảnh nếu có
+        // Xử lý ảnh nếu có
         try {
             if (userImagePath != null && !userImagePath.isEmpty()) {
                 // Xóa ảnh cũ nếu đã có
@@ -145,6 +142,7 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
 
         return userRepository.save(user);
     }
+
 
     @Override
     public void deleteUserById(UUID userId) {
