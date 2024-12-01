@@ -69,46 +69,42 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
     }
 
     @Override
-    public Cart createCartNoUser(CartCreateRequestDTO params, HttpServletRequest request) {
-        log.info("Create cart for guest" + request.getCookies());
-        UUID guestId = null;
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if ("guestId".equals(cookie.getName())) {
-                    guestId = UUID.fromString(cookie.getValue());
-                    break;
-                }
-            }
-        }
+    public Cart createCartNoUser(CartCreateRequestDTO params, UUID guestId) {
         if (guestId == null) {
             throw new EntityNotFoundException("Guest not found");
         }
-        final UUID finalGuestId = guestId;
+
+        // Tìm giỏ hàng dựa trên guestId và trạng thái khách
         Cart cartSaved = cartRepository.findByUserId(guestId, CART_STATUS_GUEST)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
                     UUID cartId = UUID.randomUUID();
-                    newCart.setCartId(cartId);
+                    newCart.setCartId(cartId); // Dùng guestId làm cartId
                     newCart.setCartStatus(CART_STATUS_GUEST);
-                    newCart.setUser(null);
-                    newCart.setGuestId(finalGuestId);
+                    newCart.setUser(null); // Không gắn user
+                    newCart.setGuestId(guestId);
                     return cartRepository.save(newCart);
                 });
 
+        // Tìm product
         Product product = productRepository.findById(params.getSizeProduct().getProductId())
-                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with ID: " + params.getSizeProduct().getProductId()));
 
+        // Tìm product size
         ProductSize productSize = productSizeRepository.findById(params.getSizeProduct().getSizeId())
-                .orElseThrow(() -> new EntityNotFoundException("Size not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Size not found with ID: " + params.getSizeProduct().getSizeId()));
 
+        // Thêm sản phẩm vào giỏ hàng
         CartProduct cartProduct = new CartProduct();
         cartProduct.setProductSize(productSize);
         cartProduct.setCart(cartSaved);
         cartProduct.setProduct(product);
         cartProduct.setQuantity(params.getSizeProduct().getProductSizeQuantity());
 
+        // Thêm CartProduct vào danh sách
         cartSaved.getCartProducts().add(cartProduct);
 
+        // Lưu và trả kết quả
         return cartRepository.save(cartSaved);
     }
 
