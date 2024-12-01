@@ -15,8 +15,6 @@ import java.sql.Timestamp;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateCustomerRequestDTO {
 
-    @NotEmpty(message = "Mật khẩu không được để trống")
-    @Size(min = 8, message = "Mật khẩu phải có ít nhất 8 ký tự")
     @JsonProperty("userPassword")
     String userPassword;
 
@@ -26,7 +24,7 @@ public class UpdateCustomerRequestDTO {
     String userPhone;
 
     @JsonProperty("userBirthday")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     Timestamp userBirthday;
 
     @NotEmpty(message = "Họ không được để trống")
@@ -37,11 +35,7 @@ public class UpdateCustomerRequestDTO {
     @JsonProperty("userFirstName")
     String userFirstName;
 
-    @JsonProperty("userWrongPassword")
-    int userWrongPassword;
-
-    @JsonProperty("userPasswordLevel2")
-    String userPasswordLevel2;
 }
+
 
 
