@@ -38,6 +38,8 @@ public class OrderResponseDTO implements IDto<Order> {
     private int orderPayment;
     @JsonProperty("items")
     private List<CartResponseDTO> items;
+    @JsonProperty("shipperId")
+    private UUID shipperId;
 
 
     @Override

@@ -8,5 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface SlideshowRepository extends JpaRepository<SlideshowImage, UUID> {
-    SlideshowImage findSlideshowById(UUID slideshowId);
+//    SlideshowImage findSlideshowById(UUID slideshowId);
 }

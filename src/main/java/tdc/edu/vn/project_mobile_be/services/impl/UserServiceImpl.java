@@ -62,9 +62,6 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
         user.setUserFirstName(request.getUserFirstName());
         user.setUserLastName(request.getUserLastName());
         user.setUserWrongPassword(request.getUserWrongPassword());
-        IdCard idCard = idCardRepository.findByCardId(request.getIdCards())
-                .orElseThrow(() -> new EntityNotFoundException("IdCard not found"));
-        user.setICard(idCard);
         if (request.getRoles() != null && !request.getRoles().isEmpty()) {
             Set<Role> roles = new HashSet<>();
             for (String roleName : request.getRoles()) {
