@@ -1,6 +1,5 @@
 package tdc.edu.vn.project_mobile_be.entities.user;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,7 +9,6 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
 import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
-import tdc.edu.vn.project_mobile_be.entities.one_time_password.OneTimePassword;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
@@ -93,9 +91,6 @@ public class User {
     private Set<Post> post;
 
 
-
-    @OneToMany(mappedBy = "user")
-    private Set<OneTimePassword> oneTimePasswords = new HashSet<>();
     @ManyToMany(fetch = FetchType.EAGER)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

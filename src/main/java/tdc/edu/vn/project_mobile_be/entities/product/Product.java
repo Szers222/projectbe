@@ -8,12 +8,12 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.*;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
+import tdc.edu.vn.project_mobile_be.entities.collection.Collection;
 import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
 import tdc.edu.vn.project_mobile_be.entities.relationship.ShipmentProduct;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
-import tdc.edu.vn.project_mobile_be.entities.slideshow.SlideshowImage;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
@@ -101,14 +101,9 @@ public class Product {
     )
     private Set<Category> categories = new HashSet<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "products")
     @JsonBackReference
-    @JoinTable(
-            name = "products_slideshow_images",
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "slideshow_image_id")
-    )
-    Set<SlideshowImage> slideshowImages = new HashSet<>();
+    private Set<Collection> collections = new HashSet<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
