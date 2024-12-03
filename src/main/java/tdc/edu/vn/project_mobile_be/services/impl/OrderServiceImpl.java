@@ -155,10 +155,18 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         return getOrderResponseDTOS(orders);
     }
 
+    @Override
+    public List<OrderResponseDTO> getOrderByStatus(int status) {
+        List<Order> orders = orderRepository.findOrderByStatus(status);
+        return getOrderResponseDTOS(orders);
+    }
+
+
     private List<OrderResponseDTO> getOrderResponseDTOS(List<Order> orders) {
         List<CartResponseDTO> cartResponseDTOS = new ArrayList<>();
         orders.forEach(order -> {
             CartResponseDTO dto = buildCartResponse(order.getCart().getCartId());
+        dto.setCartId(order.getCart().getCartId());
             cartResponseDTOS.add(dto);
         });
         List<OrderResponseDTO> orderResponseDTOS = new ArrayList<>();
@@ -189,7 +197,6 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
         if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_CANCEL) {
             Cart cart = order.getCart();
-            cart.setCartStatus(CART_STATUS_USER);
             User user = cart.getUser();
             user.setCancelCount(user.getCancelCount() + 1);
             cartRepository.save(cart);
@@ -344,10 +351,5 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         return format.format(price);
     }
 
-    @Override
-    public List<OrderResponseDTO> getOrderByStatus(int status) {
-        List<Order> orders = orderRepository.findOrderByStatus(status);
-        return getOrderResponseDTOS(orders);
-    }
 
 }

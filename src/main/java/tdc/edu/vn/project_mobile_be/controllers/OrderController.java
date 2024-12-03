@@ -99,7 +99,8 @@ public class OrderController {
 
     @GetMapping({"/orders/status", "/orders/status/"})
     public ResponseEntity<ResponseData<List<OrderResponseDTO>>> getOrderByStatus(@RequestParam int status) {
-        OrderStatusDTO orderStatusDTO = new OrderStatusDTO(status);
+        OrderStatusDTO orderStatusDTO = new OrderStatusDTO();
+        orderStatusDTO.setStatus(status);
         List<OrderResponseDTO> orders = orderService.getOrderByStatus(orderStatusDTO.getStatus());
         ResponseData<List<OrderResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Orders found!", orders);
         return ResponseEntity.ok(responseData);
