@@ -2,6 +2,8 @@ package tdc.edu.vn.project_mobile_be.services.impl;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.ListNotFoundException;
@@ -44,6 +46,11 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
     private CartRepository repository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
 
     private final int CART_STATUS_WISH_LIST = 0;
     private final int CART_STATUS_USER = 1;
@@ -195,19 +202,27 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
             cartRepository.save(cart);
             userRepository.save(user);
             orderRepository.delete(order);
+
+            messagingTemplate.convertAndSend("/topic/orders", "Order Cancelled: " + orderChangeStatusDTO.getOrderId());
             return null;
         } else if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_PROCESSING) {
             Cart current = order.getCart();
             current.setCartStatus(CART_STATUS_PROCESS);
             cartRepository.save(current);
+
             Cart newCart = new Cart();
             newCart.setCartId(UUID.randomUUID());
             newCart.setCartStatus(CART_STATUS_USER);
             newCart.setUser(order.getCart().getUser());
             cartRepository.save(newCart);
         }
+
         order.setOrderStatus(orderChangeStatusDTO.getStatus());
-        return orderRepository.save(order);
+        Order updatedOrder = orderRepository.save(order);
+
+        OrderResponseDTO orderResponseDTO = getOrderByCart(updatedOrder.getCart().getCartId());
+        messagingTemplate.convertAndSend("/topic/orders", orderResponseDTO);
+        return updatedOrder;
     }
 
 
