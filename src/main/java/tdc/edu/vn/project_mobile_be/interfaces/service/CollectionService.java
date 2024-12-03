@@ -12,4 +12,6 @@ public interface CollectionService extends IService<Collection, UUID> {
     Collection createSlideshowImage(CollectionCreateRequestDTO params, MultipartFile file);
 
     CollectionResponseDTO getCollection(UUID id);
+
+    void deleteCollection(UUID id);
 }

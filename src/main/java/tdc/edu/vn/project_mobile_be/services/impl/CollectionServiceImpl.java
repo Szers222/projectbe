@@ -3,6 +3,7 @@ package tdc.edu.vn.project_mobile_be.services.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import tdc.edu.vn.project_mobile_be.commond.customexception.ParamNullException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.collection.CollectionCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.collection.CollectionResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.product.ProductResponseDTO;
@@ -36,13 +37,13 @@ public class CollectionServiceImpl extends AbService<Collection, UUID> implement
         collection.setCollectionId(UUID.randomUUID());
         Set<Product> products = new HashSet<>();
         for (UUID productId : params.getProducts()) {
-            Product product = productRepository.findById(productId).orElse(null);
-            if (product != null) {
-                products.add(product);
-            }
+            productRepository.findById(productId).ifPresent(products::add);
         }
         if (products.size() > 6) {
             throw new RuntimeException("products không được lớn hơn 6");
+        }
+        if (products.isEmpty()) {
+            throw new RuntimeException("products không được nhỏ hơn 1");
         }
         try {
             String url = googleCloudStorageService.uploadFile(file);
@@ -64,17 +65,14 @@ public class CollectionServiceImpl extends AbService<Collection, UUID> implement
         if (collection == null) {
             return null;
         }
-        System.console().printf("collection.getProducts() = " + collection.getProducts());
+
 
         List<ProductResponseDTO> productResponseDTOS = new ArrayList<>();
-
-
-//
-//        products.forEach(product -> {
-//            ProductResponseDTO dto = productService.getProductById(product.getProductId());
-//            productResponseDTOS.add(dto);
-//        });
-
+        List<Product> listProduct = productRepository.findByCollectionId(id);
+        listProduct.forEach(product -> {
+            ProductResponseDTO productResponseDTO = productService.getProductById(product.getProductId());
+            productResponseDTOS.add(productResponseDTO);
+        });
 
         CollectionResponseDTO collectionResponseDTO = new CollectionResponseDTO();
         collectionResponseDTO.toDto(collection);
@@ -86,4 +84,18 @@ public class CollectionServiceImpl extends AbService<Collection, UUID> implement
 
         return collectionResponseDTO;
     }
+
+    @Override
+    public void deleteCollection(UUID id) {
+        if (id == null) {
+            throw new ParamNullException("id không được null");
+        }
+        Collection collection = collectionRepository.findById(id).orElse(null);
+        if (collection == null) {
+            throw new RuntimeException("Collection không tồn tại");
+        }
+
+        collectionRepository.delete(collection);
+    }
+
 }

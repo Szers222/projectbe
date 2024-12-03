@@ -1,11 +1,9 @@
 package tdc.edu.vn.project_mobile_be.entities.collection;
 
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -40,8 +38,10 @@ public class Collection {
     private String collectionAlt;
 
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JsonBackReference
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @JsonManagedReference(value = "product-collection")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @JoinTable(
             name = "collects_products",
             joinColumns = @JoinColumn(name = "collection_id"),

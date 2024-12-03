@@ -94,15 +94,17 @@ public class Product {
 
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JsonBackReference
+    @JsonManagedReference(value = "product-category")
     @JoinTable(name = "categories_products",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
     private Set<Category> categories = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "products")
-    @JsonBackReference
+    @ManyToMany(mappedBy = "products")
+    @JsonBackReference(value = "product-collection")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<Collection> collections = new HashSet<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)

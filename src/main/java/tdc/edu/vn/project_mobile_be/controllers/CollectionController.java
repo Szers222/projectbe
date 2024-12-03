@@ -59,9 +59,15 @@ public class CollectionController {
 
     @GetMapping("/collection/{id}")
     public ResponseEntity<ResponseData<?>> getCollection(@PathVariable UUID id) {
-
         CollectionResponseDTO collection = collectionService.getCollection(id);
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Lấy thông tin sản phẩm thành công", collection);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @DeleteMapping("/collection/{id}")
+    public ResponseEntity<ResponseData<?>> deleteCollection(@PathVariable UUID id) {
+        collectionService.deleteCollection(id);
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Xóa sản phẩm thành công", null);
         return ResponseEntity.ok(responseData);
     }
 }

@@ -36,4 +36,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
     @Query("delete from Product p where p.productId = :productId")
     void deleteByProductId(@Param("productId") UUID productId);
 
+    @Query("SELECT p FROM Product p join p.collections pc on pc.collectionId = :collectionId")
+    List<Product> findByCollectionId(@Param("collectionId") UUID collectionId);
+
 }
