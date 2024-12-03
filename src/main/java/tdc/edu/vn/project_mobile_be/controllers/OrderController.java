@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -87,6 +88,7 @@ public class OrderController {
     @GetMapping({"/order/user/{userId}", "/order/user/{userId}/"})
     public ResponseEntity<ResponseData<List<OrderResponseDTO>>> getOrderByUserId(@PathVariable UUID userId) {
         List<OrderResponseDTO> orders = orderService.getOrderByUserId(userId);
+
         ResponseData<List<OrderResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Orders found!", orders);
         return ResponseEntity.ok(responseData);
     }

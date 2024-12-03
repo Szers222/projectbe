@@ -148,7 +148,7 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
 
     @Override
     public List<OrderResponseDTO> getOrderByUserId(UUID userId) {
-        if (userId != null) {
+        if (userId == null) {
             throw new ParamNullException("UserId is null");
         }
         List<Order> orders = orderRepository.findOrderByUserId(userId);
@@ -205,7 +205,7 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
             newCart.setCartStatus(CART_STATUS_USER);
             newCart.setUser(order.getCart().getUser());
             cartRepository.save(newCart);
-        } else if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_PROCESSED) {
+        } else if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_SHIP) {
             User shipper = userRepository.findById(orderChangeStatusDTO.getShipper())
                     .orElseThrow(() -> new EntityNotFoundException("Shipper not found"));
             order.setUser(shipper);
