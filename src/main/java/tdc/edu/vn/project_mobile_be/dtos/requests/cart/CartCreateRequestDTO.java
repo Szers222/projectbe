@@ -13,6 +13,7 @@ import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -23,6 +24,8 @@ public class CartCreateRequestDTO implements IDto<Cart> {
     @JsonProperty("cartItem")
     private SizeProductRequestParamsDTO sizeProduct;
 
+    @JsonProperty("guestId")
+    UUID guestId;
 
     @Override
     public Cart toEntity() {

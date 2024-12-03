@@ -13,7 +13,7 @@ import java.util.UUID;
 public interface CartService extends IService<Cart, UUID> {
     Cart createCartByUser(UUID userId);
 
-    Cart createCartNoUser(CartCreateRequestDTO cartCreateRequestDTOd, HttpServletRequest request);
+    Cart createCartNoUser(CartCreateRequestDTO cartCreateRequestDTOd, UUID guestId);
 
     Cart addProductToCart(CartUpdateRequestDTO cartUpdateRequestDTO, UUID cartId);
 

@@ -31,10 +31,9 @@ public class CartController {
     private CartService cartService;
 
 
-    @PostMapping(value = {"/cart/guest", "/cart/guest/"})
+    @PostMapping(value = {"/cart/create_guest", "/cart/create_guest/"})
     public ResponseEntity<ResponseData<?>> createCart(
             @Valid @RequestBody CartCreateRequestDTO params,
-            HttpServletRequest request,
             BindingResult bindingResult
     ) {
         if (bindingResult.hasErrors()) {
@@ -43,7 +42,7 @@ public class CartController {
                     .collect(Collectors.toList());
             throw new MultipleFieldsNullOrEmptyException(errorMessages);
         }
-        Cart cartCreated = cartService.createCartNoUser(params, request);
+        Cart cartCreated = cartService.createCartNoUser(params, params.getGuestId());
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Cart tạo thành công !", cartCreated);
         return ResponseEntity.ok(responseData);
     }

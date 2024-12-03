@@ -5,10 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -17,8 +15,6 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateCustomerRequestDTO {
 
-    @NotEmpty(message = "Mật khẩu không được để trống")
-    @Size(min = 8, message = "Mật khẩu phải có ít nhất 8 ký tự")
     @JsonProperty("userPassword")
     String userPassword;
 
@@ -28,11 +24,8 @@ public class UpdateCustomerRequestDTO {
     String userPhone;
 
     @JsonProperty("userBirthday")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     Timestamp userBirthday;
-
-    @JsonProperty("userAddress")
-    String userAddress;
 
     @NotEmpty(message = "Họ không được để trống")
     @JsonProperty("userLastName")
@@ -42,14 +35,7 @@ public class UpdateCustomerRequestDTO {
     @JsonProperty("userFirstName")
     String userFirstName;
 
-    @JsonProperty("userWrongPassword")
-    int userWrongPassword;
-
-    @JsonProperty("userPasswordLevel2")
-    String userPasswordLevel2;
-
-    @NotNull(message = "IdCard không được để trống")
-    @JsonProperty("idCards")
-    UUID idCards;
 }
+
+
 
