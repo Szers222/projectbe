@@ -1,6 +1,7 @@
 package tdc.edu.vn.project_mobile_be.entities.category;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -75,7 +76,7 @@ public class Category {
     // ManyToMany - Product - Category
     @ManyToMany(mappedBy = "categories")
     @ToString.Exclude
-    @JsonBackReference
     @EqualsAndHashCode.Exclude
+    @JsonManagedReference(value = "product-category")
     private Set<Product> products = new HashSet<>();
 }

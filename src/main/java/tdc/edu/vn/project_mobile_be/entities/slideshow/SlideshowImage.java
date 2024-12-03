@@ -37,13 +37,6 @@ public class SlideshowImage {
     @Column(name = "slideshow_image_alt", length = 255, columnDefinition = "VARCHAR(255)")
     private String slideShowImageImageAlt;
 
-    @ManyToMany(mappedBy = "slideshowImages")
-    @ToString.Exclude
-    @JsonBackReference
-    @EqualsAndHashCode.Exclude
-    private Set<Product> products = new HashSet<>();
-
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
