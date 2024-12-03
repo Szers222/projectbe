@@ -52,7 +52,6 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
     private final int COUPON_PER_HUNDRED_TYPE = 0;
     private final int COUPON_PRICE_TYPE = 1;
     private final int COUPON_SHIP_TYPE = 2;
-    private final double SHIP_FEE = 30000;
     private final int PRODUCT_MIN_PRICE = 0;
 
     private final int ORDER_STATUS_CHECK = 0;
@@ -126,7 +125,7 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         order.setOrderDistrict(currentCart.getUser().getDetail().getDistrict());
         order.setOrderWard(currentCart.getUser().getDetail().getWard());
         order.setOrderAddress(currentCart.getUser().getDetail().getAddressName());
-        order.setOrderFeeShip(SHIP_FEE);
+        order.setOrderFeeShip(request.getFeeShip());
         order.setTotalPrice(request.getTotalPrice());
         order.setOrderName(fullName);
         order.setCoupons(coupons);
@@ -305,7 +304,7 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         orderEntity.setCoupons(coupons);
         orderEntity.setCart(cart);
 
-        double shipFee = couponShip != null ? SHIP_FEE - couponShip.getCouponPrice() : SHIP_FEE;
+        double shipFee = couponShip != null ? order.getFeeShip() - couponShip.getCouponPrice() : order.getFeeShip();
         orderEntity.setOrderFeeShip(shipFee);
 
         orderEntity.setTotalPrice(order.getTotalPrice());
