@@ -1,6 +1,6 @@
 server:
   ip: localhost
-password: ''
+  password: ''
 
 
 spring:
@@ -10,7 +10,7 @@ spring:
   datasource:
     url: jdbc:mysql://${server.ip}:3306/mobileproject
     username: root
-    password: ${password}
+    password: ${server.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
   cloud:
     config:
@@ -73,7 +73,7 @@ spring.devtools:
       time-zone: Asia/Ho_Chi_Minh
 
 redis:
-  host: ${server.ip}
+  host: localhost
   port: 6379
   password: ''
   cache:

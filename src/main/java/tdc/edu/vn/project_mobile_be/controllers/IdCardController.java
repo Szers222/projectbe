@@ -1,7 +1,9 @@
 package tdc.edu.vn.project_mobile_be.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +22,12 @@ public class IdCardController {
 
     @Autowired
     private IdCardService idCardService;
+    private final ObjectMapper objectMapper;
 
+    @Autowired
+    public IdCardController(@Lazy ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
     @PostMapping(value = "/auth/idcard", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseData<IdCard>> uploadIdCardImages(
             @ModelAttribute @Valid CreateIdCardRequestDTO idCardRequestDTO) {
@@ -34,9 +41,9 @@ public class IdCardController {
     }
     @PutMapping(value = "/auth/idcard/{cardId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseData<IdCard>> updateIdCard(
-            @PathVariable UUID cardId,
-            @ModelAttribute @Valid CreateIdCardRequestDTO idCardRequestDTO) {
-        IdCard updatedIdCard = idCardService.updateIdCard(cardId, idCardRequestDTO);
+            @PathVariable UUID cardId, @ModelAttribute @Valid CreateIdCardRequestDTO params) {
+
+        IdCard updatedIdCard = idCardService.updateIdCard(cardId, params);
         return ResponseEntity.ok(
                 new ResponseData<>(HttpStatus.OK, "IdCard đã được cập nhật thành công", updatedIdCard)
         );
