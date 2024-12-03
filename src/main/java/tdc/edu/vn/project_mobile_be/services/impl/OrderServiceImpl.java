@@ -163,16 +163,53 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
 
 
     private List<OrderResponseDTO> getOrderResponseDTOS(List<Order> orders) {
-        List<CartResponseDTO> cartResponseDTOS = new ArrayList<>();
-        orders.forEach(order -> {
-            CartResponseDTO dto = buildCartResponse(order.getCart().getCartId());
-        dto.setCartId(order.getCart().getCartId());
-            cartResponseDTOS.add(dto);
-        });
         List<OrderResponseDTO> orderResponseDTOS = new ArrayList<>();
         orders.forEach(order -> {
             OrderResponseDTO dto = new OrderResponseDTO();
-            dto.toDto(order);
+            List<CartResponseDTO> cartResponseDTOS = new ArrayList<>();
+            Cart cart = order.getCart();
+            List<CartProductResponseDTO> cartProductResponseDTOS = new ArrayList<>();
+
+            cart.getCartProducts().forEach(cartProduct -> {
+                CartProductResponseDTO cartProductResponseDTO = new CartProductResponseDTO();
+                cartProductResponseDTO.setProductId(cartProduct.getProduct().getProductId());
+                cartProductResponseDTO.setProductSizeId(cartProduct.getProductSize().getProductSizeId());
+                cartProductResponseDTO.setProductImage(cartProduct.getProduct().getImages().stream().findFirst().get().getProductImagePath());
+                cartProductResponseDTO.setCartProductPrice(formatProductPrice(cartProduct.getProduct().getProductPrice()));
+                cartProductResponseDTO.setCartProductQuantity(cartProduct.getQuantity());
+                cartProductResponseDTO.setCartProductDiscount(cartProduct.getProduct().getProductSale());
+                cartProductResponseDTO.setCartProductTotalPrice(cartProduct.getProduct().getProductPriceSale() * cartProduct.getQuantity());
+                cartProductResponseDTO.setProductSize(cartProduct.getProductSize().getProductSizeName());
+                cartProductResponseDTO.setProductName(cartProduct.getProduct().getProductName());
+                cartProductResponseDTO.setCartProductDiscountPrice(formatProductPrice(cartProduct.getProduct().getProductPriceSale()));
+                cartProductResponseDTOS.add(cartProductResponseDTO);
+            });
+            CartResponseDTO cartResponseDTO = new CartResponseDTO();
+            cartResponseDTO.setCartId(cart.getCartId());
+            cartResponseDTO.setCartProductTotalPrice(formatPrice(order.getTotalPrice()));
+            cartResponseDTO.setCartProductQuantity(cart.getCartProducts().size());
+            cartResponseDTO.setCartProducts(cartProductResponseDTOS);
+            cartResponseDTOS.add(cartResponseDTO);
+
+
+            if (!order.getCoupons().isEmpty()) {
+                order.getCoupons().forEach(coupon -> {
+                    if (coupon.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
+                        dto.setOrderCouponPerHundred(coupon.getCouponPerHundred());
+                    }
+                    if (coupon.getCouponType() == COUPON_PRICE_TYPE) {
+                        dto.setOrderCouponPrice(coupon.getCouponPrice());
+                    }
+                    if (coupon.getCouponType() == COUPON_SHIP_TYPE) {
+                        dto.setOrderShipper(formatProductPrice(order.getOrderFeeShip() - coupon.getCouponPrice()));
+                    }
+                });
+            }
+            if (order.getUser() != null) {
+                dto.setOrderShipperName(order.getUser().getUserFirstName() + " " + order.getUser().getUserLastName());
+                dto.setOrderShipperPhone(order.getUser().getUserPhone());
+            }
+
             dto.setItems(cartResponseDTOS);
             dto.setOrderDate(order.getCreatedAt().toString());
             dto.setOrderTotal(order.getTotalPrice());
@@ -183,6 +220,7 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
             dto.setUserEmail(order.getOrderEmail());
             dto.setUserName(order.getOrderName());
             dto.setUserPhone(order.getOrderPhone());
+            dto.setOrderNote(order.getOrderNote());
             orderResponseDTOS.add(dto);
         });
         return orderResponseDTOS;
