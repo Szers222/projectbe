@@ -228,21 +228,12 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
             cartResponseDTOS.add(cartResponseDTO);
 
 
-            if (!order.getCoupons().isEmpty()) {
-                order.getCoupons().forEach(coupon -> {
-                    if (coupon.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
-                        dto.setOrderCouponPerHundred(coupon.getCouponPerHundred());
-                    }
-                    if (coupon.getCouponType() == COUPON_PRICE_TYPE) {
-                        dto.setOrderCouponPrice(coupon.getCouponPrice());
-                    }
-                    if (coupon.getCouponType() == COUPON_SHIP_TYPE) {
-                        dto.setOderCouponShip(coupon.getCouponFeeShip());
-                        dto.setOrderShipper(formatProductPrice(order.getOrderFeeShip() - coupon.getCouponFeeShip()));
-                    }
+            Coupon couponShip = getCouponByType(order.getCoupons(), COUPON_SHIP_TYPE).orElse(null);
+            Coupon couponPerHundred = getCouponByType(order.getCoupons(), COUPON_PER_HUNDRED_TYPE).orElse(null);
+            Coupon couponPrice = getCouponByType(order.getCoupons(), COUPON_PRICE_TYPE).orElse(null);
 
-                });
-            }
+
+
             if (order.getUser() != null) {
                 dto.setOrderShipperName(order.getUser().getUserFirstName() + " " + order.getUser().getUserLastName());
                 dto.setOrderShipperPhone(order.getUser().getUserPhone());
@@ -259,6 +250,10 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
             dto.setUserName(order.getOrderName());
             dto.setUserPhone(order.getOrderPhone());
             dto.setOrderNote(order.getOrderNote());
+            dto.setOrderShipper(formatProductPrice(order.getOrderFeeShip()));
+            dto.setOrderCouponPerHundred(couponPerHundred != null ? couponPerHundred.getCouponPerHundred() : 0);
+            dto.setOrderCouponPrice(couponPrice != null ? couponPrice.getCouponPrice() : 0);
+            dto.setOderCouponShip(couponShip != null ? couponShip.getCouponPrice() : 0);
             orderResponseDTOS.add(dto);
         });
         return orderResponseDTOS;
