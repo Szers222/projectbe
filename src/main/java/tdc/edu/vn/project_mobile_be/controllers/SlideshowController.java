@@ -16,6 +16,7 @@ import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.slideshowimage.SlideshowImageCreateDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.slideshowimage.SlideshowImageUpdateDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.slideshow.SlideshowResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.slideshow.SlideshowImage;
 import tdc.edu.vn.project_mobile_be.interfaces.service.SlideshowImageService;
 
@@ -76,6 +77,20 @@ public class SlideshowController {
         SlideshowImage slideshowImage = slideshowImageService.updateSlideshowImage(params, id);
 
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Cập nhật banner thành công", slideshowImage);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @DeleteMapping("/slideshow/{id}")
+    public ResponseEntity<ResponseData<?>> deleteShipment(@PathVariable UUID id) {
+        slideshowImageService.deleteSlideshowImage(id);
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Xóa banner thành công", null);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @GetMapping("/slideshows")
+    public ResponseEntity<ResponseData<?>> getSlideshows(@RequestParam   String content) {
+        List<SlideshowResponseDTO> slideshowImages = slideshowImageService.getSlideshowImage(content);
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Lấy danh sách banner thành công", slideshowImages);
         return ResponseEntity.ok(responseData);
     }
 
