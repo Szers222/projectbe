@@ -200,6 +200,7 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
                         dto.setOrderCouponPrice(coupon.getCouponPrice());
                     }
                     if (coupon.getCouponType() == COUPON_SHIP_TYPE) {
+                        dto.setOderCouponShip(coupon.getCouponPrice());
                         dto.setOrderShipper(formatProductPrice(order.getOrderFeeShip() - coupon.getCouponPrice()));
                     }
                 });
@@ -294,7 +295,6 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         orderEntity.setTotalPrice(order.getTotalPrice());
         return orderEntity;
     }
-
 
     private Order populateBaseOrderEntity(OrderCreateRequestDTO order, Cart cart, Set<Coupon> coupons,
                                           Coupon couponShip) {
