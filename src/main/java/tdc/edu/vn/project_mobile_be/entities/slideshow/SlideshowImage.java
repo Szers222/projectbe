@@ -38,6 +38,9 @@ public class SlideshowImage {
     @Column(name = "slideshow_image_url")
     private int slideShowImageUrl;
 
+    @Column(name = "slideshow_content")
+    private String slideShowContent;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;

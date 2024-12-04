@@ -24,9 +24,6 @@ public class SlideshowImageServiceImpl extends AbService<SlideshowImage, UUID> i
         if (params.getSlideShowImageImageIndex() < 0) {
             throw new IllegalArgumentException("Image index must be greater than 0");
         }
-        if (params.getSlideShowImageImageIndex() > 5) {
-            throw new IllegalArgumentException("Image index must be less than 5");
-        }
         if (params.getImagePath() == null) {
             throw new IllegalArgumentException("Image must not be null");
         }
@@ -39,7 +36,7 @@ public class SlideshowImageServiceImpl extends AbService<SlideshowImage, UUID> i
         } catch (Exception e) {
             throw new IllegalArgumentException("Image upload failed");
         }
-
     }
+
 
 }

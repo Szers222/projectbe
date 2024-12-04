@@ -32,6 +32,8 @@ public class SlideshowImageCreateDTO implements IDto<SlideshowImage> {
     @JsonProperty("imagePath")
     private MultipartFile imagePath;
 
+    @JsonProperty("content")
+    private String slideShowContent;
 
     @Override
     public SlideshowImage toEntity() {
