@@ -26,29 +26,7 @@ public class SlideshowImageServiceImpl extends AbService<SlideshowImage, UUID> i
 
     @Override
     public SlideshowImage createSlideshowImage(SlideshowImageCreateDTO params, MultipartFile file) {
-        if (params == null) {
-            return null;
-        }
-        SlideshowImage slideshowImage = params.toEntity();
-        slideshowImage.setSlideShowImageId(UUID.randomUUID());
-        Set<Product> products = slideshowImage.getProducts();
-        for (UUID productId : params.getProducts()) {
-            Product product = productRepository.findById(productId).orElse(null);
-            if (product != null) {
-                products.add(product);
-            }
-        }
-        if (products.size() > 6) {
-            throw new RuntimeException("products không được lớn hơn 6");
-        }
-        try {
-            String url = googleCloudStorageService.uploadFile(file);
-            slideshowImage.setSlideShowImageImageURL(url);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        slideshowImage.setProducts(products);
-        return slideshowRepository.save(slideshowImage);
+        return null;
     }
 
 }
