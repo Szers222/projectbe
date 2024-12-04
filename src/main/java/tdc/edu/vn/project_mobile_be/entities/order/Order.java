@@ -10,12 +10,11 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
 import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
+import tdc.edu.vn.project_mobile_be.entities.review.Review;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @Entity
@@ -85,6 +84,10 @@ public class Order {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Cart cart;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "order-review")
+    private Set<Review> reviews = new HashSet<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
