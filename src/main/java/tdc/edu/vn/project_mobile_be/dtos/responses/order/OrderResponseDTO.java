@@ -47,6 +47,8 @@ public class OrderResponseDTO implements IDto<Order> {
     private float orderCouponPerHundred;
     @JsonProperty("orderCouponPrice")
     private double orderCouponPrice;
+    @JsonProperty("oderCouponShip")
+    private double oderCouponShip;
     @JsonProperty("items")
     private List<CartResponseDTO> items;
 
