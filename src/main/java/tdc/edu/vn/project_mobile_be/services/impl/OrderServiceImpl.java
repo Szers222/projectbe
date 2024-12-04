@@ -207,8 +207,8 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
                         dto.setOrderCouponPrice(coupon.getCouponPrice());
                     }
                     if (coupon.getCouponType() == COUPON_SHIP_TYPE) {
-                        dto.setOderCouponShip(coupon.getCouponPrice());
-                        dto.setOrderShipper(formatProductPrice(order.getOrderFeeShip() - coupon.getCouponPrice()));
+                        dto.setOderCouponShip(coupon.getCouponFeeShip());
+                        dto.setOrderShipper(formatProductPrice(order.getOrderFeeShip() - coupon.getCouponFeeShip()));
                     }
                 });
             }
