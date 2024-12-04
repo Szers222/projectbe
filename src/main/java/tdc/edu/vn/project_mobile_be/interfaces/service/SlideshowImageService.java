@@ -8,5 +8,5 @@ import tdc.edu.vn.project_mobile_be.interfaces.IService;
 import java.util.UUID;
 
 public interface SlideshowImageService extends IService<SlideshowImage, UUID> {
-    SlideshowImage createSlideshowImage(SlideshowImageCreateDTO params, MultipartFile file);
+    SlideshowImage createSlideshowImage(SlideshowImageCreateDTO params);
 }

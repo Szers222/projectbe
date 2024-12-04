@@ -5,12 +5,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tdc.edu.vn.project_mobile_be.entities.product.Product;
+import org.springframework.beans.BeanUtils;
+import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.entities.slideshow.SlideshowImage;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
-
-import java.util.List;
-import java.util.UUID;
 
 
 @Data
@@ -21,21 +19,29 @@ public class SlideshowImageCreateDTO implements IDto<SlideshowImage> {
     @NotNull(message = "Image ALT is required")
     @JsonProperty("imageAlt")
     private String imageAlt;
+
     @NotNull(message = "Image index is required")
     @JsonProperty("imageIndex")
     private int imageIndex;
-    @NotNull(message = "Product is required")
-    @JsonProperty("products")
-    private List<UUID> products;
+
+    @NotNull(message = "Image URL is required")
+    @JsonProperty("imageUrl")
+    private String imageUrl;
+
+    @NotNull(message = "Image is required")
+    @JsonProperty("imagePath")
+    private MultipartFile imagePath;
 
 
     @Override
     public SlideshowImage toEntity() {
-        return null;
+        SlideshowImage enitty = new SlideshowImage();
+        BeanUtils.copyProperties(this, enitty);
+        return enitty;
     }
 
     @Override
     public void toDto(SlideshowImage entity) {
-
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }
