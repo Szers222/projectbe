@@ -36,7 +36,7 @@ public class SlideshowImage {
     private String slideShowImageImageAlt;
 
     @Column(name = "slideshow_image_url")
-    private int slideShowImageUrl;
+    private String slideShowImageUrl;
 
     @Column(name = "slideshow_content")
     private String slideShowContent;
