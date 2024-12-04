@@ -2,6 +2,8 @@ package tdc.edu.vn.project_mobile_be.services.impl;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.ListNotFoundException;
@@ -44,6 +46,11 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
     private CartRepository repository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
 
     private final int CART_STATUS_WISH_LIST = 0;
     private final int CART_STATUS_USER = 1;
@@ -52,7 +59,6 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
     private final int COUPON_PER_HUNDRED_TYPE = 0;
     private final int COUPON_PRICE_TYPE = 1;
     private final int COUPON_SHIP_TYPE = 2;
-    private final double SHIP_FEE = 30000;
     private final int PRODUCT_MIN_PRICE = 0;
 
     private final int ORDER_STATUS_CHECK = 0;
@@ -126,7 +132,7 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         order.setOrderDistrict(currentCart.getUser().getDetail().getDistrict());
         order.setOrderWard(currentCart.getUser().getDetail().getWard());
         order.setOrderAddress(currentCart.getUser().getDetail().getAddressName());
-        order.setOrderFeeShip(SHIP_FEE);
+        order.setOrderFeeShip(request.getFeeShip());
         order.setTotalPrice(request.getTotalPrice());
         order.setOrderName(fullName);
         order.setCoupons(coupons);
@@ -155,41 +161,29 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         return getOrderResponseDTOS(orders);
     }
 
-    private List<OrderResponseDTO> getOrderResponseDTOS(List<Order> orders) {
-        List<CartResponseDTO> cartResponseDTOS = new ArrayList<>();
-        orders.forEach(order -> {
-            CartResponseDTO dto = buildCartResponse(order.getCart().getCartId());
-            cartResponseDTOS.add(dto);
-        });
-        List<OrderResponseDTO> orderResponseDTOS = new ArrayList<>();
-        orders.forEach(order -> {
-            OrderResponseDTO dto = new OrderResponseDTO();
-            dto.toDto(order);
-            dto.setItems(cartResponseDTOS);
-            dto.setOrderDate(order.getCreatedAt().toString());
-            dto.setOrderTotal(order.getTotalPrice());
-            dto.setOrderAddress(order.getOrderAddress() + ", " + order.getOrderWard() + ", " + order.getOrderDistrict() + ", " + order.getOrderCity());
-            dto.setOrderId(order.getOrderId());
-            dto.setOrderStatus(order.getOrderStatus());
-            dto.setOrderPayment(order.getOrderPayment());
-            dto.setUserEmail(order.getOrderEmail());
-            dto.setUserName(order.getOrderName());
-            dto.setUserPhone(order.getOrderPhone());
-            orderResponseDTOS.add(dto);
-        });
-        return orderResponseDTOS;
+    @Override
+    public List<OrderResponseDTO> getOrderByStatus(int status) {
+        List<Order> orders = orderRepository.findOrderByStatus(status);
+        return getOrderResponseDTOS(orders);
     }
 
-
+    @Override
+    public OrderResponseDTO getOrderByCart(UUID cartId) {
+        Order order = orderRepository.findOrderByCartId(cartId);
+        if (order == null) {
+            throw new EntityNotFoundException("Order not found");
+        }
+        List<Order> orders = new ArrayList<>();
+        orders.add(order);
+        return getOrderResponseDTOS(orders).stream().findFirst().get();
+    }
 
     @Override
     public Order orderChangeStatus(OrderChangeStatusDTO orderChangeStatusDTO) {
-        System.console().printf("OrderChangeStatusDTO: %s", orderChangeStatusDTO);
         Order order = orderRepository.findById(orderChangeStatusDTO.getOrderId())
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
         if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_CANCEL) {
             Cart cart = order.getCart();
-            cart.setCartStatus(CART_STATUS_USER);
             User user = cart.getUser();
             user.setCancelCount(user.getCancelCount() + 1);
             cartRepository.save(cart);
@@ -215,30 +209,67 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
     }
 
 
-    @Override
-    public OrderResponseDTO getOrderByCart(UUID cartId) {
-        if (cartId == null) {
-            throw new ParamNullException("CartId is null");
-        }
-        Order order = orderRepository.findOrderByCartId(cartId);
-        if (order == null) {
-            throw new EntityNotFoundException("Order not found");
-        }
-        CartResponseDTO dto = buildCartResponse(cartId);
-        OrderResponseDTO orderResponseDTO = new OrderResponseDTO();
-        orderResponseDTO.toDto(order);
-        orderResponseDTO.setItems(Collections.singletonList(dto));
-        orderResponseDTO.setOrderDate(order.getCreatedAt().toString());
-        orderResponseDTO.setOrderTotal(order.getTotalPrice());
-        orderResponseDTO.setOrderAddress(order.getOrderAddress() + ", " + order.getOrderWard() + ", " + order.getOrderDistrict() + ", " + order.getOrderCity());
-        orderResponseDTO.setOrderId(order.getOrderId());
-        orderResponseDTO.setOrderStatus(order.getOrderStatus());
-        orderResponseDTO.setOrderPayment(order.getOrderPayment());
-        orderResponseDTO.setUserEmail(order.getOrderEmail());
-        orderResponseDTO.setUserName(order.getOrderName());
-        orderResponseDTO.setUserPhone(order.getOrderPhone());
-        return orderResponseDTO;
+    private List<OrderResponseDTO> getOrderResponseDTOS(List<Order> orders) {
+        List<OrderResponseDTO> orderResponseDTOS = new ArrayList<>();
+        orders.forEach(order -> {
+            OrderResponseDTO dto = new OrderResponseDTO();
+            List<CartResponseDTO> cartResponseDTOS = new ArrayList<>();
+            Cart cart = order.getCart();
+            List<CartProductResponseDTO> cartProductResponseDTOS = new ArrayList<>();
+
+            cart.getCartProducts().forEach(cartProduct -> {
+                CartProductResponseDTO cartProductResponseDTO = new CartProductResponseDTO();
+                cartProductResponseDTO.setProductId(cartProduct.getProduct().getProductId());
+                cartProductResponseDTO.setProductSizeId(cartProduct.getProductSize().getProductSizeId());
+                cartProductResponseDTO.setProductImage(cartProduct.getProduct().getImages().stream().findFirst().get().getProductImagePath());
+                cartProductResponseDTO.setCartProductPrice(formatProductPrice(cartProduct.getProduct().getProductPrice()));
+                cartProductResponseDTO.setCartProductQuantity(cartProduct.getQuantity());
+                cartProductResponseDTO.setCartProductDiscount(cartProduct.getProduct().getProductSale());
+                cartProductResponseDTO.setCartProductTotalPrice(cartProduct.getProduct().getProductPriceSale() * cartProduct.getQuantity());
+                cartProductResponseDTO.setProductSize(cartProduct.getProductSize().getProductSizeName());
+                cartProductResponseDTO.setProductName(cartProduct.getProduct().getProductName());
+                cartProductResponseDTO.setCartProductDiscountPrice(formatProductPrice(cartProduct.getProduct().getProductPriceSale()));
+                cartProductResponseDTOS.add(cartProductResponseDTO);
+            });
+            CartResponseDTO cartResponseDTO = new CartResponseDTO();
+            cartResponseDTO.setCartId(cart.getCartId());
+            cartResponseDTO.setCartProductTotalPrice(formatPrice(order.getTotalPrice()));
+            cartResponseDTO.setCartProductQuantity(cart.getCartProducts().size());
+            cartResponseDTO.setCartProducts(cartProductResponseDTOS);
+            cartResponseDTOS.add(cartResponseDTO);
+
+
+            Coupon couponShip = getCouponByType(order.getCoupons(), COUPON_SHIP_TYPE).orElse(null);
+            Coupon couponPerHundred = getCouponByType(order.getCoupons(), COUPON_PER_HUNDRED_TYPE).orElse(null);
+            Coupon couponPrice = getCouponByType(order.getCoupons(), COUPON_PRICE_TYPE).orElse(null);
+
+
+
+            if (order.getUser() != null) {
+                dto.setOrderShipperName(order.getUser().getUserFirstName() + " " + order.getUser().getUserLastName());
+                dto.setOrderShipperPhone(order.getUser().getUserPhone());
+            }
+
+            dto.setItems(cartResponseDTOS);
+            dto.setOrderDate(order.getCreatedAt().toString());
+            dto.setOrderTotal(order.getTotalPrice());
+            dto.setOrderAddress(order.getOrderAddress() + ", " + order.getOrderWard() + ", " + order.getOrderDistrict() + ", " + order.getOrderCity());
+            dto.setOrderId(order.getOrderId());
+            dto.setOrderStatus(order.getOrderStatus());
+            dto.setOrderPayment(order.getOrderPayment());
+            dto.setUserEmail(order.getOrderEmail());
+            dto.setUserName(order.getOrderName());
+            dto.setUserPhone(order.getOrderPhone());
+            dto.setOrderNote(order.getOrderNote());
+            dto.setOrderShipper(formatProductPrice(order.getOrderFeeShip()));
+            dto.setOrderCouponPerHundred(couponPerHundred != null ? couponPerHundred.getCouponPerHundred() : 0);
+            dto.setOrderCouponPrice(couponPrice != null ? couponPrice.getCouponPrice() : 0);
+            dto.setOderCouponShip(couponShip != null ? couponShip.getCouponPrice() : 0);
+            orderResponseDTOS.add(dto);
+        });
+        return orderResponseDTOS;
     }
+
 
 
     private Order populateOrderForGuest(OrderCreateRequestDTO order, Cart cart, Set<Coupon> coupons,
@@ -255,7 +286,6 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         return orderEntity;
     }
 
-
     private Order populateBaseOrderEntity(OrderCreateRequestDTO order, Cart cart, Set<Coupon> coupons,
                                           Coupon couponShip) {
         Order orderEntity = order.toEntity();
@@ -264,7 +294,7 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         orderEntity.setCoupons(coupons);
         orderEntity.setCart(cart);
 
-        double shipFee = couponShip != null ? SHIP_FEE - couponShip.getCouponPrice() : SHIP_FEE;
+        double shipFee = couponShip != null ? order.getFeeShip() - couponShip.getCouponPrice() : order.getFeeShip();
         orderEntity.setOrderFeeShip(shipFee);
 
         orderEntity.setTotalPrice(order.getTotalPrice());
@@ -349,10 +379,5 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         return format.format(price);
     }
 
-    @Override
-    public List<OrderResponseDTO> getOrderByStatus(int status) {
-        List<Order> orders = orderRepository.findOrderByStatus(status);
-        return getOrderResponseDTOS(orders);
-    }
 
 }

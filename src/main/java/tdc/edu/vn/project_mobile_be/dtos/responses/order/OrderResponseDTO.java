@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import tdc.edu.vn.project_mobile_be.dtos.responses.cart.CartProductResponseDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.cart.CartResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
@@ -36,6 +35,20 @@ public class OrderResponseDTO implements IDto<Order> {
     private String userEmail;
     @JsonProperty("orderPayment")
     private int orderPayment;
+    @JsonProperty("orderNote")
+    private String orderNote;
+    @JsonProperty("orderShipper")
+    private String orderShipper;
+    @JsonProperty("orderShipperPhone")
+    private String orderShipperPhone;
+    @JsonProperty("orderShipperName")
+    private String orderShipperName;
+    @JsonProperty("orderCouponPerHundred")
+    private float orderCouponPerHundred;
+    @JsonProperty("orderCouponPrice")
+    private double orderCouponPrice;
+    @JsonProperty("oderCouponShip")
+    private double oderCouponShip;
     @JsonProperty("items")
     private List<CartResponseDTO> items;
     @JsonProperty("shipperId")

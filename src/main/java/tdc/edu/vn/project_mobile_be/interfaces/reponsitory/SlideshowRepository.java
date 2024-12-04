@@ -1,12 +1,12 @@
-package tdc.edu.vn.project_mobile_be.interfaces.reponsitory;
+package tdc.edu.vn.project_mobile_be.interfaces.service;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.web.multipart.MultipartFile;
+import tdc.edu.vn.project_mobile_be.dtos.requests.slideshowimage.SlideshowImageCreateDTO;
 import tdc.edu.vn.project_mobile_be.entities.slideshow.SlideshowImage;
+import tdc.edu.vn.project_mobile_be.interfaces.IService;
 
 import java.util.UUID;
 
-@Repository
-public interface SlideshowRepository extends JpaRepository<SlideshowImage, UUID> {
-//    SlideshowImage findSlideshowById(UUID slideshowId);
+public interface SlideshowImageService extends IService<SlideshowImage, UUID> {
+    SlideshowImage createSlideshowImage(SlideshowImageCreateDTO params, MultipartFile file);
 }
