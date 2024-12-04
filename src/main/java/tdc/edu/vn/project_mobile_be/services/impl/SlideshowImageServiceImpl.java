@@ -21,10 +21,10 @@ public class SlideshowImageServiceImpl extends AbService<SlideshowImage, UUID> i
 
     @Override
     public SlideshowImage createSlideshowImage(SlideshowImageCreateDTO params) {
-        if (params.getImageIndex() < 0) {
+        if (params.getSlideShowImageImageIndex() < 0) {
             throw new IllegalArgumentException("Image index must be greater than 0");
         }
-        if (params.getImageIndex() > 5) {
+        if (params.getSlideShowImageImageIndex() > 5) {
             throw new IllegalArgumentException("Image index must be less than 5");
         }
         if (params.getImagePath() == null) {

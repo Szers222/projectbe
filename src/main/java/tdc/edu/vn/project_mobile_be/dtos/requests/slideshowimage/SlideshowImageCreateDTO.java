@@ -18,15 +18,15 @@ public class SlideshowImageCreateDTO implements IDto<SlideshowImage> {
 
     @NotNull(message = "Image ALT is required")
     @JsonProperty("imageAlt")
-    private String imageAlt;
+    private String slideShowImageImageAlt;
 
     @NotNull(message = "Image index is required")
     @JsonProperty("imageIndex")
-    private int imageIndex;
+    private int slideShowImageImageIndex;
 
     @NotNull(message = "Image URL is required")
     @JsonProperty("imageUrl")
-    private String imageUrl;
+    private String slideShowImageUrl;
 
     @NotNull(message = "Image is required")
     @JsonProperty("imagePath")
