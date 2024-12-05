@@ -2,6 +2,8 @@ package tdc.edu.vn.project_mobile_be.services.impl;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.ListNotFoundException;
@@ -44,6 +46,11 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
     private CartRepository repository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
 
     private final int CART_STATUS_WISH_LIST = 0;
     private final int CART_STATUS_USER = 1;
@@ -160,6 +167,43 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         return getOrderResponseDTOS(orders);
     }
 
+    @Override
+    public OrderResponseDTO getOrderByCart(UUID cartId) {
+        Order order = orderRepository.findOrderByCartId(cartId);
+        if (order == null) {
+            throw new EntityNotFoundException("Order not found");
+        }
+        List<Order> orders = new ArrayList<>();
+        orders.add(order);
+        return getOrderResponseDTOS(orders).stream().findFirst().get();
+    }
+
+    @Override
+    public Order orderChangeStatus(OrderChangeStatusDTO orderChangeStatusDTO) {
+        Order order = orderRepository.findById(orderChangeStatusDTO.getOrderId())
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+        if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_CANCEL) {
+            Cart cart = order.getCart();
+            User user = cart.getUser();
+            user.setCancelCount(user.getCancelCount() + 1);
+            cartRepository.save(cart);
+            userRepository.save(user);
+            orderRepository.delete(order);
+            return null;
+        } else if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_PROCESSING) {
+            Cart current = order.getCart();
+            current.setCartStatus(CART_STATUS_PROCESS);
+            cartRepository.save(current);
+            Cart newCart = new Cart();
+            newCart.setCartId(UUID.randomUUID());
+            newCart.setCartStatus(CART_STATUS_USER);
+            newCart.setUser(order.getCart().getUser());
+            cartRepository.save(newCart);
+        }
+        order.setOrderStatus(orderChangeStatusDTO.getStatus());
+        return orderRepository.save(order);
+    }
+
 
     private List<OrderResponseDTO> getOrderResponseDTOS(List<Order> orders) {
         List<OrderResponseDTO> orderResponseDTOS = new ArrayList<>();
@@ -191,20 +235,12 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
             cartResponseDTOS.add(cartResponseDTO);
 
 
-            if (!order.getCoupons().isEmpty()) {
-                order.getCoupons().forEach(coupon -> {
-                    if (coupon.getCouponType() == COUPON_PER_HUNDRED_TYPE) {
-                        dto.setOrderCouponPerHundred(coupon.getCouponPerHundred());
-                    }
-                    if (coupon.getCouponType() == COUPON_PRICE_TYPE) {
-                        dto.setOrderCouponPrice(coupon.getCouponPrice());
-                    }
-                    if (coupon.getCouponType() == COUPON_SHIP_TYPE) {
-                        dto.setOderCouponShip(coupon.getCouponPrice());
-                        dto.setOrderShipper(formatProductPrice(order.getOrderFeeShip() - coupon.getCouponPrice()));
-                    }
-                });
-            }
+            Coupon couponShip = getCouponByType(order.getCoupons(), COUPON_SHIP_TYPE).orElse(null);
+            Coupon couponPerHundred = getCouponByType(order.getCoupons(), COUPON_PER_HUNDRED_TYPE).orElse(null);
+            Coupon couponPrice = getCouponByType(order.getCoupons(), COUPON_PRICE_TYPE).orElse(null);
+
+
+
             if (order.getUser() != null) {
                 dto.setOrderShipperName(order.getUser().getUserFirstName() + " " + order.getUser().getUserLastName());
                 dto.setOrderShipperPhone(order.getUser().getUserPhone());
@@ -221,65 +257,15 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
             dto.setUserName(order.getOrderName());
             dto.setUserPhone(order.getOrderPhone());
             dto.setOrderNote(order.getOrderNote());
+            dto.setOrderShipper(formatProductPrice(order.getOrderFeeShip()));
+            dto.setOrderCouponPerHundred(couponPerHundred != null ? couponPerHundred.getCouponPerHundred() : 0);
+            dto.setOrderCouponPrice(couponPrice != null ? couponPrice.getCouponPrice() : 0);
+            dto.setOderCouponShip(couponShip != null ? couponShip.getCouponPrice() : 0);
             orderResponseDTOS.add(dto);
         });
         return orderResponseDTOS;
     }
 
-
-
-    @Override
-    public Order orderChangeStatus(OrderChangeStatusDTO orderChangeStatusDTO) {
-        System.console().printf("OrderChangeStatusDTO: %s", orderChangeStatusDTO);
-        Order order = orderRepository.findById(orderChangeStatusDTO.getOrderId())
-                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
-        if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_CANCEL) {
-            Cart cart = order.getCart();
-            User user = cart.getUser();
-            user.setCancelCount(user.getCancelCount() + 1);
-            cartRepository.save(cart);
-            userRepository.save(user);
-            orderRepository.delete(order);
-            return null;
-        } else if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_PROCESSING) {
-            Cart current = order.getCart();
-            current.setCartStatus(CART_STATUS_PROCESS);
-            cartRepository.save(current);
-            Cart newCart = new Cart();
-            newCart.setCartId(UUID.randomUUID());
-            newCart.setCartStatus(CART_STATUS_USER);
-            newCart.setUser(order.getCart().getUser());
-            cartRepository.save(newCart);
-        }
-        order.setOrderStatus(orderChangeStatusDTO.getStatus());
-        return orderRepository.save(order);
-    }
-
-
-    @Override
-    public OrderResponseDTO getOrderByCart(UUID cartId) {
-        if (cartId == null) {
-            throw new ParamNullException("CartId is null");
-        }
-        Order order = orderRepository.findOrderByCartId(cartId);
-        if (order == null) {
-            throw new EntityNotFoundException("Order not found");
-        }
-        CartResponseDTO dto = buildCartResponse(cartId);
-        OrderResponseDTO orderResponseDTO = new OrderResponseDTO();
-        orderResponseDTO.toDto(order);
-        orderResponseDTO.setItems(Collections.singletonList(dto));
-        orderResponseDTO.setOrderDate(order.getCreatedAt().toString());
-        orderResponseDTO.setOrderTotal(order.getTotalPrice());
-        orderResponseDTO.setOrderAddress(order.getOrderAddress() + ", " + order.getOrderWard() + ", " + order.getOrderDistrict() + ", " + order.getOrderCity());
-        orderResponseDTO.setOrderId(order.getOrderId());
-        orderResponseDTO.setOrderStatus(order.getOrderStatus());
-        orderResponseDTO.setOrderPayment(order.getOrderPayment());
-        orderResponseDTO.setUserEmail(order.getOrderEmail());
-        orderResponseDTO.setUserName(order.getOrderName());
-        orderResponseDTO.setUserPhone(order.getOrderPhone());
-        return orderResponseDTO;
-    }
 
 
     private Order populateOrderForGuest(OrderCreateRequestDTO order, Cart cart, Set<Coupon> coupons,
