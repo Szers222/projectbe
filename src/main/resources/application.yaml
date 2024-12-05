@@ -16,22 +16,22 @@ spring:
     config:
       import-check:
         enabled: false
-  jpa:đr
-  database: mysql
-  show-sql: true
-  hibernate:
-    ddl-auto: update
-  properties:
+  jpa:
+    database: mysql
+    show-sql: true
     hibernate:
-      use_sql_comments: true
-      format_sql: true
-      type:
-        descriptor:
-          sql:
-            BasicBinder: org.hibernate.type.descriptor.sql.UUIDTypeDescriptor
-            jdbc:
-              fetch_size: 100
-              batch_size: 30
+      ddl-auto: update
+    properties:
+      hibernate:
+        use_sql_comments: true
+        format_sql: true
+        type:
+          descriptor:
+            sql:
+              BasicBinder: org.hibernate.type.descriptor.sql.UUIDTypeDescriptor
+              jdbc:
+                fetch_size: 100
+                batch_size: 30
 
   servlet:
     multipart:

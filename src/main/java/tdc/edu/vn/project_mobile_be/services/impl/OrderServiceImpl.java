@@ -87,7 +87,6 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         if (cart.getCartStatus() == CART_STATUS_GUEST) {
             orderEntity = populateOrderForGuest(order, cart, coupons, couponShip);
         }
-
         return orderRepository.save(orderEntity);
     }
 
@@ -165,10 +164,7 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         order.setTotalPrice(request.getTotalPrice());
         order.setOrderName(fullName);
         order.setCoupons(coupons);
-        Order savedOrder = orderRepository.save(order);
-
-
-        return savedOrder;
+        return orderRepository.save(order);
     }
 
 
@@ -326,7 +322,11 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
             }
         }
         order.setOrderStatus(orderChangeStatusDTO.getStatus());
-        return orderRepository.save(order);
+        Order updatedOrder = orderRepository.save(order);
+
+        OrderResponseDTO orderResponseDTO = getOrderByCart(updatedOrder.getCart().getCartId());
+        messagingTemplate.convertAndSend("/topic/orders", orderResponseDTO);
+        return updatedOrder;
     }
 
 
