@@ -1,6 +1,7 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
 import jakarta.transaction.Transactional;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -70,9 +71,6 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
     private final int ORDER_STATUS_CANCEL = 6;
 
 
-
-
-
     @Override
     @Transactional
     public Order createOrderByGuest(OrderCreateRequestDTO order) {
@@ -96,18 +94,49 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
     @Override
     @Transactional
     public Order createOrderByUser(OrderCreateRequestByUserDTO request) {
-
-
         if (request == null || request.getUserId() == null) {
             throw new ParamNullException("Order or CartId is null");
         }
 
         Order order = request.toEntity();
 
-        Cart currentCart = cartRepository.findByUserId(request.getUserId(), CART_STATUS_USER).orElseThrow(() -> new EntityNotFoundException("Cart not found"));
-        if (currentCart.getCartProducts().isEmpty()) {
-            throw new EntityNotFoundException("Cart is empty");
+        List<Cart> currentCarts = cartRepository.findByUserId(request.getUserId(), CART_STATUS_USER);
+
+        if (currentCarts.isEmpty()) {
+            throw new EntityNotFoundException("Cart not found");
         }
+        Cart currentCart = getCart(currentCarts);
+        return getOrder(request, order, currentCart);
+    }
+
+    @Override
+    public Order createOrderByUserBuyNow(OrderCreateRequestByUserDTO request) {
+        if (request == null || request.getUserId() == null) {
+            throw new ParamNullException("Order or CartId is null");
+        }
+
+        Order order = request.toEntity();
+
+        List<Cart> currentCarts = cartRepository.findByUserId(request.getUserId(), CART_STATUS_USER);
+
+        if (currentCarts.isEmpty()) {
+            throw new EntityNotFoundException("Cart not found");
+        }
+        Cart currentCart;
+        if (currentCarts.size() > 1) {
+            if (currentCarts.getFirst().getCreatedAt().after(currentCarts.getLast().getCreatedAt())) {
+                currentCart = currentCarts.getFirst();
+            } else {
+                currentCart = currentCarts.getLast();
+            }
+        } else {
+            currentCart = currentCarts.getFirst();
+        }
+        return getOrder(request, order, currentCart);
+    }
+
+    @NotNull
+    private Order getOrder(OrderCreateRequestByUserDTO request, Order order, Cart currentCart) {
         Set<Coupon> coupons = new HashSet<>();
         if (request.getOrderCoupon() != null) {
             for (UUID couponCode : request.getOrderCoupon()) {
@@ -140,6 +169,26 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
 
 
         return savedOrder;
+    }
+
+
+    @NotNull
+    private static Cart getCart(List<Cart> currentCarts) {
+        Cart currentCart;
+        if (currentCarts.size() > 1) {
+            if (currentCarts.getFirst().getCreatedAt().after(currentCarts.getLast().getCreatedAt())) {
+                currentCart = currentCarts.getLast();
+            } else {
+                currentCart = currentCarts.getFirst();
+            }
+        } else {
+            currentCart = currentCarts.getFirst();
+        }
+
+        if (currentCart.getCartProducts().isEmpty()) {
+            throw new EntityNotFoundException("Cart is empty");
+        }
+        return currentCart;
     }
 
     @Override
@@ -178,33 +227,6 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         return getOrderResponseDTOS(orders).stream().findFirst().get();
     }
 
-    @Override
-    public Order orderChangeStatus(OrderChangeStatusDTO orderChangeStatusDTO) {
-        Order order = orderRepository.findById(orderChangeStatusDTO.getOrderId())
-                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
-        if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_CANCEL) {
-            Cart cart = order.getCart();
-            User user = cart.getUser();
-            user.setCancelCount(user.getCancelCount() + 1);
-            cartRepository.save(cart);
-            userRepository.save(user);
-            orderRepository.delete(order);
-            return null;
-        } else if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_PROCESSING) {
-            Cart current = order.getCart();
-            current.setCartStatus(CART_STATUS_PROCESS);
-            cartRepository.save(current);
-            Cart newCart = new Cart();
-            newCart.setCartId(UUID.randomUUID());
-            newCart.setCartStatus(CART_STATUS_USER);
-            newCart.setUser(order.getCart().getUser());
-            cartRepository.save(newCart);
-        }
-        order.setOrderStatus(orderChangeStatusDTO.getStatus());
-        return orderRepository.save(order);
-    }
-
-
     private List<OrderResponseDTO> getOrderResponseDTOS(List<Order> orders) {
         List<OrderResponseDTO> orderResponseDTOS = new ArrayList<>();
         orders.forEach(order -> {
@@ -240,7 +262,6 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
             Coupon couponPrice = getCouponByType(order.getCoupons(), COUPON_PRICE_TYPE).orElse(null);
 
 
-
             if (order.getUser() != null) {
                 dto.setOrderShipperName(order.getUser().getUserFirstName() + " " + order.getUser().getUserLastName());
                 dto.setOrderShipperPhone(order.getUser().getUserPhone());
@@ -266,6 +287,47 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         return orderResponseDTOS;
     }
 
+    @Override
+    public Order orderChangeStatus(OrderChangeStatusDTO orderChangeStatusDTO) {
+        Order order = orderRepository.findById(orderChangeStatusDTO.getOrderId())
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+        if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_CANCEL) {
+            Cart cart = order.getCart();
+            User user = cart.getUser();
+            if (user != null) {
+                user.setCancelCount(user.getCancelCount() + 1);
+                userRepository.save(user);
+            }
+            cartRepository.save(cart);
+            orderRepository.delete(order);
+            return null;
+        } else if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_PROCESSING) {
+            Cart currentCart = order.getCart();
+            currentCart.setCartStatus(CART_STATUS_PROCESS);
+            cartRepository.save(currentCart);
+            if (currentCart.getUser() != null) {
+                List<Cart> carts = cartRepository.findByUserIdAndCartStatus(currentCart.getUser().getUserId(), CART_STATUS_USER);
+                if (carts.isEmpty()) {
+                    Cart newCart = new Cart();
+                    newCart.setCartId(UUID.randomUUID());
+                    newCart.setCartStatus(CART_STATUS_USER);
+                    newCart.setUser(order.getCart().getUser());
+                    cartRepository.save(newCart);
+                } else if (carts.size() == 1) {
+                    carts.forEach(cart -> {
+                        cart.setUser(order.getCart().getUser());
+                        cartRepository.save(cart);
+                    });
+                }
+                order.getCoupons().forEach(coupon -> {
+                    coupon.setCouponQuantity(coupon.getCouponQuantity() - 1);
+                    couponRepository.save(coupon);
+                });
+            }
+        }
+        order.setOrderStatus(orderChangeStatusDTO.getStatus());
+        return orderRepository.save(order);
+    }
 
 
     private Order populateOrderForGuest(OrderCreateRequestDTO order, Cart cart, Set<Coupon> coupons,

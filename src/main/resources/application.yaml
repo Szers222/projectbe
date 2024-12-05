@@ -16,22 +16,22 @@ spring:
     config:
       import-check:
         enabled: false
-  jpa:
-    database: mysql
-    show-sql: true
+  jpa:đr
+  database: mysql
+  show-sql: true
+  hibernate:
+    ddl-auto: update
+  properties:
     hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        use_sql_comments: true
-        format_sql: true
-        type:
-          descriptor:
-            sql:
-              BasicBinder: org.hibernate.type.descriptor.sql.UUIDTypeDescriptor
-              jdbc:
-                fetch_size: 100
-                batch_size: 30
+      use_sql_comments: true
+      format_sql: true
+      type:
+        descriptor:
+          sql:
+            BasicBinder: org.hibernate.type.descriptor.sql.UUIDTypeDescriptor
+            jdbc:
+              fetch_size: 100
+              batch_size: 30
 
   servlet:
     multipart:
@@ -98,7 +98,7 @@ payment:
     url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
     tmnCode: 6LD3JKMX
     secretKey: E4NTQV04NGOUHWW0QJ01AYN9LTVO2OYQ
-    returnUrl: http://localhost:8080/api/v1/payment/vn-pay-callback
+    returnUrl: http://${server.ip}:8080/api/v1/payment/vn-pay-callback
     version: 2.1.0
     command: pay
     orderType: other

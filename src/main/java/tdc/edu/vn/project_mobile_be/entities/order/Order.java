@@ -84,6 +84,7 @@ public class Order {
     @JoinColumn(name = "cart_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonManagedReference(value = "cart-order")
     private Cart cart;
 
     @CreationTimestamp
