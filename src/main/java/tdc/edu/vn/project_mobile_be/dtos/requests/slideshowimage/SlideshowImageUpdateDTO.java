@@ -14,7 +14,7 @@ import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SlideshowImageCreateDTO implements IDto<SlideshowImage> {
+public class SlideshowImageUpdateDTO implements IDto<SlideshowImage> {
 
     @NotNull(message = "Image ALT is required")
     @JsonProperty("imageAlt")
