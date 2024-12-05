@@ -5,12 +5,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 
+import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -34,7 +36,7 @@ public class Cart {
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = true)
-    @JsonBackReference
+    @JsonBackReference(value = "user-cart")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private User user;
@@ -51,7 +53,11 @@ public class Cart {
     @OneToOne(mappedBy = "cart")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference
+    @JsonBackReference(value = "cart-order")
     private Order order;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
+    private Timestamp createdAt;
 
 }
