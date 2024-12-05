@@ -1,8 +1,8 @@
 package tdc.edu.vn.project_mobile_be.controllers;
 
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,12 +11,10 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
-import tdc.edu.vn.project_mobile_be.dtos.requests.cart.CartCreateRequestByUserDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.cart.CartCreateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.cart.CartUpdateRequestDTO;
-import tdc.edu.vn.project_mobile_be.dtos.requests.cart.RemoveSizeProductRequestParamsDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.cart.*;
 import tdc.edu.vn.project_mobile_be.dtos.responses.cart.CartResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.CartRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CartService;
 
 import java.util.List;
@@ -26,10 +24,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/v1")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
+@Slf4j
 public class CartController {
     @Autowired
     private CartService cartService;
-
+    @Autowired
+    private CartRepository cartRepository;
 
     @PostMapping(value = {"/cart/create_guest", "/cart/create_guest/"})
     public ResponseEntity<ResponseData<?>> createCart(
@@ -42,7 +42,7 @@ public class CartController {
                     .collect(Collectors.toList());
             throw new MultipleFieldsNullOrEmptyException(errorMessages);
         }
-        Cart cartCreated = cartService.createCartNoUser(params, params.getGuestId());
+        Cart cartCreated = cartService.createCartNoUser(params);
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Cart tạo thành công !", cartCreated);
         return ResponseEntity.ok(responseData);
     }
@@ -59,6 +59,23 @@ public class CartController {
             throw new MultipleFieldsNullOrEmptyException(errorMessages);
         }
         Cart cartCreated = cartService.createCartByUser(params.getUserId());
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Cart tạo thành công !", cartCreated);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PostMapping(value = {"/cart/user/buynow", "/cart/user/buynow/"})
+    public ResponseEntity<ResponseData<?>> createCartByUserBuyNow(
+            @Valid @RequestBody CartCreateRequestBuyNowDTO params,
+            BindingResult bindingResult
+    ) {
+
+        if (bindingResult.hasErrors()) {
+            List<String> errorMessages = bindingResult.getFieldErrors().stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
+            throw new MultipleFieldsNullOrEmptyException(errorMessages);
+        }
+        Cart cartCreated = cartService.createBuyNowCartByUser(params);
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Cart tạo thành công !", cartCreated);
         return ResponseEntity.ok(responseData);
     }
@@ -119,6 +136,7 @@ public class CartController {
         return ResponseEntity.ok(responseData);
     }
 
+
     @GetMapping(value = {"/carts/guest/{guestId}", "/cart/guest/{guestId}/"})
     public ResponseEntity<ResponseData<?>> getAllCartByGuest(
             @PathVariable UUID guestId
@@ -137,6 +155,15 @@ public class CartController {
         return ResponseEntity.ok(responseData);
     }
 
+    @GetMapping(value = {"/carts/user/buynow/{userId}", "/cart/user/buynow/{userId}/"})
+    public ResponseEntity<ResponseData<?>> getCartByUserBuyNow(
+            @PathVariable UUID userId
+    ) {
+        CartResponseDTO cart = cartService.findCartByIdUserBuyNow(userId);
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Danh sách Cart", cart);
+        return ResponseEntity.ok(responseData);
+    }
+
     @GetMapping(value = {"/carts/wishlist/user/{userId}", "/cart/user/{userId}/"})
     public ResponseEntity<ResponseData<?>> getCartWishlistByUser(
             @PathVariable UUID userId
@@ -146,5 +173,10 @@ public class CartController {
         return ResponseEntity.ok(responseData);
     }
 
-
+    @GetMapping("/carts/all")
+    public ResponseEntity<ResponseData<?>> getAllCart() {
+        List<Cart> carts = cartRepository.findAll();
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Danh sách Cart", carts);
+        return ResponseEntity.ok(responseData);
+    }
 }

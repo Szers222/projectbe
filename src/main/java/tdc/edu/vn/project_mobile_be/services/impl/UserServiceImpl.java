@@ -18,6 +18,7 @@ import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
+import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.CartRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.IdCardRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.RoleRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
@@ -47,7 +48,8 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
     PasswordEncoder passwordEncoder;
     @Autowired
     GoogleCloudStorageService googleCloudStorageService;
-
+    @Autowired
+    private CartRepository cartRepository;
 
 
     @Override
@@ -98,11 +100,16 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
 
         UserResponseDTO responseDTO = new UserResponseDTO();
         responseDTO.toDto(user);
-        Set<Cart> carts = user.getCarts();
-        carts.forEach(cart -> {
-            if (cart.getCartStatus() == 1) {
-                responseDTO.setCartId(cart.getCartId());
-            }
+
+        List<Cart> carts = cartRepository.findByUserIdAndCartStatus(user.getUserId(), 1);
+        if (carts.getFirst().getCreatedAt().after(carts.getLast().getCreatedAt())) {
+            responseDTO.setCartId(carts.getLast().getCartId());
+            responseDTO.setCartBuyNowId(carts.getFirst().getCartId());
+        } else {
+            responseDTO.setCartId(carts.getFirst().getCartId());
+            responseDTO.setCartBuyNowId(carts.getLast().getCartId());
+        }
+        user.getCarts().forEach(cart -> {
             if (cart.getCartStatus() == 0) {
                 responseDTO.setWishlistId(cart.getCartId());
             }
