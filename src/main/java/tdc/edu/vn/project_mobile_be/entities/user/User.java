@@ -112,7 +112,7 @@ public class User {
     private List<UserOtp> userOtp = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference(value = "user-cart")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<Cart> carts = new HashSet<>();

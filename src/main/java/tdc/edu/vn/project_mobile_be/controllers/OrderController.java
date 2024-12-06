@@ -61,6 +61,22 @@ public class OrderController {
         return ResponseEntity.ok(responseData);
     }
 
+    @PostMapping({"/order/user/buynow", "/order/user/buynow"})
+    public ResponseEntity<ResponseData<?>> createOrderByUserBuyNow(
+            @Valid @RequestBody OrderCreateRequestByUserDTO orderCreateRequestDTO,
+            BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            List<String> errorMessages = bindingResult.getFieldErrors().stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
+            throw new MultipleFieldsNullOrEmptyException(errorMessages);
+        }
+        Order orderCreated = orderService.createOrderByUserBuyNow(orderCreateRequestDTO);
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.CREATED, "Order created successfully!", orderCreated);
+        return ResponseEntity.ok(responseData);
+    }
+
     @GetMapping({"/order/cart/{cartId}", "/order/cart/{cartId}/"})
     public ResponseEntity<ResponseData<OrderResponseDTO>> getOrderByCart(@PathVariable UUID cartId) {
         OrderResponseDTO order = orderService.getOrderByCart(cartId);
