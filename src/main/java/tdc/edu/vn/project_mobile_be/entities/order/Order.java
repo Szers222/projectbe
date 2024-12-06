@@ -85,6 +85,7 @@ public class Order {
     @JoinColumn(name = "cart_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonManagedReference(value = "cart-order")
     private Cart cart;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)

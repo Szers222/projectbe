@@ -63,6 +63,9 @@ public class UserResponseDTO implements IDto<User> {
     @JsonProperty("cartId")
     UUID cartId;
 
+    @JsonProperty("cartBuyNowId")
+    UUID cartBuyNowId;
+
     @JsonProperty("wishListId")
     UUID wishlistId;
 

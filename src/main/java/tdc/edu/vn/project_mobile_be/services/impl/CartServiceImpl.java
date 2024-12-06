@@ -1,7 +1,5 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,6 +7,7 @@ import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundExcept
 import tdc.edu.vn.project_mobile_be.commond.customexception.ListNotFoundException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.NumberErrorException;
 import tdc.edu.vn.project_mobile_be.commond.customexception.ParamNullException;
+import tdc.edu.vn.project_mobile_be.dtos.requests.cart.CartCreateRequestBuyNowDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.cart.CartCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.cart.CartUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.cart.RemoveSizeProductRequestParamsDTO;
@@ -19,10 +18,12 @@ import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
+import tdc.edu.vn.project_mobile_be.entities.relationship.CartProductId;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CartService;
 
+import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.*;
@@ -69,20 +70,103 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
     }
 
     @Override
-    public Cart createCartNoUser(CartCreateRequestDTO params, UUID guestId) {
-        if (guestId == null) {
+    public Cart createBuyNowCartByUser(CartCreateRequestBuyNowDTO params) {
+        if (params.getUserId() == null) {
+            throw new EntityNotFoundException("User not found");
+        }
+        Optional<User> userOp = userRepository.findById(params.getUserId());
+        if (userOp.isEmpty()) {
+            throw new EntityNotFoundException("User not found");
+        }
+        User user = userOp.get();
+        List<Cart> carts = cartRepository.findByUserIdAndCartStatus(params.getUserId(), CART_STATUS_USER);
+
+        if (carts.size() < 2) {
+            Cart cart = new Cart();
+            UUID cartId = UUID.randomUUID();
+            cart.setCartId(cartId);
+            cart.setUser(user);
+            cart.setCartStatus(CART_STATUS_USER);
+            cart.setGuestId(null);
+            Cart savedCart = cartRepository.save(cart);
+
+            Product product = productRepository.findById(params.getSizeProduct().getProductId())
+                    .orElseThrow(() -> new EntityNotFoundException("Product not found with ID: " + params.getSizeProduct().getProductId()));
+            ProductSize productSize = productSizeRepository.findById(params.getSizeProduct().getSizeId())
+                    .orElseThrow(() -> new EntityNotFoundException("Size not found with ID: " + params.getSizeProduct().getSizeId()));
+
+            CartProductId cartProductId = new CartProductId();
+            cartProductId.setCart_id(savedCart.getCartId());
+            cartProductId.setProduct_id(product.getProductId());
+            cartProductId.setProduct_size_id(productSize.getProductSizeId());
+
+            CartProduct cartProduct = new CartProduct();
+            cartProduct.setId(cartProductId);
+            cartProduct.setProductSize(productSize);
+            cartProduct.setCart(savedCart);
+            cartProduct.setProduct(product);
+            cartProduct.setQuantity(params.getSizeProduct().getProductSizeQuantity());
+
+            // Thêm dòng này để lưu sản phẩm
+            cartProductRepository.save(cartProduct);
+
+            return savedCart;
+        } else if (carts.size() == 2) {
+            if (carts.get(0).getCreatedAt().after(carts.get(1).getCreatedAt())) {
+                cartProductRepository.deleteAll(carts.get(0).getCartProducts());
+                cartRepository.delete(carts.get(0));
+            } else {
+                cartProductRepository.deleteAll(carts.get(1).getCartProducts());
+                cartRepository.delete(carts.get(1));
+            }
+
+            Cart cart = new Cart();
+            UUID cartId = UUID.randomUUID();
+            cart.setCartId(cartId);
+            cart.setUser(user);
+            cart.setCartStatus(CART_STATUS_USER);
+            cart.setGuestId(null);
+            Cart savedCart = cartRepository.save(cart);
+
+            Product product = productRepository.findById(params.getSizeProduct().getProductId())
+                    .orElseThrow(() -> new EntityNotFoundException("Product not found with ID: " + params.getSizeProduct().getProductId()));
+            ProductSize productSize = productSizeRepository.findById(params.getSizeProduct().getSizeId())
+                    .orElseThrow(() -> new EntityNotFoundException("Size not found with ID: " + params.getSizeProduct().getSizeId()));
+
+            CartProductId cartProductId = new CartProductId();
+            cartProductId.setCart_id(savedCart.getCartId());
+            cartProductId.setProduct_id(product.getProductId());
+            cartProductId.setProduct_size_id(productSize.getProductSizeId());
+
+            CartProduct cartProduct = new CartProduct();
+            cartProduct.setId(cartProductId);
+            cartProduct.setProductSize(productSize);
+            cartProduct.setCart(savedCart);
+            cartProduct.setProduct(product);
+            cartProduct.setQuantity(params.getSizeProduct().getProductSizeQuantity());
+
+            cartProductRepository.save(cartProduct);
+
+            return savedCart;
+        } else {
+            return null;
+        }
+    }
+
+
+    @Override
+    public Cart createCartNoUser(CartCreateRequestDTO params) {
+        if (params.getGuestId() == null) {
             throw new EntityNotFoundException("Guest not found");
         }
-
-        // Tìm giỏ hàng dựa trên guestId và trạng thái khách
-        Cart cartSaved = cartRepository.findByUserId(guestId, CART_STATUS_GUEST)
+        Cart cartSaved = cartRepository.findByGuestId(params.getGuestId())
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
                     UUID cartId = UUID.randomUUID();
                     newCart.setCartId(cartId); // Dùng guestId làm cartId
                     newCart.setCartStatus(CART_STATUS_GUEST);
                     newCart.setUser(null); // Không gắn user
-                    newCart.setGuestId(guestId);
+                    newCart.setGuestId(params.getGuestId());
                     return cartRepository.save(newCart);
                 });
 
@@ -100,9 +184,9 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         cartProduct.setCart(cartSaved);
         cartProduct.setProduct(product);
         cartProduct.setQuantity(params.getSizeProduct().getProductSizeQuantity());
-
-        // Thêm CartProduct vào danh sách
         cartSaved.getCartProducts().add(cartProduct);
+        // Thêm CartProduct vào danh sách
+
 
         // Lưu và trả kết quả
         return cartRepository.save(cartSaved);
@@ -158,8 +242,48 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         if (userId == null) {
             throw new ParamNullException("User ID cannot be null.");
         }
-        Cart cart = cartRepository.findByUserId(userId, CART_STATUS_USER)
-                .orElseThrow(() -> new EntityNotFoundException("Cart for the user not found."));
+        List<Cart> carts = cartRepository.findByUserId(userId, CART_STATUS_USER);
+        System.console().printf("User", carts.size());
+        if (carts.isEmpty()) {
+            throw new EntityNotFoundException("Cart for the user not found.");
+        }
+        Cart cart;
+        if (carts.size() > 1) {
+            if (carts.getFirst().getCreatedAt().after(carts.getLast().getCreatedAt())) {
+                cart = carts.getLast();
+            } else {
+                cart = carts.getFirst();
+            }
+        } else {
+            cart = carts.getFirst();
+        }
+        return buildCartResponse(cart.getCartId());
+    }
+
+    @Override
+    public CartResponseDTO findCartByIdUserBuyNow(UUID userId) {
+        if (userId == null) {
+            throw new ParamNullException("User ID cannot be null.");
+        }
+        List<Cart> carts = cartRepository.findByUserId(userId, CART_STATUS_USER);
+        System.console().printf("User12313131", carts.size());
+        if (carts.isEmpty()) {
+            throw new EntityNotFoundException("Cart for the user not found.");
+        }
+        Cart cart;
+        if (carts.size() > 1) {
+            if (carts.getFirst().getCreatedAt().after(carts.getLast().getCreatedAt())) {
+                System.console().printf("if", carts.size());
+                cart = carts.getFirst();
+            } else {
+                System.console().printf("elsetrongif", carts.size());
+                cart = carts.getLast();
+            }
+        } else {
+            System.console().printf("elsle", carts.size());
+            cart = carts.getFirst();
+        }
+
         return buildCartResponse(cart.getCartId());
     }
 
@@ -168,9 +292,11 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
         if (userId == null) {
             throw new ParamNullException("User ID cannot be null.");
         }
-        Cart cart = cartRepository.findByUserId(userId, CART_STATUS_WISH_LIST)
-                .orElseThrow(() -> new EntityNotFoundException("Cart for the user not found."));
-        return buildCartResponse(cart.getCartId());
+        List<Cart> cart = cartRepository.findByUserId(userId, CART_STATUS_WISH_LIST);
+        if (cart.isEmpty()) {
+            throw new EntityNotFoundException("Cart for the user not found.");
+        }
+        return buildCartResponse(cart.getFirst().getCartId());
     }
 
     @Override
@@ -184,7 +310,7 @@ public class CartServiceImpl extends AbService<Cart, UUID> implements CartServic
     }
 
     public CartResponseDTO buildCartResponse(UUID cartId) {
-    List<CartProduct> cartProducts = cartProductRepository.findByCartId(cartId);
+        List<CartProduct> cartProducts = cartProductRepository.findByCartId(cartId);
         if (cartProducts.isEmpty()) {
             throw new ListNotFoundException("No products found in the cart.");
         }
