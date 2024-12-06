@@ -14,7 +14,6 @@ import tdc.edu.vn.project_mobile_be.dtos.requests.review.ReviewCreateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.review.ReviewResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.review.Review;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ReviewService;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -22,7 +21,7 @@ import java.util.UUID;
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/auth/reviews")
 public class ReviewController {
     @Autowired
     private final ReviewService reviewService;
@@ -31,27 +30,51 @@ public class ReviewController {
     private final ObjectMapper objectMapper;
 
 
-    @PostMapping(value = "/auth/reviews",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseData<?>> createReview(
             @RequestPart(value = "image", required = false) MultipartFile imageReview,
             @RequestPart(value = "request", required = true) String requestJson
     ) throws JsonProcessingException {
-        ReviewCreateRequestDTO request = objectMapper.readValue(requestJson, ReviewCreateRequestDTO.class);
-        Review review = reviewService.createReview(request, imageReview);
+        ReviewCreateRequestDTO requestDTO = objectMapper.readValue(requestJson, ReviewCreateRequestDTO.class);
+        Review review = reviewService.createReview(requestDTO, imageReview);
         ResponseData<?> responseData = new ResponseData<>(
                 HttpStatus.CREATED,
-                "Review đã được tạo thành công",
+                "Review đã được tạo thành công.",
                 review
+        );
+        return new ResponseEntity<>(responseData, HttpStatus.CREATED);
+    }
+
+    @PostMapping(value = "/reply", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseData<?>> replyToReview(
+            @RequestPart(value = "image", required = false) MultipartFile imageReview,
+            @RequestPart(value = "request", required = true) String requestJson
+    ) throws JsonProcessingException {
+        ReviewCreateRequestDTO requestDTO = objectMapper.readValue(requestJson, ReviewCreateRequestDTO.class);
+        if (requestDTO.getParentId() == null) {
+            return ResponseEntity.badRequest()
+                    .body(new ResponseData<>(
+                            HttpStatus.BAD_REQUEST,
+                            "Parent ID không được để trống khi phản hồi review.",
+                            null
+                    ));
+        }
+        Review reply = reviewService.replyToReview(requestDTO, imageReview);
+        ResponseData<?> responseData = new ResponseData<>(
+                HttpStatus.CREATED,
+                "Phản hồi review đã được tạo thành công.",
+                reply
         );
 
         return new ResponseEntity<>(responseData, HttpStatus.CREATED);
     }
-    @GetMapping("/auth/reviews/product/{productId}")
+
+    @GetMapping("/product/{productId}")
     public ResponseEntity<List<ReviewResponseDTO>> getReviewsByProductId(@PathVariable UUID productId) {
         List<ReviewResponseDTO> reviews = reviewService.getReviewByProductId(productId);
         return ResponseEntity.ok(reviews);
     }
-    @GetMapping("/auth/reviews/exists")
+    @GetMapping("/exists")
     public ResponseEntity<Integer> checkReviewExists(
             @RequestParam UUID orderId,
             @RequestParam UUID productId

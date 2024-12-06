@@ -10,11 +10,12 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ReviewService extends IService<Review, UUID> {
-    Review createReview(ReviewCreateRequestDTO request, MultipartFile imageReview);
+
+    Review createReview(ReviewCreateRequestDTO reviewCreateRequestDTO, MultipartFile imageReview);
+
+    Review replyToReview(ReviewCreateRequestDTO reviewCreateRequestDTO, MultipartFile imageReview);
 
     List<ReviewResponseDTO> getReviewByProductId(UUID productId);
 
     boolean checkReviewExists(UUID orderId, UUID productId);
-
-
 }

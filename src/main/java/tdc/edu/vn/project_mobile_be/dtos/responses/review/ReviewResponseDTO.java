@@ -4,10 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import tdc.edu.vn.project_mobile_be.entities.order.Order;
-import tdc.edu.vn.project_mobile_be.entities.user.User;
+import tdc.edu.vn.project_mobile_be.entities.review.Review;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -38,12 +39,13 @@ public class ReviewResponseDTO {
     @JsonProperty("productId")
     UUID productId;
 
-
     @JsonProperty("createdAt")
     Timestamp createdAt;
 
     @JsonProperty("updatedAt")
     Timestamp updatedAt;
 
+    @JsonProperty("children")
+    List<Review> children = new ArrayList<>();
 
 }

@@ -3,9 +3,7 @@ package tdc.edu.vn.project_mobile_be.entities.review;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -15,9 +13,7 @@ import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @Entity
@@ -33,37 +29,45 @@ public class Review {
     private UUID reviewId;
 
     @Column(name = "review_comment", columnDefinition = "text")
-    private String reviewComment;
+    private String reviewComment = "";
 
     @Column(name = "review_image_path", columnDefinition = "VARCHAR(255)")
-    private String reviewImagePath;
+    private String reviewImagePath = "";
 
     @Column(name = "review_rating", nullable = false, columnDefinition = "double default 0")
-    private double reviewRating;
+    private double reviewRating = 0;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JsonBackReference(value = "order-review")
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    @JoinColumn(name = "order_id")
+    private Order order = null;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JsonBackReference(value = "product-review")
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @JoinColumn(name = "product_id")
+    private Product product = null;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JsonBackReference(value = "user-review")
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "user_id")
+    private User user = null;
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private Set<ReviewLike> reviewLikes = new HashSet<>();
 
-    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private Set<ReviewReply> reviewReplies = new HashSet<>();
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    @JsonBackReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Review parent;
 
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+    @JsonBackReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<Review> children = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")

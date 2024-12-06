@@ -22,11 +22,10 @@ public class ReviewLikeController {
 
     @PostMapping(value = "/auth/review-like")
     public ResponseEntity<ResponseData<?>> addReviewLike(@RequestBody ReviewLikeRequestDTO request) {
-        ReviewLike reviewLike = reviewLikeService.addLike(request);
         ResponseData<ReviewLike> responseData = new ResponseData<>(
                 HttpStatus.CREATED,
                 "Thích review thành công",
-                reviewLike
+                null
         );
         return new ResponseEntity<>(responseData, HttpStatus.CREATED);
     }

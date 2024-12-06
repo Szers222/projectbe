@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -15,20 +16,20 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReviewCreateRequestDTO {
-    @NotNull(message = "order khong null")
     @JsonProperty("orderId")
     private UUID orderId;
-    @NotNull(message = "userId khong nulll")
     @JsonProperty("userId")
     private UUID userId;
     @JsonProperty("comment")
     private String comment;
-    @NotNull(message = "ranting khong null")
     @Min(value = 0, message = "khong dung gia tri rating")
     @Max(value = 5, message = "Khong dung gia tri rating")
     @JsonProperty("rating")
     private Double rating;
-    @NotNull(message = "Product khong null")
     @JsonProperty("productId")
     private UUID productId;
+    @JsonProperty("userImagePath")
+    MultipartFile imageReview;
+    @JsonProperty("parentId")
+    private UUID parentId;
 }

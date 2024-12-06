@@ -35,33 +35,49 @@ public class ReviewServiceImp extends AbService<Review, UUID> implements ReviewS
     private final ReviewLikeRepository reviewLikeRepository;
 
     @Override
-    public Review createReview(ReviewCreateRequestDTO request, MultipartFile imageReview) {
-        Order order = orderRepository.findById(request.getOrderId())
-                .orElseThrow(() -> new RuntimeException("Order không tồn tại"));
-
-        Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product không tồn tại"));
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
-        if (order.getOrderStatus() != 5) {
-            throw new RuntimeException("Chỉ những đơn hàng có trạng thái '5' mới được phép đánh giá");
-        }
-        String imagePath = null;
-        try {
-            if (imageReview != null && !imageReview.isEmpty()) {
-                imagePath = googleCloudStorageService.uploadFile(imageReview);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Lỗi khi upload ảnh: " + e.getMessage());
-        }
+    public Review createReview(ReviewCreateRequestDTO reviewCreateRequestDTO, MultipartFile imageReview) {
+        Order order = orderRepository.findById(reviewCreateRequestDTO.getOrderId())
+                .orElseThrow(() -> new IllegalArgumentException("Order không tồn tại!"));
+        Product product = productRepository.findById(reviewCreateRequestDTO.getProductId())
+                .orElseThrow(() -> new IllegalArgumentException("Product không tồn tại!"));
+        User user = userRepository.findById(reviewCreateRequestDTO.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User không tồn tại!"));
         Review review = new Review();
-        review.setReviewComment(request.getComment());
-        review.setReviewRating(request.getRating());
+        review.setOrder(order);
         review.setProduct(product);
         review.setUser(user);
-        review.setOrder(order);
-        review.setReviewImagePath(imagePath);
+        review.setReviewComment(reviewCreateRequestDTO.getComment());
+        review.setReviewRating(reviewCreateRequestDTO.getRating());
+        if (imageReview != null && !imageReview.isEmpty()) {
+            String imagePath = saveImage(imageReview);
+            review.setReviewImagePath(imagePath);
+        }
         return reviewRepository.save(review);
+    }
+
+    @Override
+    public Review replyToReview(ReviewCreateRequestDTO reviewCreateRequestDTO, MultipartFile imageReview) {
+        Review parentReview = reviewRepository.findById(reviewCreateRequestDTO.getParentId())
+                .orElseThrow(() -> new IllegalArgumentException("Parent review không tồn tại!"));
+        User user = userRepository.findById(reviewCreateRequestDTO.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User không tồn tại!"));
+        Review reply = new Review();
+        reply.setParent(parentReview);
+        reply.setUser(user);
+        reply.setReviewComment(reviewCreateRequestDTO.getComment());
+        if (imageReview != null && !imageReview.isEmpty()) {
+            String imagePath = saveImage(imageReview);
+            reply.setReviewImagePath(imagePath);
+        }
+        return reviewRepository.save(reply);
+    }
+
+    private String saveImage(MultipartFile image) {
+        try {
+            return googleCloudStorageService.uploadFile(image);
+        } catch (IOException e) {
+            throw new RuntimeException("Lỗi khi lưu ảnh: " + e.getMessage());
+        }
     }
 
     @Override
@@ -82,6 +98,7 @@ public class ReviewServiceImp extends AbService<Review, UUID> implements ReviewS
                             .rating((float) review.getReviewRating())
                             .totalLike(totalLikes)
                             .userFullName(userFullName)
+                            .children(review.getChildren())
                             .orderId(review.getOrder().getOrderId()) // Thêm orderId
                             .productId(review.getProduct().getProductId()) // Thêm productId
                             .createdAt(review.getCreatedAt())
