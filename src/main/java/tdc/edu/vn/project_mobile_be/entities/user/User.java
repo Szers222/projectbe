@@ -11,6 +11,7 @@ import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.idcard.IdCard;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
+import tdc.edu.vn.project_mobile_be.entities.review.ReviewLike;
 import tdc.edu.vn.project_mobile_be.entities.roles.Role;
 
 import java.sql.Timestamp;
@@ -121,5 +122,9 @@ public class User {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private UserAddress detail;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private Set<ReviewLike> reviewLikes = new HashSet<>();
 
 }
