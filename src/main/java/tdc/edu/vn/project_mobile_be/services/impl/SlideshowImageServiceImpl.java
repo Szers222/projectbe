@@ -61,6 +61,7 @@ public class SlideshowImageServiceImpl extends AbService<SlideshowImage, UUID> i
             slideshowImage.setSlideShowImageImageAlt(params.getSlideShowImageImageAlt());
             slideshowImage.setSlideShowImageImageIndex(params.getSlideShowImageImageIndex());
             slideshowImage.setSlideShowImageUrl(params.getSlideShowImageUrl());
+            slideshowImage.setSlideShowContent(params.getSlideShowContent());
             slideshowImage.setSlideShowImageImagePath(imagePath);
             return slideshowRepository.save(slideshowImage);
         } catch (Exception e) {
