@@ -179,7 +179,7 @@ public class UserOtpServiceImp implements UserOtpService {
         if (existingUser.getUserStatus() == 0) {
             throw new RuntimeException("Tài khoản chưa xác thực");
         }
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 2; i++) {
             Cart cartByUser = cartService.createCartByUser(existingUser.getUserId());
             cartByUser.setCartStatus(i);
         }

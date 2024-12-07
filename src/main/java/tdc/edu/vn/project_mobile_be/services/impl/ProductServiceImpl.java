@@ -303,20 +303,20 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         }
 
         String cacheKey = "findProductsByFilters:" + filterJson + ":" + pageableJson;
-
-        String cachedResult = (String) redisTemplate.opsForValue().get(cacheKey);
-        if (cachedResult != null) {
-            try {
-                List<ProductResponseDTO> dtoList = objectMapper.readValue(cachedResult, new TypeReference<>() {
-                });
-                if (dtoList != null) {
-                    return new PageImpl<>(dtoList, pageable, dtoList.size());
-                }
-            } catch (IOException e) {
-                // Log the exception and continue to the next step to fetch the data from DB
-                e.printStackTrace();
-            }
-        }
+//
+//        String cachedResult = (String) redisTemplate.opsForValue().get(cacheKey);
+//        if (cachedResult != null) {
+//            try {
+//                List<ProductResponseDTO> dtoList = objectMapper.readValue(cachedResult, new TypeReference<>() {
+//                });
+//                if (dtoList != null) {
+//                    return new PageImpl<>(dtoList, pageable, dtoList.size());
+//                }
+//            } catch (IOException e) {
+//                // Log the exception and continue to the next step to fetch the data from DB
+//                e.printStackTrace();
+//            }
+//        }
 
         Specification<Product> spec = Specification.where(null);  // Khởi tạo Specification rỗng
         // Lọc theo danh mục (category)
@@ -383,13 +383,13 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             dto.setCouponResponseDTO(couponResponseDTO);
             return dto;
         });
-        List<ProductResponseDTO> dtoList = dtoPage.getContent();
-        try {
-            String serializedData = objectMapper.writeValueAsString(dtoList);
-            redisTemplate.opsForValue().set(cacheKey, serializedData, 60, TimeUnit.MINUTES);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        List<ProductResponseDTO> dtoList = dtoPage.getContent();
+//        try {
+//            String serializedData = objectMapper.writeValueAsString(dtoList);
+//            redisTemplate.opsForValue().set(cacheKey, serializedData, 60, TimeUnit.MINUTES);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         return dtoPage;
     }
@@ -474,14 +474,14 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Override
     public ProductResponseDTO getProductById(UUID productId) {
         String cacheKey = "product:" + productId;
-        String cachedProduct = (String) redisTemplate.opsForValue().get(cacheKey);
-        if (cachedProduct != null) {
-            try {
-                return objectMapper.readValue(cachedProduct, ProductResponseDTO.class);
-            } catch (IOException e) {
-                log.error("Error reading product from cache: {}", e.getMessage());
-            }
-        }
+//        String cachedProduct = (String) redisTemplate.opsForValue().get(cacheKey);
+//        if (cachedProduct != null) {
+//            try {
+//                return objectMapper.readValue(cachedProduct, ProductResponseDTO.class);
+//            } catch (IOException e) {
+//                log.error("Error reading product from cache: {}", e.getMessage());
+//            }
+//        }
         Optional<Product> productOptional = productRepository.findById(productId);
         if (productOptional.isEmpty()) {
             throw new EntityNotFoundException("Product không tồn tại !");
@@ -509,12 +509,12 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         productDTO.setPostResponseDTO(postResponseDTO);
         productDTO.setProductImageResponseDTOs(productImageResponseDTOS);
         productDTO.setCouponResponseDTO(couponResponseDTO);
-        try {
-            String serializedProduct = objectMapper.writeValueAsString(productDTO);
-            redisTemplate.opsForValue().set(cacheKey, serializedProduct, 60, TimeUnit.MINUTES);
-        } catch (IOException e) {
-            log.error("Error writing product to cache: {}", e.getMessage());
-        }
+//        try {
+//            String serializedProduct = objectMapper.writeValueAsString(productDTO);
+//            redisTemplate.opsForValue().set(cacheKey, serializedProduct, 60, TimeUnit.MINUTES);
+//        } catch (IOException e) {
+//            log.error("Error writing product to cache: {}", e.getMessage());
+//        }
         return productDTO;
     }
 

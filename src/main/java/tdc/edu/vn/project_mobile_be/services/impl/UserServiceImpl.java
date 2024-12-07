@@ -102,12 +102,14 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
         responseDTO.toDto(user);
 
         List<Cart> carts = cartRepository.findByUserIdAndCartStatus(user.getUserId(), 1);
-        if (carts.getFirst().getCreatedAt().after(carts.getLast().getCreatedAt())) {
-            responseDTO.setCartId(carts.getLast().getCartId());
-            responseDTO.setCartBuyNowId(carts.getFirst().getCartId());
-        } else {
-            responseDTO.setCartId(carts.getFirst().getCartId());
-            responseDTO.setCartBuyNowId(carts.getLast().getCartId());
+        if (!carts.isEmpty()) {
+            if (carts.getFirst().getCreatedAt().after(carts.getLast().getCreatedAt())) {
+                responseDTO.setCartId(carts.getLast().getCartId());
+                responseDTO.setCartBuyNowId(carts.getFirst().getCartId());
+            } else {
+                responseDTO.setCartId(carts.getFirst().getCartId());
+                responseDTO.setCartBuyNowId(carts.getLast().getCartId());
+            }
         }
         user.getCarts().forEach(cart -> {
             if (cart.getCartStatus() == 0) {
