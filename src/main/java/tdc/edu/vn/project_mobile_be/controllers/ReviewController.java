@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.dtos.requests.review.ReviewCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.review.ReviewUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.review.ReviewResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.review.Review;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ReviewService;
@@ -82,5 +83,45 @@ public class ReviewController {
         boolean exists = reviewService.checkReviewExists(orderId, productId);
         return ResponseEntity.ok(exists ? 1 : 0);
     }
+    @GetMapping("/{productId}/rating")
+    public ResponseEntity<ResponseData<?>> getReviewsByProductAndExactRating(
+            @PathVariable UUID productId,
+            @RequestParam(name = "rating") double rating) {
+        List<ReviewResponseDTO> reviews = reviewService.getReviewsByProductAndExactRating(productId, rating);
+        ResponseData<?> responseData = new ResponseData<>(
+                HttpStatus.OK,
+                reviews.isEmpty() ? "No reviews found." : "Reviews retrieved successfully.",
+                reviews
+        );
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/update/{reviewId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseData<?>> updateReview(
+            @PathVariable UUID reviewId,
+            @RequestPart(value = "image", required = false) MultipartFile imageReview,
+            @RequestPart(value = "request", required = true) String requestJson
+    ) throws JsonProcessingException {
+        ReviewUpdateRequestDTO updateRequestDTO = objectMapper.readValue(requestJson, ReviewUpdateRequestDTO.class);
+        Review updatedReview = reviewService.updateReview(reviewId, updateRequestDTO, imageReview);
+        ResponseData<?> responseData = new ResponseData<>(
+                HttpStatus.OK,
+                "Review đã được cập nhật thành công.",
+                updatedReview
+        );
+        return ResponseEntity.ok(responseData);
+    }
+
+    @DeleteMapping("/delete/{reviewId}")
+    public ResponseEntity<ResponseData<?>> deleteReview(@PathVariable UUID reviewId) {
+        reviewService.deleteReview(reviewId);
+        ResponseData<?> responseData = new ResponseData<>(
+                HttpStatus.OK,
+                "Review đã được xóa thành công.",
+                null
+        );
+        return ResponseEntity.ok(responseData);
+    }
+
 
 }

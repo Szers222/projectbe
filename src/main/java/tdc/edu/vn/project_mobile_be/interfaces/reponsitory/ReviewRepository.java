@@ -14,14 +14,11 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
     @Query("SELECT r FROM Review r WHERE r.product.productId = :productId")
     List<Review> findByProductId(UUID productId);
 
-    @Query("SELECT r FROM Review r WHERE r.user.userId = :userId")
-    List<Review> findByUserId(UUID userId);
+    @Query("SELECT AVG(r.reviewRating) FROM Review r WHERE r.product.productId = :productId")
+    Double findAverageRatingByProductId(@Param("productId") UUID productId);
+    @Query("SELECT r FROM Review r WHERE r.product.productId = :productId AND r.reviewRating >= :rating")
+    List<Review> findByProductIdAndRating(@Param("productId") UUID productId, @Param("rating") double rating);
 
-    @Query("SELECT r FROM Review r WHERE r.reviewRating >= :rating")
-    List<Review> findByRatingGreaterThanEqual(double rating);
-
-    @Query("SELECT r FROM Review r WHERE r.order.orderId = :orderId")
-    Review findByOrderId(UUID orderId);
 
     @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END " +
             "FROM Review r WHERE r.order.orderId = :orderId AND r.product.productId = :productId")

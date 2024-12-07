@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.dtos.requests.review.ReviewCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.review.ReviewUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.review.ReviewResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
@@ -52,7 +53,9 @@ public class ReviewServiceImp extends AbService<Review, UUID> implements ReviewS
             String imagePath = saveImage(imageReview);
             review.setReviewImagePath(imagePath);
         }
-        return reviewRepository.save(review);
+        Review reviewSave = reviewRepository.save(review);
+        updateProductRating(product.getProductId());
+        return reviewSave;
     }
 
     @Override
@@ -110,5 +113,68 @@ public class ReviewServiceImp extends AbService<Review, UUID> implements ReviewS
     public boolean checkReviewExists(UUID orderId, UUID productId) {
         return reviewRepository.existsByOrderIdAndProductId(orderId, productId);
     }
+    @Override
+    public void updateProductRating(UUID productId) {
+        Double averageRating = reviewRepository.findAverageRatingByProductId(productId);
+
+        if (averageRating == null) {
+            averageRating = 0.0;
+        }
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product không tồn tại!"));
+
+        product.setProductRating(averageRating);
+        productRepository.save(product);
+    }
+    @Override
+    public List<ReviewResponseDTO> getReviewsByProductAndExactRating(UUID productId, double rating) {
+        List<Review> reviews = reviewRepository.findByProductIdAndRating(productId, rating);
+
+        // Trả về danh sách rỗng nếu không có review nào
+        return reviews.stream()
+                .map(review -> {
+                    long totalLikes = reviewLikeRepository.countByReview(review);
+                    String userFullName = review.getUser().getUserFirstName() + " " + review.getUser().getUserLastName();
+                    return ReviewResponseDTO.builder()
+                            .reviewId(review.getReviewId())
+                            .comment(review.getReviewComment())
+                            .rating((float) review.getReviewRating())
+                            .totalLike(totalLikes)
+                            .userFullName(userFullName)
+                            .children(review.getChildren())
+                            .orderId(review.getOrder().getOrderId())
+                            .productId(review.getProduct().getProductId())
+                            .createdAt(review.getCreatedAt())
+                            .updatedAt(review.getUpdatedAt())
+                            .build();
+                })
+                .toList();
+    }
+
+    @Override
+    public Review updateReview(UUID reviewId, ReviewUpdateRequestDTO updateRequestDTO, MultipartFile imageReview) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Review không tồn tại!"));
+        if (updateRequestDTO.getComment() != null) {
+            review.setReviewComment(updateRequestDTO.getComment());
+        }
+        if (updateRequestDTO.getRating() != null) {
+            review.setReviewRating(updateRequestDTO.getRating());
+        }
+        if (imageReview != null && !imageReview.isEmpty()) {
+            String imagePath = saveImage(imageReview);
+            review.setReviewImagePath(imagePath);
+        }
+        return reviewRepository.save(review);
+    }
+
+    @Override
+    public void deleteReview(UUID reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Review không tồn tại!"));
+        reviewRepository.delete(review);
+        updateProductRating(review.getProduct().getProductId());
+    }
+
 
 }
