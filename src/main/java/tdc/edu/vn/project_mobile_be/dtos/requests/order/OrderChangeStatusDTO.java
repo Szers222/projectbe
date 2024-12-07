@@ -18,4 +18,6 @@ public class OrderChangeStatusDTO {
     @NotNull(message = "Order id is required")
     @JsonProperty("orderId")
     private UUID orderId;
+    @JsonProperty("reason")
+    private String reason;
 }

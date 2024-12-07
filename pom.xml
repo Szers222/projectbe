@@ -239,6 +239,13 @@
 		</dependency>
 
 
+		<!-- https://mvnrepository.com/artifact/com.google.cloud/google-cloud-vertexai -->
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-vertexai</artifactId>
+			<version>1.14.0</version>
+		</dependency>
+
 
 	</dependencies>
 	<dependencyManagement>
@@ -250,6 +257,7 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 

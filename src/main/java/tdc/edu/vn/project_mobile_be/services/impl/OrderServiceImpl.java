@@ -21,6 +21,7 @@ import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
 import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
+import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
 import tdc.edu.vn.project_mobile_be.interfaces.service.CartService;
@@ -33,6 +34,7 @@ import java.util.stream.IntStream;
 
 @Service
 public class OrderServiceImpl extends AbService<Order, UUID> implements OrderService {
+
     @Autowired
     private CartRepository cartRepository;
     @Autowired
@@ -47,6 +49,8 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
     private CartRepository repository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ProductRepository productRepository;
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
     @Autowired
@@ -67,8 +71,12 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
     private final int ORDER_STATUS_PROCESSED = 2;
     private final int ORDER_STATUS_SHIP = 3;
     private final int ORDER_STATUS_DELIVERED = 4;
-    private final int ORDER_STATUS_COMPLETE = 5;
+    private final int ORDER_STATUS_SHIPPER_COMPLETED = 5;
+    private final int ORDER_STATUS_CUSTOM_ACCEPTED = 7;
     private final int ORDER_STATUS_CANCEL = 6;
+    private final int ORDER_STATUS_SHIPPER_CANCEL = 8;
+    @Autowired
+    private SizeProductRepository sizeProductRepository;
 
 
     @Override
@@ -294,6 +302,9 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
                 user.setCancelCount(user.getCancelCount() + 1);
                 userRepository.save(user);
             }
+            if (orderChangeStatusDTO.getReason() != null) {
+                order.setOrderNote(order.getOrderNote() + "\n- " + orderChangeStatusDTO.getReason());
+            }
             cartRepository.save(cart);
             orderRepository.delete(order);
             return null;
@@ -320,6 +331,18 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
                     couponRepository.save(coupon);
                 });
             }
+        } else if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_PROCESSED) {
+            order.getCart().getCartProducts().forEach(cartProduct -> {
+                UUID productId = cartProduct.getProduct().getProductId();
+                UUID productSizeId = cartProduct.getProductSize().getProductSizeId();
+                SizeProduct sizeProduct = sizeProductRepository.findBySizeIdAndProductId(productId, productSizeId);
+                if (sizeProduct != null) {
+                    sizeProduct.setQuantity(sizeProduct.getQuantity() - cartProduct.getQuantity());
+                    sizeProductRepository.save(sizeProduct);
+                }
+            });
+        } else if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_SHIPPER_CANCEL) {
+            order.setOrderStatus(ORDER_STATUS_PROCESSED);
         }
         order.setOrderStatus(orderChangeStatusDTO.getStatus());
         Order updatedOrder = orderRepository.save(order);

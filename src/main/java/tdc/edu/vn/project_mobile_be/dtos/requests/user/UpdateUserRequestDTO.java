@@ -44,5 +44,4 @@ public class UpdateUserRequestDTO {
     int userWrongPassword;
     UUID idCards;
     List<String> roles;
-
 }

@@ -293,30 +293,30 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @SuppressWarnings("unchecked")
     public Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable) {
 
-        String filterJson = "";
-        String pageableJson = "";
-        try {
-            filterJson = objectMapper.writeValueAsString(params);
-            pageableJson = objectMapper.writeValueAsString(pageable);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        String cacheKey = "findProductsByFilters:" + filterJson + ":" + pageableJson;
-
-        String cachedResult = (String) redisTemplate.opsForValue().get(cacheKey);
-        if (cachedResult != null) {
-            try {
-                List<ProductResponseDTO> dtoList = objectMapper.readValue(cachedResult, new TypeReference<>() {
-                });
-                if (dtoList != null) {
-                    return new PageImpl<>(dtoList, pageable, dtoList.size());
-                }
-            } catch (IOException e) {
-                // Log the exception and continue to the next step to fetch the data from DB
-                e.printStackTrace();
-            }
-        }
+//        String filterJson = "";
+//        String pageableJson = "";
+//        try {
+//            filterJson = objectMapper.writeValueAsString(params);
+//            pageableJson = objectMapper.writeValueAsString(pageable);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        String cacheKey = "findProductsByFilters:" + filterJson + ":" + pageableJson;
+//
+//        String cachedResult = (String) redisTemplate.opsForValue().get(cacheKey);
+//        if (cachedResult != null) {
+//            try {
+//                List<ProductResponseDTO> dtoList = objectMapper.readValue(cachedResult, new TypeReference<>() {
+//                });
+//                if (dtoList != null) {
+//                    return new PageImpl<>(dtoList, pageable, dtoList.size());
+//                }
+//            } catch (IOException e) {
+//                // Log the exception and continue to the next step to fetch the data from DB
+//                e.printStackTrace();
+//            }
+//        }
 
         Specification<Product> spec = Specification.where(null);  // Khởi tạo Specification rỗng
         // Lọc theo danh mục (category)
@@ -383,13 +383,13 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             dto.setCouponResponseDTO(couponResponseDTO);
             return dto;
         });
-        List<ProductResponseDTO> dtoList = dtoPage.getContent();
-        try {
-            String serializedData = objectMapper.writeValueAsString(dtoList);
-            redisTemplate.opsForValue().set(cacheKey, serializedData, 60, TimeUnit.MINUTES);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        List<ProductResponseDTO> dtoList = dtoPage.getContent();
+//        try {
+//            String serializedData = objectMapper.writeValueAsString(dtoList);
+//            redisTemplate.opsForValue().set(cacheKey, serializedData, 60, TimeUnit.MINUTES);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         return dtoPage;
     }

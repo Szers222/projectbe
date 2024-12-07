@@ -77,6 +77,6 @@ public class Category {
     @ManyToMany(mappedBy = "categories")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonManagedReference(value = "product-category")
+    @JsonBackReference(value = "product-category")
     private Set<Product> products = new HashSet<>();
 }
