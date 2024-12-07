@@ -293,6 +293,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @SuppressWarnings("unchecked")
     public Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable) {
 
+
 //        String filterJson = "";
 //        String pageableJson = "";
 //        try {
@@ -303,6 +304,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 //        }
 //
 //        String cacheKey = "findProductsByFilters:" + filterJson + ":" + pageableJson;
+
 //
 //        String cachedResult = (String) redisTemplate.opsForValue().get(cacheKey);
 //        if (cachedResult != null) {
@@ -474,14 +476,14 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Override
     public ProductResponseDTO getProductById(UUID productId) {
         String cacheKey = "product:" + productId;
-        String cachedProduct = (String) redisTemplate.opsForValue().get(cacheKey);
-        if (cachedProduct != null) {
-            try {
-                return objectMapper.readValue(cachedProduct, ProductResponseDTO.class);
-            } catch (IOException e) {
-                log.error("Error reading product from cache: {}", e.getMessage());
-            }
-        }
+//        String cachedProduct = (String) redisTemplate.opsForValue().get(cacheKey);
+//        if (cachedProduct != null) {
+//            try {
+//                return objectMapper.readValue(cachedProduct, ProductResponseDTO.class);
+//            } catch (IOException e) {
+//                log.error("Error reading product from cache: {}", e.getMessage());
+//            }
+//        }
         Optional<Product> productOptional = productRepository.findById(productId);
         if (productOptional.isEmpty()) {
             throw new EntityNotFoundException("Product không tồn tại !");
@@ -509,12 +511,12 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         productDTO.setPostResponseDTO(postResponseDTO);
         productDTO.setProductImageResponseDTOs(productImageResponseDTOS);
         productDTO.setCouponResponseDTO(couponResponseDTO);
-        try {
-            String serializedProduct = objectMapper.writeValueAsString(productDTO);
-            redisTemplate.opsForValue().set(cacheKey, serializedProduct, 60, TimeUnit.MINUTES);
-        } catch (IOException e) {
-            log.error("Error writing product to cache: {}", e.getMessage());
-        }
+//        try {
+//            String serializedProduct = objectMapper.writeValueAsString(productDTO);
+//            redisTemplate.opsForValue().set(cacheKey, serializedProduct, 60, TimeUnit.MINUTES);
+//        } catch (IOException e) {
+//            log.error("Error writing product to cache: {}", e.getMessage());
+//        }
         return productDTO;
     }
 
