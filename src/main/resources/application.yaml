@@ -102,3 +102,13 @@ payment:
     version: 2.1.0
     command: pay
     orderType: other
+gemini:
+  project:
+    id: eternal-ship-440815-g8
+  location: asia-southeast1
+  model:
+    name: gemini-pro
+  api:
+    key: AIzaSyDlBKZYIIedHtMPpphPNf37kDDGpfwpWZI
+  endpoint: projects/mobileproject-9ade0/locations/asia-southeast1/publishers/google/models/gemini-pro
+

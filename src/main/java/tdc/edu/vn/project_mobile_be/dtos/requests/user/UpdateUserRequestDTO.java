@@ -39,7 +39,7 @@ public class UpdateUserRequestDTO {
 
     @JsonProperty("userWrongPassword")
     int userWrongPassword;
-
+  
     List<String> roles;
 }
 
