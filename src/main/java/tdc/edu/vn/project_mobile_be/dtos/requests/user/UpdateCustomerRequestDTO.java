@@ -14,6 +14,8 @@ import java.sql.Timestamp;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateCustomerRequestDTO {
+    @JsonProperty("oldPassword")
+    String oldPassword;
 
     @JsonProperty("userPassword")
     String userPassword;

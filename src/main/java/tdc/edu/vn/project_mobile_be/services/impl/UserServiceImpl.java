@@ -25,10 +25,8 @@ import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.UserService;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.sql.Timestamp;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -51,22 +49,25 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
     @Autowired
     private CartRepository cartRepository;
 
+    private long DAY = System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000;
+
 
     @Override
-    public User updateUser(User user, UpdateUserRequestDTO request) {
+    public User updateUser(User user, UpdateUserRequestDTO request, MultipartFile userImagePath) {
+        // Tìm user từ database
         user = userRepository.findById(user.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        // Cập nhật thông tin cơ bản từ DTO
         user.setUserPassword(passwordEncoder.encode(request.getUserPassword()));
         user.setUserPhone(request.getUserPhone());
         user.setUserBirthday(request.getUserBirthday());
         user.setUserPasswordLevel2(passwordEncoder.encode(request.getUserPasswordLevel2()));
-        user.setUserImagePath(request.getUserImagePath());
         user.setUserFirstName(request.getUserFirstName());
         user.setUserLastName(request.getUserLastName());
         user.setUserWrongPassword(request.getUserWrongPassword());
-        IdCard idCard = idCardRepository.findByCardId(request.getIdCards())
-                .orElseThrow(() -> new EntityNotFoundException("IdCard not found"));
-        user.setICard(idCard);
+
+        // Cập nhật roles nếu có
         if (request.getRoles() != null && !request.getRoles().isEmpty()) {
             Set<Role> roles = new HashSet<>();
             for (String roleName : request.getRoles()) {
@@ -77,8 +78,25 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
             user.setRoles(roles);
         }
 
+        // Xử lý upload ảnh
+        try {
+            if (userImagePath != null && !userImagePath.isEmpty()) {
+                // Xóa ảnh cũ nếu tồn tại
+                if (user.getUserImagePath() != null) {
+                    googleCloudStorageService.deleteFile(user.getUserImagePath());
+                }
+
+                // Upload ảnh mới
+                String newImagePath = googleCloudStorageService.uploadFile(userImagePath);
+                user.setUserImagePath(newImagePath);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Lỗi khi upload ảnh: " + e.getMessage());
+        }
+
         return userRepository.save(user);
     }
+
 
     @Override
     public UserResponseDTO getUserById(UUID id) {
@@ -179,4 +197,36 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
                 })
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<UserResponseDTO> getUsersCreatedWithinLastTwoHours() {
+        Timestamp sevenDaysAgo = new Timestamp(DAY);
+        List<User> users = userRepository.findUsersCreatedWithinLastTwoHours(sevenDaysAgo);
+
+        if (users.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return users.stream()
+                .map(user -> {
+                    UserResponseDTO responseDTO = new UserResponseDTO();
+                    responseDTO.toDto(user);
+                    return responseDTO;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void changePassword(UpdateCustomerRequestDTO request) {
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName();
+
+        User user = userRepository.findByUserEmail(email)
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getUserPassword())) {
+            throw new RuntimeException("Mật khẩu cũ không chính xác");
+        }
+        user.setUserPassword(passwordEncoder.encode(request.getUserPassword()));
+        userRepository.save(user);
+    }
+
 }

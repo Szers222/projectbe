@@ -15,10 +15,11 @@ import java.util.UUID;
 public interface UserService extends IService<User, UUID> {
     List<UserResponseDTO> getAllUsers();
     @Mapping(target = "roles", ignore = true)
-    User updateUser(@MappingTarget User userId, UpdateUserRequestDTO request);
+    User updateUser(@MappingTarget User userId, UpdateUserRequestDTO request,MultipartFile userImagePath);
     UserResponseDTO getUserById(UUID id);
     UserResponseDTO getMyInfo();
     User updateMyInfo(UpdateCustomerRequestDTO request, MultipartFile userImagePath);
     void deleteUserById(UUID user);
-
+    List<UserResponseDTO> getUsersCreatedWithinLastTwoHours();
+    void changePassword(UpdateCustomerRequestDTO request);
 }

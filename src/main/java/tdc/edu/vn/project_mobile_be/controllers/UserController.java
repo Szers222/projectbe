@@ -54,19 +54,26 @@ public class UserController {
                 );
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
-    @PutMapping("/users/{users}")
+    @PutMapping(value = "/users/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ResponseData<?>> updateUser(@PathVariable("users") UUID userId, @RequestBody UpdateUserRequestDTO request) {
+    public ResponseEntity<ResponseData<?>> updateUser(
+            @PathVariable("userId") UUID userId,
+            @RequestPart(value = "request", required = true) String requestJson,
+            @RequestPart(value = "image", required = false) MultipartFile userImagePath
+    ) throws JsonProcessingException {
+        UpdateUserRequestDTO request = objectMapper.readValue(requestJson, UpdateUserRequestDTO.class);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        userService.updateUser(user,request);
+        userService.updateUser(user, request, userImagePath);
 
         ResponseData<?> responseData = new ResponseData<>(
-                HttpStatus.CREATED
-                , "User tạo thành công!"
-                , user);
-        return new ResponseEntity<>(responseData, HttpStatus.CREATED);
+                HttpStatus.OK,
+                "Thông tin người dùng đã được cập nhật thành công",
+                user
+        );
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
+
     @GetMapping("/users/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ResponseData<UserResponseDTO>> getUser(@PathVariable UUID id) {
@@ -115,4 +122,25 @@ public class UserController {
         );
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
+    @GetMapping("/users/recent")
+    public ResponseEntity<ResponseData<List<UserResponseDTO>>> getUsersCreatedWithinLastTwoHours() {
+        List<UserResponseDTO> users = userService.getUsersCreatedWithinLastTwoHours();
+        ResponseData<List<UserResponseDTO>> responseData = new ResponseData<>(
+                HttpStatus.OK,
+                "Lấy danh sách người dùng mới tạo gần nhất thành công",
+                users
+        );
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+    @PutMapping("/myInfo/change-password")
+    public ResponseEntity<ResponseData<String>> changePassword(@RequestBody UpdateCustomerRequestDTO request) {
+        userService.changePassword(request);
+        ResponseData<String> responseData = new ResponseData<>(
+                HttpStatus.OK,
+                "Đổi mật khẩu thành công",
+                null
+        );
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
 }
