@@ -21,7 +21,7 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
     @Query("SELECT u from User u where u.userEmail = :userEmail")
     Optional<User> findByUserEmail(@Param("userEmail") String userEmail);
     @Query("SELECT u FROM User u WHERE u.createdAt >= :fromTime")
-    List<User> findUsersCreatedWithinLastTwoHours(@Param("fromTime") Timestamp fromTime);
+    List<User> findUsersCreatedNew(@Param("fromTime") Timestamp fromTime);
 
 
 //    @Query("SELECT u FROM User u JOIN FETCH u.roles r w ")

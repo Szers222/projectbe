@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.commond.customexception.EntityNotFoundException;
+import tdc.edu.vn.project_mobile_be.dtos.requests.user.PasswordRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateCustomerRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateUserRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.user.UserResponseDTO;
@@ -199,9 +200,9 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
     }
 
     @Override
-    public List<UserResponseDTO> getUsersCreatedWithinLastTwoHours() {
-        Timestamp sevenDaysAgo = new Timestamp(DAY);
-        List<User> users = userRepository.findUsersCreatedWithinLastTwoHours(sevenDaysAgo);
+    public List<UserResponseDTO> getAllUserNew() {
+        Timestamp day = new Timestamp(DAY);
+        List<User> users = userRepository.findUsersCreatedNew(day);
 
         if (users.isEmpty()) {
             return Collections.emptyList();
@@ -216,7 +217,7 @@ public class UserServiceImpl extends AbService<User, UUID> implements UserServic
     }
 
     @Override
-    public void changePassword(UpdateCustomerRequestDTO request) {
+    public void changePassword(PasswordRequestDTO request) {
         var context = SecurityContextHolder.getContext();
         String email = context.getAuthentication().getName();
 

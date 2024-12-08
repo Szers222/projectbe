@@ -14,11 +14,6 @@ import java.sql.Timestamp;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateCustomerRequestDTO {
-    @JsonProperty("oldPassword")
-    String oldPassword;
-
-    @JsonProperty("userPassword")
-    String userPassword;
 
     @NotEmpty(message = "Số điện thoại không được để trống")
     @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Số điện thoại không hợp lệ")
@@ -26,14 +21,18 @@ public class UpdateCustomerRequestDTO {
     String userPhone;
 
     @JsonProperty("userBirthday")
+    @NotEmpty(message = "userBirthday không được để trống")
+    @NotNull(message = "userBirthday not null")
     @JsonFormat(pattern = "yyyy-MM-dd")
     Timestamp userBirthday;
 
     @NotEmpty(message = "Họ không được để trống")
+    @NotNull(message = "userLastName not null")
     @JsonProperty("userLastName")
     String userLastName;
 
     @NotEmpty(message = "Tên không được để trống")
+    @NotNull(message = "userFirstName not null")
     @JsonProperty("userFirstName")
     String userFirstName;
 

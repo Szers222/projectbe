@@ -3,6 +3,7 @@ package tdc.edu.vn.project_mobile_be.interfaces.service;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.springframework.web.multipart.MultipartFile;
+import tdc.edu.vn.project_mobile_be.dtos.requests.user.PasswordRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateCustomerRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateUserRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.user.UserResponseDTO;
@@ -20,6 +21,6 @@ public interface UserService extends IService<User, UUID> {
     UserResponseDTO getMyInfo();
     User updateMyInfo(UpdateCustomerRequestDTO request, MultipartFile userImagePath);
     void deleteUserById(UUID user);
-    List<UserResponseDTO> getUsersCreatedWithinLastTwoHours();
-    void changePassword(UpdateCustomerRequestDTO request);
+    List<UserResponseDTO> getAllUserNew();
+    void changePassword(PasswordRequestDTO request);
 }
