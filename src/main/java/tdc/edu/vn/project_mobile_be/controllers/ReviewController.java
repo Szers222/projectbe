@@ -38,13 +38,23 @@ public class ReviewController {
     ) throws JsonProcessingException {
         ReviewCreateRequestDTO requestDTO = objectMapper.readValue(requestJson, ReviewCreateRequestDTO.class);
         Review review = reviewService.createReview(requestDTO, imageReview);
+        if (review == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseData<>(
+                            HttpStatus.INTERNAL_SERVER_ERROR,
+                            "Không thể tạo review",
+                            null
+                    ));
+        }
         ResponseData<?> responseData = new ResponseData<>(
                 HttpStatus.CREATED,
                 "Review đã được tạo thành công.",
                 review
         );
+
         return new ResponseEntity<>(responseData, HttpStatus.CREATED);
     }
+
 
     @PostMapping(value = "/reply", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseData<?>> replyToReview(
@@ -71,9 +81,14 @@ public class ReviewController {
     }
 
     @GetMapping("/product/{productId}")
-    public ResponseEntity<List<ReviewResponseDTO>> getReviewsByProductId(@PathVariable UUID productId) {
+    public ResponseEntity<ResponseData<?>> getReviewsByProductId(@PathVariable UUID productId) {
         List<ReviewResponseDTO> reviews = reviewService.getReviewByProductId(productId);
-        return ResponseEntity.ok(reviews);
+        ResponseData<?> responseData = new ResponseData<>(
+                HttpStatus.OK,
+                reviews.isEmpty() ? "No reviews found." : "Reviews retrieved successfully.",
+                reviews
+        );
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
     @GetMapping("/exists")
     public ResponseEntity<Integer> checkReviewExists(

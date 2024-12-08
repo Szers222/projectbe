@@ -69,6 +69,10 @@ public class AuthenticationServiceImp {
 
         if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
 
+        if(user.getUserStatus() != 1) {
+            throw new RuntimeException("Tai khoan bi khoa hoac chua xac thuc");
+        }
+
         var token = generateToken(user);
 
         return AuthenticationResponseDTO.builder()

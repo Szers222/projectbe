@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.entities.review;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,11 +25,14 @@ public class ReviewLike {
     private UUID reviewLikeId;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "review_id", nullable = false)
+    @JoinColumn(name = "review_id", nullable = false, foreignKey = @ForeignKey(name = "fk_review_like_review"))
+    @JsonIgnore
     private Review review;
+
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
 }
