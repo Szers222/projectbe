@@ -57,7 +57,7 @@ public class UpdateUserRequestDTO {
     @Max(value = 6,message = "toi da 6 ki tu")
     @JsonProperty("userWrongPassword")
     int userWrongPassword;
-
+  
     List<String> roles;
 }
 

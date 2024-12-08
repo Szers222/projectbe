@@ -34,6 +34,9 @@ public class SecurityConfig {
             "/api/paypment/create-order",
             "/v2/create"
             ,"/carts/user/*",
+            "/gemini-pro-vision",
+            "/gemini-pro-vision/chat",
+            "api/gemini/generate",
     };
 
 
