@@ -293,16 +293,18 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @SuppressWarnings("unchecked")
     public Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable) {
 
-        String filterJson = "";
-        String pageableJson = "";
-        try {
-            filterJson = objectMapper.writeValueAsString(params);
-            pageableJson = objectMapper.writeValueAsString(pageable);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        String cacheKey = "findProductsByFilters:" + filterJson + ":" + pageableJson;
+//        String filterJson = "";
+//        String pageableJson = "";
+//        try {
+//            filterJson = objectMapper.writeValueAsString(params);
+//            pageableJson = objectMapper.writeValueAsString(pageable);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        String cacheKey = "findProductsByFilters:" + filterJson + ":" + pageableJson;
+
 //
 //        String cachedResult = (String) redisTemplate.opsForValue().get(cacheKey);
 //        if (cachedResult != null) {
