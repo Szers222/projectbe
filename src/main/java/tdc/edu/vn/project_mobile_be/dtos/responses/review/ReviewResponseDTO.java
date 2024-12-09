@@ -43,6 +43,9 @@ public class ReviewResponseDTO {
     @JsonProperty("userId")
     UUID userId;
 
+    @JsonProperty("reviewImg")
+    String reviewImg;
+
     @JsonProperty("createdAt")
     Timestamp createdAt;
 
