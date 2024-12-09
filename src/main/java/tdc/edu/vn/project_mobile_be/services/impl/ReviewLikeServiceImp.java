@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tdc.edu.vn.project_mobile_be.dtos.requests.review.ReviewLikeRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.responses.review.ReviewLikeResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.review.Review;
 import tdc.edu.vn.project_mobile_be.entities.review.ReviewLike;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
@@ -12,7 +13,9 @@ import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.ReviewRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.UserRepository;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ReviewLikeService;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -62,5 +65,24 @@ public class ReviewLikeServiceImp extends AbService<ReviewLike, UUID> implements
                         ("Không tìm thấy lượt thích cho review này"));
         reviewLikeRepository.delete(reviewLike);
     }
+
+    @Override
+    public List<ReviewLikeResponseDTO> toReviewLike(UUID reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Không tìm thấy review với ID: " + reviewId));
+        List<ReviewLike> reviewLikes = reviewLikeRepository.findAllByReview(review);
+        if (reviewLikes.isEmpty()) {
+            throw new RuntimeException("Không có lượt thích nào cho review này");
+        }
+        return reviewLikes.stream()
+                .map(reviewLike -> ReviewLikeResponseDTO.builder()
+                        .reviewId(review.getReviewId())
+                        .userId(reviewLike.getUser().getUserId())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+
 
 }
