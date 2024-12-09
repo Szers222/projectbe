@@ -344,7 +344,9 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
             });
         } else if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_SHIPPER_CANCEL) {
             order.setOrderStatus(ORDER_STATUS_PROCESSED);
-
+            if (orderChangeStatusDTO.getReason() != null) {
+                order.setOrderNote(order.getOrderNote() + "\n- " + orderChangeStatusDTO.getReason());
+            }
         } else if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_SHIP) {
             User shipper = userRepository.findById(orderChangeStatusDTO.getShipper())
                     .orElseThrow(() -> new EntityNotFoundException("Shipper not found"));
