@@ -32,8 +32,10 @@ public class SecurityConfig {
             "/api/v1/products/filters?",
             "/ws",
             "/api/paypment/create-order",
-            "/v2/create"
-            ,"/carts/user/*",
+            "/v2/create",
+            "/api/*",
+            "/api/*/*",
+            "/carts/user/*",
             "/gemini-pro-vision",
             "/gemini-pro-vision/chat",
             "api/gemini/generate",
