@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
+
 public class SlideshowController {
     @Autowired
     private SlideshowImageService slideshowImageService;
