@@ -18,9 +18,12 @@ import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ReviewService;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 
 @Service
 @RequiredArgsConstructor
@@ -124,6 +127,15 @@ public class ReviewServiceImp extends AbService<Review, UUID> implements ReviewS
                             .isLikedByCurrentUser(isLiked)
                             .build();
                 })
+                .sorted((r1, r2) -> {
+                    // Sắp xếp theo lượt thích giảm dần
+                    int compareByLikes = Long.compare(r2.getTotalLike(), r1.getTotalLike());
+                    if (compareByLikes != 0) {
+                        return compareByLikes;
+                    }
+                    // Nếu lượt thích bằng nhau, sắp xếp theo ngày tạo mới nhất
+                    return r2.getCreatedAt().compareTo(r1.getCreatedAt());
+                })
                 .toList();
     }
 
@@ -139,10 +151,13 @@ public class ReviewServiceImp extends AbService<Review, UUID> implements ReviewS
         if (averageRating == null) {
             averageRating = 0.0;
         }
+        // Làm tròn giá trị đến 2 chữ số thập phân
+        BigDecimal roundedAverageRating = BigDecimal.valueOf(averageRating)
+                .setScale(2, RoundingMode.HALF_UP);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product không tồn tại!"));
 
-        product.setProductRating(averageRating);
+        product.setProductRating(roundedAverageRating.doubleValue());
         productRepository.save(product);
     }
     @Override
@@ -181,6 +196,15 @@ public class ReviewServiceImp extends AbService<Review, UUID> implements ReviewS
                             .updatedAt(review.getUpdatedAt())
                             .isLikedByCurrentUser(isLiked)
                             .build();
+                })
+                .sorted((r1, r2) -> {
+                    // Sắp xếp theo lượt thích giảm dần
+                    int compareByLikes = Long.compare(r2.getTotalLike(), r1.getTotalLike());
+                    if (compareByLikes != 0) {
+                        return compareByLikes;
+                    }
+                    // Nếu lượt thích bằng nhau, sắp xếp theo ngày tạo mới nhất
+                    return r2.getCreatedAt().compareTo(r1.getCreatedAt());
                 })
                 .toList();
     }
