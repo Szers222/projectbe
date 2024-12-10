@@ -355,7 +355,6 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
                     .orElseThrow(() -> new EntityNotFoundException("Shipper not found"));
             order.setUser(shipper);
         }
-        log.info("zxczx123213131cz {}",order);
         order.setOrderStatus(orderChangeStatusDTO.getStatus());
         Order updatedOrder = orderRepository.save(order);
 
