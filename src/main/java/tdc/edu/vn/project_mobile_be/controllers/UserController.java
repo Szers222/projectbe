@@ -44,7 +44,6 @@ public class UserController {
 
     // Get All Users
     @GetMapping("/users")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ResponseData<List<UserResponseDTO>>> getAllUsers() {
         List<UserResponseDTO> users = userService.getAllUsers();
         ResponseData<List<UserResponseDTO>> responseData =
@@ -56,7 +55,6 @@ public class UserController {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
     @PutMapping(value = "/users/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ResponseData<?>> updateUser(
             @PathVariable("userId") UUID userId,
             @Valid @RequestPart(value = "request", required = true) String requestJson,
@@ -76,7 +74,6 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ResponseData<UserResponseDTO>> getUser(@PathVariable UUID id) {
         UserResponseDTO user = userService.getUserById(id);
         ResponseData<UserResponseDTO> responseData = new ResponseData<>(
