@@ -16,7 +16,8 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @DynamicInsert

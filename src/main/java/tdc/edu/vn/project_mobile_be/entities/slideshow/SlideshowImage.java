@@ -1,9 +1,7 @@
 package tdc.edu.vn.project_mobile_be.entities.slideshow;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -13,7 +11,8 @@ import java.sql.Timestamp;
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @DynamicInsert

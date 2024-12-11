@@ -2,17 +2,15 @@ package tdc.edu.vn.project_mobile_be.entities.user;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
 @DynamicUpdate
 @DynamicInsert
 @NoArgsConstructor

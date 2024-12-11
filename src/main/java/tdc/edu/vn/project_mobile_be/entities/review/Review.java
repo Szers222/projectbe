@@ -16,7 +16,8 @@ import tdc.edu.vn.project_mobile_be.entities.user.User;
 import java.sql.Timestamp;
 import java.util.*;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "review")
 @AllArgsConstructor
