@@ -1,4 +1,4 @@
-package tdc.edu.vn.project_mobile_be.dtos.requests.slideshowimage;
+package tdc.edu.vn.project_mobile_be.dtos.responses.slideshow;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
@@ -6,15 +6,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.entities.slideshow.SlideshowImage;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
+
+import java.util.UUID;
 
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SlideshowImageCreateDTO implements IDto<SlideshowImage> {
+public class SlideshowResponseDTO implements IDto<SlideshowImage> {
+
+    @JsonProperty("id")
+    private UUID slideShowImageId;
 
     @NotNull(message = "Image ALT is required")
     @JsonProperty("imageAlt")
@@ -30,20 +34,19 @@ public class SlideshowImageCreateDTO implements IDto<SlideshowImage> {
 
     @NotNull(message = "Image is required")
     @JsonProperty("imagePath")
-    private MultipartFile imagePath;
+    private String slideShowImageImagePath;
 
     @JsonProperty("content")
     private String slideShowContent;
 
+
     @Override
     public SlideshowImage toEntity() {
-        SlideshowImage enitty = new SlideshowImage();
-        BeanUtils.copyProperties(this, enitty);
-        return enitty;
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public void toDto(SlideshowImage entity) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        BeanUtils.copyProperties(entity, this);
     }
 }

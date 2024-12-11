@@ -20,4 +20,7 @@ public class OrderChangeStatusDTO {
     private UUID orderId;
     @JsonProperty("reason")
     private String reason;
+    @JsonProperty("shipper")
+    private UUID shipper;
+
 }
