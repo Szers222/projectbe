@@ -21,7 +21,8 @@ import java.util.Set;
 import java.util.UUID;
 
 
-@Data
+@Getter
+@Setter
 @Table(name = "products")
 @Entity
 @AllArgsConstructor

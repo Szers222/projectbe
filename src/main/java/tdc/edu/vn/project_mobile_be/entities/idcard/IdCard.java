@@ -13,7 +13,8 @@ import java.sql.Timestamp;
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "idCard")
 @AllArgsConstructor
 @NoArgsConstructor

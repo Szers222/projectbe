@@ -18,7 +18,8 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "roles")
 @AllArgsConstructor
 @NoArgsConstructor

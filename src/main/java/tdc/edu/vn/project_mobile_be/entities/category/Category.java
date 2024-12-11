@@ -18,7 +18,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "categories", schema = "relationship")
 @AllArgsConstructor

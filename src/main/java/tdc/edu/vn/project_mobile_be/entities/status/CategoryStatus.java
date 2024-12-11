@@ -12,7 +12,8 @@ import java.util.Set;
 import java.util.UUID;
 
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "category_status")
 @AllArgsConstructor

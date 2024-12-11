@@ -19,7 +19,8 @@ import java.sql.Timestamp;
 import java.util.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @DynamicUpdate
 @DynamicInsert
 @NoArgsConstructor
