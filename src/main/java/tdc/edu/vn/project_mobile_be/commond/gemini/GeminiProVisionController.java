@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import tdc.edu.vn.project_mobile_be.services.impl.GeminiServiceImpl;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -23,10 +24,16 @@ public class GeminiProVisionController {
         return geminiService.chatDiscussion(question);
     }
 
-    @PostMapping("/generate")
+    @PostMapping("/chat/product")
     public CompletableFuture<String> generateContent(
             @RequestParam("prompt") String prompt,
             @RequestParam("productId") UUID productId) throws IOException {
         return geminiService.generateContent(prompt, productId);
+    }
+    @PostMapping("/chat/compare")
+    public CompletableFuture<String> compareProduct(
+            @RequestParam("prompt") String prompt,
+            @RequestParam("productIds") List<UUID> productIds) throws IOException {
+        return geminiService.compareProduct(prompt, productIds);
     }
 }

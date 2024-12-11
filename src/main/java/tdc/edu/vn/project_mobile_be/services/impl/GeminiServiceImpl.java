@@ -12,6 +12,7 @@ import tdc.edu.vn.project_mobile_be.interfaces.service.GeminiService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.ProductService;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -39,7 +40,6 @@ public class GeminiServiceImpl implements GeminiService {
 
     public CompletableFuture<String> generateContent(String prompt, UUID productId) throws IOException {
 
-
         String productJson;
         try {
             ProductResponseDTO productDTO = productService.getProductById(productId);
@@ -50,6 +50,46 @@ public class GeminiServiceImpl implements GeminiService {
         }
 
         String fullPrompt = String.format("Yêu cầu: %s\n\n---\n" + "Dữ liệu sản phẩm (JSON):\n%s\n" + "---\n\n" + "Hãy thực hiện yêu cầu dựa trên dữ liệu sản phẩm trên.", prompt, productJson);
+
+        GenerativeModel model = generativeModel;
+        GenerateContentResponse responseFuture = model.generateContent(fullPrompt);
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return ResponseHandler.getText(responseFuture);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return "Error generating content.";
+            }
+        });
+    }
+
+    public CompletableFuture<String> compareProduct(String prompt, List<UUID> productIds) throws IOException {
+
+        String productJson1 = "";
+        String productJson2 = "";
+        try {
+            for (int i = 0; i < productIds.size(); i++) {
+                ProductResponseDTO productDTO = productService.getProductById(productIds.get(i));
+                if (i == 0) {
+                    productJson1 = objectMapper.writeValueAsString(productDTO);
+                }
+                if (i == 1) {
+                    productJson2 = objectMapper.writeValueAsString(productDTO);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return CompletableFuture.completedFuture("Error processing product data.");
+        }
+
+        String fullPrompt = String.format(
+                "Yêu cầu: %s\n\n---\n"
+                        + "Dữ liệu sản phẩm 1 (JSON):"
+                        + "\n%s\n"
+                        + "Dữ liệu sản phẩm 2 (JSON):"
+                        + "\n%s\n"
+                        + "---\n\n"
+                        + "Hãy thực hiện yêu cầu dựa trên dữ liệu sản phẩm trên.", prompt, productJson1, productJson2);
 
         GenerativeModel model = generativeModel;
         GenerateContentResponse responseFuture = model.generateContent(fullPrompt);
