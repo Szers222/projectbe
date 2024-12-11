@@ -39,6 +39,9 @@ public class SecurityConfig {
             "/gemini-pro-vision",
             "/gemini-pro-vision/chat",
             "api/gemini/generate",
+            "api/gemini/*",
+            "/api/gemini/chat/compare"
+
     };
 
 

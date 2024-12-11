@@ -193,6 +193,10 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         if (productImages.isEmpty()) {
             throw new EntityNotFoundException("ProductImage không tồn tại !");
         }
+        ProductSupplier productSupplier = productSupplierRepository.findProductSupplierById(params.getProductSupplier());
+        if (productSupplier == null) {
+            throw new EntityNotFoundException("ProductSupplier not found !");
+        }
 
         Coupon coupon = new Coupon();
         if (params.getCoupon() != null) {
@@ -222,6 +226,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         product.setProductQuantity(params.getProductQuantity());
         product.setProductYearOfManufacture(params.getProductYearOfManufacture());
         product.setPost(post);
+        product.setSupplier(productSupplier);
         product.setCategories(categories);
         product.setProductSale(productSale);
         product.getImages().addAll(productImages);
