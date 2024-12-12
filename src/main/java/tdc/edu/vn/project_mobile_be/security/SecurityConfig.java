@@ -40,7 +40,13 @@ public class SecurityConfig {
             "/gemini-pro-vision/chat",
             "api/gemini/generate",
             "api/gemini/*",
-            "/api/gemini/chat/compare"
+            "/api/gemini/chat/compare",
+            "/swagger-ui/*",
+            "/swagger-ui.html",
+            "/v3/api-docs/*",
+            "/swagger-ui/oauth2-re",
+            "/v3/api-docs/swagger-config"
+            , "v3/api-docs"
 
     };
 

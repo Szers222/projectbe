@@ -36,7 +36,7 @@ import java.util.UUID;
 public class UserController {
 
     @Autowired
-    @Qualifier("user_ServiceImpl")
+
     UserService userService;
     @Autowired
     UserRepository userRepository;
