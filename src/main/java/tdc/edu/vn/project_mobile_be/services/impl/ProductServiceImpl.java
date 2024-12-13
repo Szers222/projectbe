@@ -297,22 +297,22 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Transactional
     public Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable) {
 
-        // Serialize filter parameters
-        String filterJson = "";
-        try {
-            filterJson = objectMapper.writeValueAsString(params);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        // Serialize filter parameters
+//        String filterJson = "";
+//        try {
+//            filterJson = objectMapper.writeValueAsString(params);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        // Serialize only relevant parts of Pageable
+//        String pageableKey = "page:" + pageable.getPageNumber() +
+//                ",size:" + pageable.getPageSize() +
+//                ",sort:" + (pageable.getSort() != null ? pageable.getSort().toString() : "");
 
-        // Serialize only relevant parts of Pageable
-        String pageableKey = "page:" + pageable.getPageNumber() +
-                ",size:" + pageable.getPageSize() +
-                ",sort:" + (pageable.getSort() != null ? pageable.getSort().toString() : "");
-
-        String cacheKey = "findProductsByFilters:" + filterJson + ":" + pageableKey;
-        log.info("Cache key: {}", cacheKey);
-        // Try to get from cache
+//        String cacheKey = "findProductsByFilters:" + filterJson + ":" + pageableKey;
+//        log.info("Cache key: {}", cacheKey);
+//        // Try to get from cache
 //        String cachedResult = (String) redisTemplate.opsForValue().get(cacheKey);
 //        log.info("Cache key123: {}", cachedResult);
 //        if (cachedResult != null) {
