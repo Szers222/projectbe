@@ -18,6 +18,8 @@ import tdc.edu.vn.project_mobile_be.dtos.responses.order.OrderResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.interfaces.service.OrderService;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -119,6 +121,12 @@ public class OrderController {
         OrderStatusDTO orderStatusDTO = new OrderStatusDTO();
         orderStatusDTO.setStatus(status);
         List<OrderResponseDTO> orders = orderService.getOrderByStatus(orderStatusDTO.getStatus());
+        ResponseData<List<OrderResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Orders found!", orders);
+        return ResponseEntity.ok(responseData);
+    }
+    @GetMapping({"/orders/date", "/orders/date/"})
+    public ResponseEntity<ResponseData<List<OrderResponseDTO>>> getOrderByDate(@RequestParam LocalDate date) {
+        List<OrderResponseDTO> orders = orderService.getOrderByDate(date);
         ResponseData<List<OrderResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Orders found!", orders);
         return ResponseEntity.ok(responseData);
     }

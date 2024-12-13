@@ -10,6 +10,7 @@ import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
 import tdc.edu.vn.project_mobile_be.interfaces.IDto;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 
 @Data
@@ -20,9 +21,11 @@ public class ProductImageParamsWithProductRequestDTO implements IDto<ProductImag
     @JsonIgnore
     private String productImagePath;
 
-    @NotBlank(message = "product-image-alt không được để trống")
+    @NotNull(message = "product-image-alt không được để trống")
     @JsonProperty("productImageAlt")
     private String productImageAlt;
+
+
 
     @JsonIgnore
     private Timestamp createdAt;

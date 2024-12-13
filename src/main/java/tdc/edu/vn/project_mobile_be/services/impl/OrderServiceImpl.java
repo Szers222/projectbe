@@ -20,7 +20,6 @@ import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductImage;
-import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
 import tdc.edu.vn.project_mobile_be.entities.relationship.SizeProduct;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import tdc.edu.vn.project_mobile_be.interfaces.reponsitory.*;
@@ -28,7 +27,9 @@ import tdc.edu.vn.project_mobile_be.interfaces.service.CartService;
 import tdc.edu.vn.project_mobile_be.interfaces.service.OrderService;
 
 import java.math.RoundingMode;
+import java.sql.Timestamp;
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -77,6 +78,8 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
     private final int ORDER_STATUS_SHIPPER_CANCEL = 8;
     @Autowired
     private SizeProductRepository sizeProductRepository;
+    @Autowired
+    private ProductImageRepository productImageRepository;
 
 
     @Override
@@ -221,6 +224,17 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
     }
 
     @Override
+    public List<OrderResponseDTO> getOrderByDate(LocalDate date) {
+        Timestamp startDat = Timestamp.valueOf(date.atTime(0, 0, 0));
+        Timestamp endDate = Timestamp.valueOf(date.atTime(23, 59, 59));
+        List<Order> orders = orderRepository.findOrderByDate(startDat, endDate);
+        if (orders.isEmpty()) {
+            throw new ListNotFoundException("No orders found");
+        }
+        return getOrderResponseDTOS(orders);
+    }
+
+    @Override
     public OrderResponseDTO getOrderByCart(UUID cartId) {
         Order order = orderRepository.findOrderByCartId(cartId);
         if (order == null) {
@@ -239,11 +253,19 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
             Cart cart = order.getCart();
             List<CartProductResponseDTO> cartProductResponseDTOS = new ArrayList<>();
 
+
             cart.getCartProducts().forEach(cartProduct -> {
+                List<ProductImage> productImage = productImageRepository.findByProductImageId(cartProduct.getProduct().getProductId());
+
                 CartProductResponseDTO cartProductResponseDTO = new CartProductResponseDTO();
                 cartProductResponseDTO.setProductId(cartProduct.getProduct().getProductId());
                 cartProductResponseDTO.setProductSizeId(cartProduct.getProductSize().getProductSizeId());
-                cartProductResponseDTO.setProductImage(cartProduct.getProduct().getImages().stream().findFirst().get().getProductImagePath());
+                for (ProductImage image : productImage) {
+                    if (image.getProductImageIndex() == 1) {
+                        cartProductResponseDTO.setProductImage(image.getProductImagePath());
+                        break;
+                    }
+                }
                 cartProductResponseDTO.setCartProductPrice(formatProductPrice(cartProduct.getProduct().getProductPrice()));
                 cartProductResponseDTO.setCartProductQuantity(cartProduct.getQuantity());
                 cartProductResponseDTO.setCartProductDiscount(cartProduct.getProduct().getProductSale());
@@ -412,42 +434,6 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
             }
         }
         return coupons;
-    }
-
-    public CartResponseDTO buildCartResponse(UUID cartId) {
-        List<CartProduct> cartProducts = cartProductRepository.findByCartId(cartId);
-        if (cartProducts.isEmpty()) {
-            throw new ListNotFoundException("No products found in the cart.");
-        }
-
-        List<CartProductResponseDTO> dtos = new ArrayList<>();
-        double total = cartProducts.stream().mapToDouble(item -> {
-            CartProductResponseDTO dto = new CartProductResponseDTO();
-            String productName = item.getProduct().getProductName();
-            String sizeName = item.getProductSize().getProductSizeName();
-            int quantity = item.getQuantity();
-            String productPrice = formatProductPrice(item.getProduct().getProductPrice());
-            double totalPrice = item.getProduct().getProductPrice() * quantity;
-            Set<ProductImage> productImage = item.getProduct().getImages();
-            productImage.forEach(image -> {
-                if (image.getProductImageIndex() == 1) {
-                    dto.setProductImage(image.getProductImagePath());
-                }
-            });
-            dto.setProductName(productName);
-            dto.setProductSize(sizeName);
-            dto.setCartProductQuantity(quantity);
-            dto.setCartProductPrice(productPrice);
-            dto.setCartProductTotalPrice(totalPrice);
-            dtos.add(dto);
-            return totalPrice;
-        }).sum();
-
-        CartResponseDTO cartResponseDTO = new CartResponseDTO();
-        cartResponseDTO.setCartProducts(dtos);
-        cartResponseDTO.setCartProductTotalPrice(formatPrice(total));
-
-        return cartResponseDTO;
     }
 
     public String formatProductPrice(double price) {

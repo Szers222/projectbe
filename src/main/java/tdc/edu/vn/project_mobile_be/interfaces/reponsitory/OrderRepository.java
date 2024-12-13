@@ -23,9 +23,6 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     @Query("SELECT o FROM Order o where o.orderStatus = ?1")
     List<Order> findOrderByStatus(int status);
 
-    @Query("SELECT o FROM Order o WHERE o.createdAt BETWEEN :startOfDay AND :endOfDay")
-    List<Order> findOrdersByDay(@Param("startOfDay") Timestamp startOfDay, @Param("endOfDay") Timestamp endOfDay);
-
-    @Query("SELECT SUM(sp.price * sp.quantity) FROM ShipmentProduct sp JOIN sp.shipment s WHERE s.shipmentDate BETWEEN :startOfDay AND :endOfDay")
-    Double findTotalCogsByDay(@Param("startOfDay") Timestamp startOfDay, @Param("endOfDay") Timestamp endOfDay);
+    @Query("SELECT o FROM Order o WHERE o.updatedAt BETWEEN ?1 AND ?2")
+    List<Order> findOrderByDate(Timestamp startOfDay, Timestamp endOfDay);
 }
