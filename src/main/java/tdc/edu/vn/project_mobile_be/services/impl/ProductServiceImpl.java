@@ -96,8 +96,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+//    @Autowired
+//    private RedisTemplate<String, Object> redisTemplate;
 
 
     @Override
