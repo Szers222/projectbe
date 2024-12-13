@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 import tdc.edu.vn.project_mobile_be.entities.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.sql.Timestamp;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,6 +20,9 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
 
     @Query("SELECT u from User u where u.userEmail = :userEmail")
     Optional<User> findByUserEmail(@Param("userEmail") String userEmail);
+    @Query("SELECT u FROM User u WHERE u.createdAt >= :fromTime")
+    List<User> findUsersCreatedNew(@Param("fromTime") Timestamp fromTime);
+
 
 //    @Query("SELECT u FROM User u JOIN FETCH u.roles r w ")
 //    Optional<User> findByEmailWithRoles(@Param("userId") UUID userId);

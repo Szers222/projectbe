@@ -15,7 +15,8 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "posts")
 @AllArgsConstructor

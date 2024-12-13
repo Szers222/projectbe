@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import tdc.edu.vn.project_mobile_be.entities.review.Review;
+import tdc.edu.vn.project_mobile_be.entities.review.ReviewLike;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -39,11 +40,20 @@ public class ReviewResponseDTO {
     @JsonProperty("productId")
     UUID productId;
 
+    @JsonProperty("userId")
+    UUID userId;
+
+    @JsonProperty("reviewImg")
+    String reviewImg;
+
     @JsonProperty("createdAt")
     Timestamp createdAt;
 
     @JsonProperty("updatedAt")
     Timestamp updatedAt;
+
+    @JsonProperty("isLikedByCurrentUser")
+    boolean isLikedByCurrentUser;
 
     @JsonProperty("children")
     List<Review> children = new ArrayList<>();
