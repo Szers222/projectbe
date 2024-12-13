@@ -2,7 +2,7 @@ package tdc.edu.vn.project_mobile_be.entities.relationship;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import tdc.edu.vn.project_mobile_be.entities.cart.Cart;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
@@ -10,8 +10,10 @@ import tdc.edu.vn.project_mobile_be.entities.shipment.Shipment;
 
 @Entity
 @Table(name = "carts_products")
-@Data
-
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class CartProduct {
     @EmbeddedId
     private CartProductId id = new CartProductId();

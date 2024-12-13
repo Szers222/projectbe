@@ -1,6 +1,7 @@
 package tdc.edu.vn.project_mobile_be.entities.review;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,7 +16,8 @@ import tdc.edu.vn.project_mobile_be.entities.user.User;
 import java.sql.Timestamp;
 import java.util.*;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "review")
 @AllArgsConstructor
@@ -53,8 +55,9 @@ public class Review {
     private User user = null;
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonIgnore
     private Set<ReviewLike> reviewLikes = new HashSet<>();
+
 
     @ManyToOne
     @JoinColumn(name = "parent_id")
@@ -63,11 +66,12 @@ public class Review {
     @EqualsAndHashCode.Exclude
     private Review parent;
 
-    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<Review> children = new ArrayList<>();
+
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")

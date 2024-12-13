@@ -320,6 +320,7 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
         Order order = orderRepository.findById(orderChangeStatusDTO.getOrderId())
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
         if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_CANCEL) {
+
             Cart cart = order.getCart();
             User user = cart.getUser();
             if (user != null) {
@@ -331,6 +332,8 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
             }
             cartRepository.save(cart);
             orderRepository.delete(order);
+
+            messagingTemplate.convertAndSend("/topic/orders", orderChangeStatusDTO.getOrderId());
             return null;
         } else if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_PROCESSING) {
             Cart currentCart = order.getCart();
@@ -368,7 +371,9 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
             });
         } else if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_SHIPPER_CANCEL) {
             order.setOrderStatus(ORDER_STATUS_PROCESSED);
-
+            if (orderChangeStatusDTO.getReason() != null) {
+                order.setOrderNote(order.getOrderNote() + "\n- " + orderChangeStatusDTO.getReason());
+            }
         } else if (orderChangeStatusDTO.getStatus() == ORDER_STATUS_SHIP) {
             User shipper = userRepository.findById(orderChangeStatusDTO.getShipper())
                     .orElseThrow(() -> new EntityNotFoundException("Shipper not found"));

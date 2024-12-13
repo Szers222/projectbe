@@ -2,13 +2,16 @@ package tdc.edu.vn.project_mobile_be.entities.relationship;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSize;
 
 @Entity
 @Table(name = "products_sizes")
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class SizeProduct {
     @EmbeddedId
     private SizeProductId id = new SizeProductId();

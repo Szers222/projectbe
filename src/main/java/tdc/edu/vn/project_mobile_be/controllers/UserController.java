@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
+import tdc.edu.vn.project_mobile_be.dtos.requests.user.PasswordRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateCustomerRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.requests.user.UpdateUserRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.user.UserResponseDTO;
@@ -35,7 +36,7 @@ import java.util.UUID;
 public class UserController {
 
     @Autowired
-    @Qualifier("user_ServiceImpl")
+
     UserService userService;
     @Autowired
     UserRepository userRepository;
@@ -43,7 +44,6 @@ public class UserController {
 
     // Get All Users
     @GetMapping("/users")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ResponseData<List<UserResponseDTO>>> getAllUsers() {
         List<UserResponseDTO> users = userService.getAllUsers();
         ResponseData<List<UserResponseDTO>> responseData =
@@ -54,21 +54,26 @@ public class UserController {
                 );
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
-    @PutMapping("/users/{users}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ResponseData<?>> updateUser(@PathVariable("users") UUID userId, @RequestBody UpdateUserRequestDTO request) {
+    @PutMapping(value = "/users/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseData<?>> updateUser(
+            @PathVariable("userId") UUID userId,
+            @Valid @RequestPart(value = "request", required = true) String requestJson,
+            @RequestPart(value = "image", required = false) MultipartFile userImagePath
+    ) throws JsonProcessingException {
+        UpdateUserRequestDTO request = objectMapper.readValue(requestJson, UpdateUserRequestDTO.class);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        userService.updateUser(user,request);
+        userService.updateUser(user, request, userImagePath);
 
         ResponseData<?> responseData = new ResponseData<>(
-                HttpStatus.CREATED
-                , "User tạo thành công!"
-                , user);
-        return new ResponseEntity<>(responseData, HttpStatus.CREATED);
+                HttpStatus.OK,
+                "Thông tin người dùng đã được cập nhật thành công",
+                user
+        );
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
+
     @GetMapping("/users/{id}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ResponseData<UserResponseDTO>> getUser(@PathVariable UUID id) {
         UserResponseDTO user = userService.getUserById(id);
         ResponseData<UserResponseDTO> responseData = new ResponseData<>(
@@ -91,7 +96,7 @@ public class UserController {
     @PutMapping(value = "/customer/myInfo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseData<?>> updateMyInfo(
             @RequestPart(value = "image", required = false) MultipartFile userImagePath,
-            @RequestPart(value = "request", required = true) String requestJson
+            @Valid @RequestPart(value = "request", required = true) String requestJson
     ) throws JsonProcessingException {
         UpdateCustomerRequestDTO request = objectMapper.readValue(requestJson, UpdateCustomerRequestDTO.class);
 
@@ -115,4 +120,25 @@ public class UserController {
         );
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
+    @GetMapping("/users/recent")
+    public ResponseEntity<ResponseData<List<UserResponseDTO>>> getAllUserNew() {
+        List<UserResponseDTO> users = userService.getAllUserNew();
+        ResponseData<List<UserResponseDTO>> responseData = new ResponseData<>(
+                HttpStatus.OK,
+                "Lấy danh sách người dùng mới tạo gần nhất thành công",
+                users
+        );
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+    @PutMapping("/myInfo/change-password")
+    public ResponseEntity<ResponseData<String>> changePassword(@RequestBody @Valid PasswordRequestDTO request) {
+        userService.changePassword(request);
+        ResponseData<String> responseData = new ResponseData<>(
+                HttpStatus.OK,
+                "Đổi mật khẩu thành công",
+                null
+        );
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
 }

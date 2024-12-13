@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.entities.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,7 +19,8 @@ import java.sql.Timestamp;
 import java.util.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @DynamicUpdate
 @DynamicInsert
 @NoArgsConstructor
@@ -124,7 +126,7 @@ public class User {
     private UserAddress detail;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonIgnore
     private Set<ReviewLike> reviewLikes = new HashSet<>();
 
 }

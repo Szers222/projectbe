@@ -32,8 +32,10 @@ public class SecurityConfig {
             "/api/v1/products/filters?",
             "/ws",
             "/api/paypment/create-order",
-            "/v2/create"
-            ,"/carts/user/*",
+            "/v2/create",
+            "/api/*",
+            "/api/*/*",
+            "/carts/user/*",
             "/gemini-pro-vision",
             "/gemini-pro-vision/chat",
             "api/gemini/generate",
@@ -45,6 +47,7 @@ public class SecurityConfig {
             "/swagger-ui/oauth2-re",
             "/v3/api-docs/swagger-config"
             , "v3/api-docs"
+
     };
 
 

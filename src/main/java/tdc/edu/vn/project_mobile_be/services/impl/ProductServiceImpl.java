@@ -11,7 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.redis.core.RedisTemplate;
+//import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,6 +95,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     private ApplicationEventPublisher applicationEventPublisher;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
