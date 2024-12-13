@@ -53,12 +53,12 @@ public class Shipment {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "supplier_id")
-    @JsonManagedReference(value = "productSupplier-shipment")
+    @JsonBackReference(value = "productSupplier-shipment")
     @ToString.Exclude
     private ProductSupplier productSupplier;
 
     @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference(value = "shipment-shipmentProduct")
+    @JsonManagedReference(value = "shipment")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<ShipmentProduct> shipmentProducts = new HashSet<>();

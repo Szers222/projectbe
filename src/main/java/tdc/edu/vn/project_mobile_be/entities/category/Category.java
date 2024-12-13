@@ -57,27 +57,25 @@ public class Category {
      */
     @ManyToOne
     @JoinColumn(name = "category_status_id")
-    @JsonBackReference
     private CategoryStatus categoryStatus;
 
     // Parent - Children
     @ManyToOne
     @JoinColumn(name = "parent_id")
-    @JsonBackReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonBackReference(value = "parent-children")
     private Category parent;
 
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
-    @JsonBackReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonManagedReference(value = "parent-children")
     private List<Category> children;
 
     // ManyToMany - Product - Category
     @ManyToMany(mappedBy = "categories")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference(value = "product-category")
     private Set<Product> products = new HashSet<>();
 }

@@ -2,6 +2,7 @@ package tdc.edu.vn.project_mobile_be.dtos.responses.post;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PostResponseDTO implements IDto<Post> {
 
     @JsonProperty("postName")
@@ -33,8 +35,6 @@ public class PostResponseDTO implements IDto<Post> {
     private String userName;
     @JsonProperty("postStatus")
     private PostStatus postStatus;
-//    @JsonProperty("postComment")
-//    private List<PostComment> postCommentList;
 
     @JsonIgnore
     private UUID postId;

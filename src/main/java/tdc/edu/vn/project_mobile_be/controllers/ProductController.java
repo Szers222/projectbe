@@ -220,4 +220,10 @@ public class ProductController {
         return ResponseEntity.ok(responseData);
     }
 
+    @GetMapping("/products/new/created")
+    public ResponseEntity<ResponseData<List<ProductResponseDTO>>> getTop10NewProducts() {
+        List<ProductResponseDTO> products = productService.getProductNew();
+        ResponseData<List<ProductResponseDTO>> responseData = new ResponseData<>(HttpStatus.OK, "Success", products);
+        return ResponseEntity.ok(responseData);
+    }
 }

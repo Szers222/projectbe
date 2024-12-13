@@ -2,6 +2,7 @@ package tdc.edu.vn.project_mobile_be.dtos.responses.category;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,6 +17,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CategoryStatusResponseDTO implements IDto<CategoryStatus> {
     @JsonProperty("name")
     private String categoryStatusName;

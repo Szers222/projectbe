@@ -41,11 +41,11 @@ public class ProductSupplier {
     private Timestamp updatedAt;
 
     @OneToMany(mappedBy = "productSupplier", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonBackReference(value = "productSupplier-shipment")
+    @JsonManagedReference(value = "productSupplier-shipment")
     private Set<Shipment> shipments = new HashSet<>();
 
     @OneToMany(mappedBy = "supplier",cascade = CascadeType.ALL,orphanRemoval = true )
-    @JsonBackReference
+    @JsonManagedReference(value = "product-supplier")
     private Set<Product> products = new HashSet<>();
 
 }
