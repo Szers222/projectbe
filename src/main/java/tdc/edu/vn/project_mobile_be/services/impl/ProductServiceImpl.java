@@ -297,35 +297,35 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Transactional
     public Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable) {
 
-        // Serialize filter parameters
-        String filterJson = "";
-        try {
-            filterJson = objectMapper.writeValueAsString(params);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        // Serialize filter parameters
+//        String filterJson = "";
+//        try {
+//            filterJson = objectMapper.writeValueAsString(params);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        // Serialize only relevant parts of Pageable
+//        String pageableKey = "page:" + pageable.getPageNumber() +
+//                ",size:" + pageable.getPageSize() +
+//                ",sort:" + (pageable.getSort() != null ? pageable.getSort().toString() : "");
 
-        // Serialize only relevant parts of Pageable
-        String pageableKey = "page:" + pageable.getPageNumber() +
-                ",size:" + pageable.getPageSize() +
-                ",sort:" + (pageable.getSort() != null ? pageable.getSort().toString() : "");
-
-        String cacheKey = "findProductsByFilters:" + filterJson + ":" + pageableKey;
-        log.info("Cache key: {}", cacheKey);
-        // Try to get from cache
-        String cachedResult = (String) redisTemplate.opsForValue().get(cacheKey);
-        log.info("Cache key123: {}", cachedResult);
-        if (cachedResult != null) {
-            try {
-                List<ProductResponseDTO> dtoList = objectMapper.readValue(cachedResult, new TypeReference<>() {
-                });
-                // No need to check for null, objectMapper.readValue throws exception if it's null or invalid
-                return new PageImpl<>(dtoList, pageable, dtoList.size());
-            } catch (IOException e) {
-                // Log the exception and continue to fetch from DB
-                e.printStackTrace();
-            }
-        }
+//        String cacheKey = "findProductsByFilters:" + filterJson + ":" + pageableKey;
+//        log.info("Cache key: {}", cacheKey);
+//        // Try to get from cache
+//        String cachedResult = (String) redisTemplate.opsForValue().get(cacheKey);
+//        log.info("Cache key123: {}", cachedResult);
+//        if (cachedResult != null) {
+//            try {
+//                List<ProductResponseDTO> dtoList = objectMapper.readValue(cachedResult, new TypeReference<>() {
+//                });
+//                // No need to check for null, objectMapper.readValue throws exception if it's null or invalid
+//                return new PageImpl<>(dtoList, pageable, dtoList.size());
+//            } catch (IOException e) {
+//                // Log the exception and continue to fetch from DB
+//                e.printStackTrace();
+//            }
+//        }
 
         Specification<Product> spec = Specification.where(null);  // Khởi tạo Specification rỗng
         // Lọc theo danh mục (category)
@@ -393,13 +393,13 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             return dto;
         });
 
-        List<ProductResponseDTO> dtoList = dtoPage.getContent();
-        try {
-            String serializedData = objectMapper.writeValueAsString(dtoList);
-            redisTemplate.opsForValue().set(cacheKey, serializedData, 60, TimeUnit.MINUTES);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        List<ProductResponseDTO> dtoList = dtoPage.getContent();
+//        try {
+//            String serializedData = objectMapper.writeValueAsString(dtoList);
+//            redisTemplate.opsForValue().set(cacheKey, serializedData, 60, TimeUnit.MINUTES);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         return dtoPage;
 
