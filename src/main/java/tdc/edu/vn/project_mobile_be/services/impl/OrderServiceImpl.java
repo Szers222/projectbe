@@ -1,6 +1,7 @@
 package tdc.edu.vn.project_mobile_be.services.impl;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -33,6 +34,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.IntStream;
 
+@Slf4j
 @Service
 public class OrderServiceImpl extends AbService<Order, UUID> implements OrderService {
 
@@ -255,23 +257,23 @@ public class OrderServiceImpl extends AbService<Order, UUID> implements OrderSer
 
 
             cart.getCartProducts().forEach(cartProduct -> {
-                List<ProductImage> productImage = productImageRepository.findByProductImageId(cartProduct.getProduct().getProductId());
+
 
                 CartProductResponseDTO cartProductResponseDTO = new CartProductResponseDTO();
                 cartProductResponseDTO.setProductId(cartProduct.getProduct().getProductId());
                 cartProductResponseDTO.setProductSizeId(cartProduct.getProductSize().getProductSizeId());
-                for (ProductImage image : productImage) {
-                    if (image.getProductImageIndex() == 1) {
-                        cartProductResponseDTO.setProductImage(image.getProductImagePath());
-                        break;
+                cartProduct.getProduct().getImages().forEach(productImage -> {
+                    if (productImage.getProductImageIndex() == 1) {
+                        cartProductResponseDTO.setProductImage(productImage.getProductImagePath());
                     }
-                }
+                });
                 cartProductResponseDTO.setCartProductPrice(formatProductPrice(cartProduct.getProduct().getProductPrice()));
                 cartProductResponseDTO.setCartProductQuantity(cartProduct.getQuantity());
                 cartProductResponseDTO.setCartProductDiscount(cartProduct.getProduct().getProductSale());
                 cartProductResponseDTO.setCartProductTotalPrice(cartProduct.getProduct().getProductPriceSale() * cartProduct.getQuantity());
                 cartProductResponseDTO.setProductSize(cartProduct.getProductSize().getProductSizeName());
                 cartProductResponseDTO.setProductName(cartProduct.getProduct().getProductName());
+
                 cartProductResponseDTO.setCartProductDiscountPrice(formatProductPrice(cartProduct.getProduct().getProductPriceSale()));
                 cartProductResponseDTOS.add(cartProductResponseDTO);
             });
