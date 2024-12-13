@@ -69,6 +69,7 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
         List<ProductImage> result = new ArrayList<>();
 
         try {
+            int indext = 0;
             for (MultipartFile file : files) {
                 if (file.isEmpty()) {
                     throw new FileEmptyException("One of the files is empty");
@@ -81,7 +82,7 @@ public class ProductImageServiceImpl extends AbService<ProductImage, UUID> imple
                 productImage.setProductImageId(UUID.randomUUID());
                 productImage.setProduct(product);
                 productImage.setProductImagePath(imageUrl);
-
+                productImage.setProductImageIndex(++indext);
                 // Lưu ProductImage và thêm vào danh sách kết quả
                 result.add(productImageRepository.save(productImage));
             }

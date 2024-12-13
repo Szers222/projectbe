@@ -1,5 +1,6 @@
 package tdc.edu.vn.project_mobile_be.entities.relationship;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import tdc.edu.vn.project_mobile_be.entities.product.Product;
@@ -24,6 +25,7 @@ public class ShipmentProduct {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("shipment_id")
+    @JsonBackReference(value = "shipment-shipmentProduct")
     @JoinColumn(name = "shipment_id")
     private Shipment shipment;
 
@@ -36,7 +38,6 @@ public class ShipmentProduct {
     private double price;
     @Column(name = "shipments_products_quantity", nullable = false, columnDefinition = "int default 0")
     private int quantity;
-
 
 
 }

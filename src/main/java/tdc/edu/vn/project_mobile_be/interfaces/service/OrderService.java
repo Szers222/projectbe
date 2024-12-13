@@ -8,6 +8,8 @@ import tdc.edu.vn.project_mobile_be.dtos.responses.order.OrderResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.order.Order;
 import tdc.edu.vn.project_mobile_be.interfaces.IService;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,4 +30,6 @@ public interface OrderService extends IService<Order, UUID> {
     List<OrderResponseDTO> getOrderByShipperId(UUID shipperId);
 
     List<OrderResponseDTO> getOrderByStatus(int status);
+
+    List<OrderResponseDTO> getOrderByDate(LocalDate date);
 }

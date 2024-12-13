@@ -2,6 +2,7 @@ package tdc.edu.vn.project_mobile_be.entities.shipment;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -40,6 +41,8 @@ public class Shipment {
     @Column(name = "shipment_ship_cost", columnDefinition = "FLOAT DEFAULT 0")
     private double shipmentShipCost;
 
+
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Timestamp createdAt;
@@ -50,12 +53,12 @@ public class Shipment {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "supplier_id")
-    @JsonBackReference
+    @JsonManagedReference(value = "productSupplier-shipment")
     @ToString.Exclude
     private ProductSupplier productSupplier;
 
     @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonBackReference
+    @JsonManagedReference(value = "shipment-shipmentProduct")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<ShipmentProduct> shipmentProducts = new HashSet<>();
