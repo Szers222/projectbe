@@ -54,7 +54,6 @@ public class Cart {
     @OneToOne(mappedBy = "cart")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference(value = "cart-order")
     private Order order;
 
     @CreationTimestamp

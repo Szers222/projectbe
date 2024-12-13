@@ -39,4 +39,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
     @Query("SELECT p FROM Product p join p.collections pc on pc.collectionId = :collectionId")
     List<Product> findByCollectionId(@Param("collectionId") UUID collectionId);
 
+    @Query(value = "SELECT * FROM products p WHERE p.created_at >= CURRENT_TIMESTAMP - INTERVAL 30 DAY ORDER BY p.created_at DESC LIMIT 10", nativeQuery = true)
+    List<Product> findTop10ByOrderByCreatedAtDesc();
 }

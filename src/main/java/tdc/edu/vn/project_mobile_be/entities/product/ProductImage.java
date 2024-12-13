@@ -1,6 +1,7 @@
 package tdc.edu.vn.project_mobile_be.entities.product;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -46,7 +47,7 @@ public class ProductImage {
     @ManyToOne
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference
+    @JsonBackReference(value = "size-product")
     @JoinColumn(name = "product_id", nullable = false, columnDefinition = "BINARY(16)")
     private Product product;
 

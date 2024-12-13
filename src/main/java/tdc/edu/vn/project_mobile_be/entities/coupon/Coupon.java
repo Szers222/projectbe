@@ -66,13 +66,11 @@ public class Coupon {
     @OneToOne(mappedBy = "coupon")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference
     private Product product;
 
 
     @ManyToMany(mappedBy = "coupons")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference(value = "order-coupon")
     private Set<Order> order = new HashSet<>();
 }

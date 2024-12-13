@@ -29,5 +29,6 @@ public interface ProductService extends IService<Product, UUID> {
 
     List<ProductResponseDTO> findProductRelate(UUID productId);
 
+    List<ProductResponseDTO> getProductNew();
 
 }

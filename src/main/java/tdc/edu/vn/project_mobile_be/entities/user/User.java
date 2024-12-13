@@ -97,7 +97,6 @@ public class User {
     @ManyToMany(fetch = FetchType.EAGER)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonManagedReference(value = "user-role")
     @JoinTable(
             name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),

@@ -61,7 +61,7 @@ public class Review {
 
     @ManyToOne
     @JoinColumn(name = "parent_id")
-    @JsonBackReference
+    @JsonBackReference(value = "parent-review")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Review parent;

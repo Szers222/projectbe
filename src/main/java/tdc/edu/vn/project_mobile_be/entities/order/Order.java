@@ -75,7 +75,6 @@ public class Order {
             joinColumns = @JoinColumn(name = "order_id"),
             inverseJoinColumns = @JoinColumn(name = "coupon_id")
     )
-    @JsonManagedReference(value = "order-coupon")
     private Set<Coupon> coupons = new HashSet<>();
 
     @ManyToOne
@@ -86,7 +85,6 @@ public class Order {
     @JoinColumn(name = "cart_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonManagedReference(value = "cart-order")
     private Cart cart;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)

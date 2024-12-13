@@ -9,6 +9,8 @@ import tdc.edu.vn.project_mobile_be.entities.product.Product;
 import tdc.edu.vn.project_mobile_be.entities.product.ProductSupplier;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,6 +47,18 @@ public class ProductSpecifications implements Specification<Product> {
             query.distinct(true);
             return cb.or(cb.like(categories.get("categoryName"), likePattern)
                     , cb.like(root.get("productName"), likePattern));
+        };
+    }
+
+    public static Specification<Product> findTop10NewProducts(Integer days) {
+        return (root, query, criteriaBuilder) -> {
+
+            LocalDateTime daysAgo = LocalDateTime.now().minusDays(days);
+            Timestamp daysAgoTimestamp = Timestamp.valueOf(daysAgo);
+
+            assert query != null;
+            query.orderBy(criteriaBuilder.desc(root.get("createdAt")));
+            return criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), daysAgoTimestamp);
         };
     }
 

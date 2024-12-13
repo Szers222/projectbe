@@ -21,17 +21,19 @@ public class ShipmentProduct {
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("product_id")
     @JoinColumn(name = "product_id")
+    @JsonBackReference(value = "shipment-product")
     private Product product;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("shipment_id")
-    @JsonBackReference(value = "shipment-shipmentProduct")
+    @JsonBackReference(value = "shipment")
     @JoinColumn(name = "shipment_id")
     private Shipment shipment;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("product_size_id")
     @JoinColumn(name = "product_size_id")
+    @JsonBackReference(value = "shipment-product-size")
     private ProductSize productSize;
 
     @Column(name = "shipments_products_price", nullable = false, columnDefinition = "double default 0")

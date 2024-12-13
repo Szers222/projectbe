@@ -1,6 +1,8 @@
 package tdc.edu.vn.project_mobile_be.entities.post;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -57,8 +59,6 @@ public class Post {
     @JoinColumn(name = "post_status_id", nullable = false)
     private PostStatus postStatus;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private List<PostComment> postComments;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "post")
     @ToString.Exclude

@@ -40,7 +40,6 @@ public class Collection {
 
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JsonManagedReference(value = "product-collection")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @JoinTable(

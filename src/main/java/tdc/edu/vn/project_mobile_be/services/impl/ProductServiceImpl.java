@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
@@ -11,7 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-//import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,8 +97,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-//    @Autowired
-//    private RedisTemplate<String, Object> redisTemplate;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
 
     @Override
@@ -297,41 +298,42 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
     @Transactional
     public Page<ProductResponseDTO> findProductsByFilters(ProductRequestParamsDTO params, Pageable pageable) {
 
-//        // Serialize filter parameters
-//        String filterJson = "";
-//        try {
-//            filterJson = objectMapper.writeValueAsString(params);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        // Serialize only relevant parts of Pageable
-//        String pageableKey = "page:" + pageable.getPageNumber() +
-//                ",size:" + pageable.getPageSize() +
-//                ",sort:" + (pageable.getSort() != null ? pageable.getSort().toString() : "");
-//
-//        String cacheKey = "findProductsByFilters:" + filterJson + ":" + pageableKey;
-//        log.info("Cache key: {}", cacheKey);
-//        // Try to get from cache
-//        String cachedResult = (String) redisTemplate.opsForValue().get(cacheKey);
-//        log.info("Cache key123: {}", cachedResult);
-//        if (cachedResult != null) {
-//            try {
-//                List<ProductResponseDTO> dtoList = objectMapper.readValue(cachedResult, new TypeReference<>() {
-//                });
-//                // No need to check for null, objectMapper.readValue throws exception if it's null or invalid
-//                return new PageImpl<>(dtoList, pageable, dtoList.size());
-//            } catch (IOException e) {
-//                // Log the exception and continue to fetch from DB
-//                e.printStackTrace();
-//            }
-//        }
+        // Serialize filter parameters
+        String filterJson = "";
+        try {
+            filterJson = objectMapper.writeValueAsString(params);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Serialize only relevant parts of Pageable
+        String pageableKey = "page:" + pageable.getPageNumber() +
+                ",size:" + pageable.getPageSize() +
+                ",sort:" + (pageable.getSort() != null ? pageable.getSort().toString() : "");
+
+        String cacheKey = "findProductsByFilters:" + filterJson + ":" + pageableKey;
+        log.info("Cache key: {}", cacheKey);
+        // Try to get from cache
+        String cachedResult = (String) redisTemplate.opsForValue().get(cacheKey);
+        log.info("Cache key123: {}", cachedResult);
+        if (cachedResult != null) {
+            try {
+                List<ProductResponseDTO> dtoList = objectMapper.readValue(cachedResult, new TypeReference<>() {
+                });
+
+                return new PageImpl<>(dtoList, pageable, dtoList.size());
+            } catch (IOException e) {
+                // Log the exception and continue to fetch from DB
+                e.printStackTrace();
+            }
+        }
 
         Specification<Product> spec = Specification.where(null);  // Khởi tạo Specification rỗng
         // Lọc theo danh mục (category)
         if (params.getCategoryId() != null && categoryRepository.findById(params.getCategoryId()).isPresent()) {
             spec = spec.and(ProductSpecifications.hasCategory(params.getCategoryId()));
         }
+
 
         // Lọc theo khoảng giá
         if (params.getMinPrice() != null && params.getMaxPrice() != null) {
@@ -359,6 +361,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         } else {
             spec = spec.and(ProductSpecifications.hasSearch(""));
         }
+
 
         // Truy vấn với các tiêu chí kết hợp
         Page<Product> products = productRepository.findAll(spec, pageable);
@@ -393,14 +396,12 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             return dto;
         });
 
-//        List<ProductResponseDTO> dtoList = dtoPage.getContent();
-//        try {
-//            String serializedData = objectMapper.writeValueAsString(dtoList);
-//            redisTemplate.opsForValue().set(cacheKey, serializedData, 60, TimeUnit.MINUTES);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
+        try {
+            String serializedData = objectMapper.writeValueAsString(products);
+            redisTemplate.opsForValue().set(cacheKey, serializedData, 60, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return dtoPage;
 
     }
@@ -438,26 +439,19 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         productRepository.delete(product);
         messagingTemplate.convertAndSend("/topic/products", productId);
     }
-
-
     @Override
-    public List<ProductResponseDTO> getProductByCategoryId(UUID categoryId) {
-        List<Product> products = productRepository.findByCategoryId(categoryId);
-        Category category = categoryRepository.findByCategoryId(categoryId);
-        if (category == null) {
-            throw new EntityNotFoundException("Category không tồn tại !");
-        }
-        if (products.isEmpty() && category.getChildren().isEmpty()) {
+    public List<ProductResponseDTO> getProductNew() {
+        Specification<Product> spec = ProductSpecifications.findTop10NewProducts(90);
+        List<Product> products = productRepository.findAll(spec);
+        if (products.isEmpty()) {
             throw new ListNotFoundException("Không tìm thấy sản phẩm");
         }
+        products = products.subList(0, 10);
+        return getProductResponseDTOS(products);
+    }
 
-        if (category.getChildren() != null) {
-            List<Category> categoryChildren = category.getChildren();
-            categoryChildren.forEach(categoryChild -> {
-                List<Product> productsChild = productRepository.findByCategoryId(categoryChild.getCategoryId());
-                products.addAll(productsChild);
-            });
-        }
+    @NotNull
+    private List<ProductResponseDTO> getProductResponseDTOS(List<Product> products) {
         List<ProductResponseDTO> result = new ArrayList<>();
         products.forEach(product -> {
             List<CategoryResponseDTO> categoryResponseDTOs = getCategoryResponseDTOs(product);
@@ -481,6 +475,28 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             result.add(dto);
         });
         return result;
+    }
+
+
+    @Override
+    public List<ProductResponseDTO> getProductByCategoryId(UUID categoryId) {
+        List<Product> products = productRepository.findByCategoryId(categoryId);
+        Category category = categoryRepository.findByCategoryId(categoryId);
+        if (category == null) {
+            throw new EntityNotFoundException("Category không tồn tại !");
+        }
+        if (products.isEmpty() && category.getChildren().isEmpty()) {
+            throw new ListNotFoundException("Không tìm thấy sản phẩm");
+        }
+
+        if (category.getChildren() != null) {
+            List<Category> categoryChildren = category.getChildren();
+            categoryChildren.forEach(categoryChild -> {
+                List<Product> productsChild = productRepository.findByCategoryId(categoryChild.getCategoryId());
+                products.addAll(productsChild);
+            });
+        }
+        return getProductResponseDTOS(products);
     }
     @Override
     public ProductResponseDTO getProductById(UUID productId) {

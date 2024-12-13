@@ -70,18 +70,16 @@ public class Product {
     @JoinColumn(name = "coupon_id", referencedColumnName = "coupon_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference
     private Coupon coupon;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference
     @JoinColumn(name = "post_id", referencedColumnName = "post_id")
     private Post post;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "product", orphanRemoval = true, cascade = CascadeType.ALL)
-    @JsonBackReference
+    @JsonManagedReference(value = "size-product")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<ProductImage> images = new HashSet<>();
@@ -89,13 +87,12 @@ public class Product {
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference
+    @JsonBackReference(value = "product-supplier")
     @JoinColumn(name = "supplier_id")
     private ProductSupplier supplier;
 
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JsonManagedReference(value = "product-category")
     @JoinTable(name = "categories_products",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
@@ -103,21 +100,20 @@ public class Product {
     private Set<Category> categories = new HashSet<>();
 
     @ManyToMany(mappedBy = "products")
-    @JsonBackReference(value = "product-collection")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<Collection> collections = new HashSet<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
-    @JsonBackReference
+    @JsonManagedReference(value = "shipment-product")
     @EqualsAndHashCode.Exclude
     private Set<ShipmentProduct> shipmentProducts = new HashSet<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference
+    @JsonManagedReference(value = "product-cart")
     private Set<CartProduct> cartProducts = new HashSet<>();
 
 
