@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import tdc.edu.vn.project_mobile_be.commond.ResponseData;
 import tdc.edu.vn.project_mobile_be.commond.customexception.MultipleFieldsNullOrEmptyException;
 import tdc.edu.vn.project_mobile_be.dtos.requests.newsale.NewSaleCreateRequestDTO;
+import tdc.edu.vn.project_mobile_be.dtos.requests.newsale.NewSaleUpdateRequestDTO;
 import tdc.edu.vn.project_mobile_be.dtos.responses.newsale.NewSaleResponseDTO;
 import tdc.edu.vn.project_mobile_be.entities.collection.NewSale;
 import tdc.edu.vn.project_mobile_be.interfaces.service.NewSaleService;
@@ -47,7 +48,7 @@ public class NewSaleController {
         }
         NewSaleCreateRequestDTO params = objectMapper.readValue(paramsJson, NewSaleCreateRequestDTO.class);
 
-        NewSale newsale = newsaleService.createSlideshowImage(params, file);
+        NewSale newsale = newsaleService.createSlideshowImage(params);
 
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Cập nhật sản phẩm thành công", newsale);
         return ResponseEntity.ok(responseData);
@@ -71,6 +72,13 @@ public class NewSaleController {
     public ResponseEntity<ResponseData<?>> getAllNewSale() {
         List<NewSaleResponseDTO> newsales = newsaleService.getAllNewSale();
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Lấy thông tin sản phẩm thành công", newsales);
+        return ResponseEntity.ok(responseData);
+    }
+
+    @PutMapping("/newsale/{id}")
+    public ResponseEntity<ResponseData<?>> updateNewSale(@PathVariable UUID id, @RequestBody NewSaleUpdateRequestDTO params) {
+        NewSale newsale = newsaleService.updateNewSale(id, params);
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Cập nhật sản phẩm thành công", newsale);
         return ResponseEntity.ok(responseData);
     }
 }

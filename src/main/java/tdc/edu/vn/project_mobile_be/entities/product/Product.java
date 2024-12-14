@@ -105,7 +105,7 @@ public class Product {
     @EqualsAndHashCode.Exclude
     private Set<Collection> collections = new HashSet<>();
 
-    @ManyToMany(mappedBy = "newsales")
+    @ManyToMany(mappedBy = "products")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<NewSale> newsales = new HashSet<>();
