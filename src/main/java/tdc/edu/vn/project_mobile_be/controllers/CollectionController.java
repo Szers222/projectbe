@@ -72,4 +72,10 @@ public class CollectionController {
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Xóa sản phẩm thành công", null);
         return ResponseEntity.ok(responseData);
     }
+    @GetMapping("/collections")
+    public ResponseEntity<ResponseData<?>> getAllCollection() {
+        List<CollectionResponseDTO> collections = collectionService.getAllCollection();
+        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Lấy thông tin sản phẩm thành công", collections);
+        return ResponseEntity.ok(responseData);
+    }
 }

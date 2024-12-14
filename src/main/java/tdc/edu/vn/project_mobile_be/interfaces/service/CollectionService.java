@@ -6,6 +6,7 @@ import tdc.edu.vn.project_mobile_be.dtos.responses.collection.CollectionResponse
 import tdc.edu.vn.project_mobile_be.entities.collection.Collection;
 import tdc.edu.vn.project_mobile_be.interfaces.IService;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface CollectionService extends IService<Collection, UUID> {
@@ -14,4 +15,6 @@ public interface CollectionService extends IService<Collection, UUID> {
     CollectionResponseDTO getCollection(UUID id);
 
     void deleteCollection(UUID id);
+
+    List<CollectionResponseDTO> getAllCollection();
 }

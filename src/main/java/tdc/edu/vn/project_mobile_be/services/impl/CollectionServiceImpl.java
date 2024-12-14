@@ -98,4 +98,20 @@ public class CollectionServiceImpl extends AbService<Collection, UUID> implement
         collectionRepository.delete(collection);
     }
 
+    @Override
+    public List<CollectionResponseDTO> getAllCollection() {
+        List<Collection> collections = collectionRepository.findAll();
+        List<CollectionResponseDTO> collectionResponseDTOS = new ArrayList<>();
+        collections.forEach(collection -> {
+            CollectionResponseDTO collectionResponseDTO = new CollectionResponseDTO();
+            collectionResponseDTO.toDto(collection);
+            collectionResponseDTO.setCollectionId(collection.getCollectionId());
+            collectionResponseDTO.setImageAlt(collection.getCollectionAlt());
+            collectionResponseDTO.setImageUrl(collection.getCollectionUrl());
+            collectionResponseDTO.setImageIndex(collection.getCollectionIndex());
+            collectionResponseDTOS.add(collectionResponseDTO);
+        });
+        return collectionResponseDTOS;
+    }
+
 }
