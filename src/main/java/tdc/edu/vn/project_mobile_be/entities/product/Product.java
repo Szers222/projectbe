@@ -9,6 +9,7 @@ import lombok.*;
 import org.hibernate.annotations.*;
 import tdc.edu.vn.project_mobile_be.entities.category.Category;
 import tdc.edu.vn.project_mobile_be.entities.collection.Collection;
+import tdc.edu.vn.project_mobile_be.entities.collection.NewSale;
 import tdc.edu.vn.project_mobile_be.entities.coupon.Coupon;
 import tdc.edu.vn.project_mobile_be.entities.post.Post;
 import tdc.edu.vn.project_mobile_be.entities.relationship.CartProduct;
@@ -103,6 +104,11 @@ public class Product {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<Collection> collections = new HashSet<>();
+
+    @ManyToMany(mappedBy = "products")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<NewSale> newsales = new HashSet<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
