@@ -1,6 +1,7 @@
 package tdc.edu.vn.project_mobile_be.entities.status;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
@@ -33,6 +34,6 @@ public class CategoryStatus {
     @OneToMany(mappedBy = "categoryStatus")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonBackReference
+    @JsonManagedReference(value = "category-status")
     private Set<Category> categories = new HashSet<>();
 }

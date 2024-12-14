@@ -1,7 +1,7 @@
 package tdc.edu.vn.project_mobile_be.entities.collection;
 
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -47,6 +47,7 @@ public class Collection {
             joinColumns = @JoinColumn(name = "collection_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
+    @JsonBackReference
     Set<Product> products = new HashSet<>();
 
     @CreationTimestamp
