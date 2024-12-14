@@ -312,16 +312,16 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
                 ",sort:" + (pageable.getSort() != null ? pageable.getSort().toString() : "");
 
         String cacheKey = "findProductsByFilters:" + filterJson + ":" + pageableKey;
-        log.info("Cache key: {}", cacheKey);
+
         // Try to get from cache
         String cachedResult = (String) redisTemplate.opsForValue().get(cacheKey);
-        log.info("Cache key123: {}", cachedResult);
+
         if (cachedResult != null) {
             try {
-                List<ProductResponseDTO> dtoList = objectMapper.readValue(cachedResult, new TypeReference<>() {
+                List<ProductResponseDTO> productList = objectMapper.readValue(cachedResult, new TypeReference<List<ProductResponseDTO>>() {
                 });
+                return new PageImpl<>(productList, pageable, productList.size());
 
-                return new PageImpl<>(dtoList, pageable, dtoList.size());
             } catch (IOException e) {
                 // Log the exception and continue to fetch from DB
                 e.printStackTrace();
@@ -365,15 +365,20 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
         // Truy vấn với các tiêu chí kết hợp
         Page<Product> products = productRepository.findAll(spec, pageable);
-        if (products.isEmpty() || products.getSize() == PRODUCT_MIN_SIZE) {
-            throw new ListNotFoundException("Không tìm thấy sản phẩm");
+        if (products.isEmpty()) {
+            throw new ListNotFoundException("Không 123 tìm thấy sản phẩm");
         }
-
         // Chuyển đổi sang DTO
         Page<ProductResponseDTO> dtoPage = products.map(product -> {
-            List<CategoryResponseDTO> categoryResponseDTOs = getCategoryResponseDTOs(product);
+            List<CategoryResponseDTO> categoryResponseDTOs = new ArrayList<>();
             List<ProductImageResponseDTO> productImageResponseDTOS = getProductImageResponseDTOs(product);
+            if (productImageResponseDTOS.isEmpty()) {
+                throw new ListNotFoundException("Không tìm thấy sản phẩm");
+            }
             List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
+            if (productSizeResponseDTOS.isEmpty()) {
+                throw new ListNotFoundException("Không tìm thấy sản phẩm");
+            }
             ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
             PostResponseDTO postResponseDTO = getPostResponseDTO(product);
             String productPriceSaleString = formatProductPriceSale(product);
@@ -397,13 +402,14 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         });
 
         try {
-            String serializedData = objectMapper.writeValueAsString(products);
+            String serializedData = objectMapper.writeValueAsString(dtoPage.getContent());
             redisTemplate.opsForValue().set(cacheKey, serializedData, 60, TimeUnit.MINUTES);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return dtoPage;
 
+        log.info("dtoPage: {}", dtoPage);
+        return dtoPage;
     }
 
     @Override
@@ -596,6 +602,9 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
 
     public List<ProductSizeResponseDTO> getProductSizeResponseDTOs(Product product) {
         List<SizeProduct> sizeProducts = sizeProductRepository.findByProductId(product.getProductId());
+        if (sizeProducts.isEmpty()) {
+            throw new ListNotFoundException("Không tìm thấy size sản phẩm");
+        }
         return product.getSizeProducts().stream().map(productSize -> {
             ProductSizeResponseDTO productSizeResponseDTO = new ProductSizeResponseDTO();
             productSizeResponseDTO.toDto(productSize.getSize());

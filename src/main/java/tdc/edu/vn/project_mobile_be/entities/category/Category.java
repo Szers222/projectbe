@@ -57,6 +57,7 @@ public class Category {
      */
     @ManyToOne
     @JoinColumn(name = "category_status_id")
+    @JsonBackReference(value = "category-status")
     private CategoryStatus categoryStatus;
 
     // Parent - Children
@@ -77,5 +78,6 @@ public class Category {
     @ManyToMany(mappedBy = "categories")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonBackReference
     private Set<Product> products = new HashSet<>();
 }
