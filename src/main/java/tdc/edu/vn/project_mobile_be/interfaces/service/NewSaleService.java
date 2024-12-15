@@ -12,7 +12,7 @@ import java.util.UUID;
 public interface NewSaleService extends IService<NewSale, UUID> {
     NewSale createSlideshowImage(NewSaleCreateRequestDTO params);
 
-    NewSaleResponseDTO getNewSale(int status);
+    NewSaleResponseDTO getNewSale(Integer status);
 
     void deleteNewSale(UUID id);
 

@@ -55,7 +55,7 @@ public class NewSaleController {
     }
 
     @GetMapping("/newsale")
-    public ResponseEntity<ResponseData<?>> getNewSale(@RequestParam int status) {
+    public ResponseEntity<ResponseData<?>> getNewSale(@RequestParam Integer status) {
         NewSaleResponseDTO newsale = newsaleService.getNewSale(status);
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Lấy thông tin sản phẩm thành công", newsale);
         return ResponseEntity.ok(responseData);
