@@ -181,7 +181,7 @@ public class ProductController {
     }
 
     @GetMapping("/product/{productId}")
-    public ResponseEntity<ResponseData<ProductResponseDTO>> getProductById(@PathVariable UUID productId) {
+    public ResponseEntity<ResponseData<ProductResponseDTO>> getProductById(@PathVariable("productId") UUID productId) {
         ProductResponseDTO product = productService.getProductById(productId);
         ResponseData<ProductResponseDTO> responseData = new ResponseData<>(HttpStatus.OK, "Success", product);
         return ResponseEntity.ok(responseData);

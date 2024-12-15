@@ -13,11 +13,13 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import tdc.edu.vn.project_mobile_be.commond.GuestAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS = {
             "/api/v1/*",
@@ -47,6 +49,7 @@ public class SecurityConfig {
             "/swagger-ui/oauth2-re",
             "/v3/api-docs/swagger-config"
             , "v3/api-docs"
+            ,"/redis/ping"
 
     };
 

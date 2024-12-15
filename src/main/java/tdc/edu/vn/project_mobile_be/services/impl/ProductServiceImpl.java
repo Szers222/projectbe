@@ -408,8 +408,57 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             e.printStackTrace();
         }
 
-        log.info("dtoPage: {}", dtoPage);
         return dtoPage;
+    }
+
+    @Override
+    public ProductResponseDTO getProductById(UUID productId) {
+        String cacheKey = "product:" + productId;
+        String cachedProduct = (String) redisTemplate.opsForValue().get(cacheKey);
+        if (cachedProduct != null) {
+            try {
+                ProductResponseDTO cacheProduct = objectMapper.readValue(cachedProduct, new TypeReference<ProductResponseDTO>() {
+                });
+                return cacheProduct;
+            } catch (IOException e) {
+                log.error("Error reading product from cache: {}", e.getMessage());
+            }
+        }
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if (productOptional.isEmpty()) {
+            throw new EntityNotFoundException("Product không tồn tại !");
+        }
+        Product product = productOptional.get();
+//        List<CategoryResponseDTO> categoryResponseDTOs = getCategoryResponseDTOs(product);
+        List<CategoryResponseDTO> categoryResponseDTOs = new ArrayList<>();
+        List<ProductImageResponseDTO> productImageResponseDTOS = getProductImageResponseDTOs(product);
+        List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
+        ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
+        PostResponseDTO postResponseDTO = getPostResponseDTO(product);
+        String productPriceSaleString = formatProductPriceSale(product);
+        String productPriceString = formatProductPrice(product);
+        CouponResponseDTO couponResponseDTO = new CouponResponseDTO();
+        if (product.getCoupon() != null) {
+            couponResponseDTO.toDto(product.getCoupon());
+        }
+
+        ProductResponseDTO productDTO = new ProductResponseDTO();
+        productDTO.toDto(product);
+        productDTO.setProductPrice(productPriceString);
+        productDTO.setProductPriceSale(productPriceSaleString);
+        productDTO.setCategoryResponseDTO(categoryResponseDTOs);
+        productDTO.setProductSizeResponseDTOs(productSizeResponseDTOS);
+        productDTO.setSupplier(productSupplierResponseDTO);
+        productDTO.setPostResponseDTO(postResponseDTO);
+        productDTO.setProductImageResponseDTOs(productImageResponseDTOS);
+        productDTO.setCouponResponseDTO(couponResponseDTO);
+        try {
+            String serializedProduct = objectMapper.writeValueAsString(productDTO);
+            redisTemplate.opsForValue().set(cacheKey, serializedProduct, 60, TimeUnit.MINUTES);
+        } catch (IOException e) {
+            log.error("Error writing product to cache: {}", e.getMessage());
+        }
+        return productDTO;
     }
 
     @Override
@@ -504,52 +553,7 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         }
         return getProductResponseDTOS(products);
     }
-    @Override
-    public ProductResponseDTO getProductById(UUID productId) {
-        String cacheKey = "product:" + productId;
-//        String cachedProduct = (String) redisTemplate.opsForValue().get(cacheKey);
-//        if (cachedProduct != null) {
-//            try {
-//                return objectMapper.readValue(cachedProduct, ProductResponseDTO.class);
-//            } catch (IOException e) {
-//                log.error("Error reading product from cache: {}", e.getMessage());
-//            }
-//        }
-        Optional<Product> productOptional = productRepository.findById(productId);
-        if (productOptional.isEmpty()) {
-            throw new EntityNotFoundException("Product không tồn tại !");
-        }
-        Product product = productOptional.get();
-        List<CategoryResponseDTO> categoryResponseDTOs = getCategoryResponseDTOs(product);
-        List<ProductImageResponseDTO> productImageResponseDTOS = getProductImageResponseDTOs(product);
-        List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
-        ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
-        PostResponseDTO postResponseDTO = getPostResponseDTO(product);
-        String productPriceSaleString = formatProductPriceSale(product);
-        String productPriceString = formatProductPrice(product);
-        CouponResponseDTO couponResponseDTO = new CouponResponseDTO();
-        if (product.getCoupon() != null) {
-            couponResponseDTO.toDto(product.getCoupon());
-        }
 
-        ProductResponseDTO productDTO = new ProductResponseDTO();
-        productDTO.toDto(product);
-        productDTO.setProductPrice(productPriceString);
-        productDTO.setProductPriceSale(productPriceSaleString);
-        productDTO.setCategoryResponseDTO(categoryResponseDTOs);
-        productDTO.setProductSizeResponseDTOs(productSizeResponseDTOS);
-        productDTO.setSupplier(productSupplierResponseDTO);
-        productDTO.setPostResponseDTO(postResponseDTO);
-        productDTO.setProductImageResponseDTOs(productImageResponseDTOS);
-        productDTO.setCouponResponseDTO(couponResponseDTO);
-//        try {
-//            String serializedProduct = objectMapper.writeValueAsString(productDTO);
-//            redisTemplate.opsForValue().set(cacheKey, serializedProduct, 60, TimeUnit.MINUTES);
-//        } catch (IOException e) {
-//            log.error("Error writing product to cache: {}", e.getMessage());
-//        }
-        return productDTO;
-    }
 
 
 
@@ -588,6 +592,14 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             categoryResponseDTO.toDto(category);
             return categoryResponseDTO;
         });
+    }
+
+    public int setLevel(Category parentEntity) {
+        if (parentEntity.getParent() == null) {
+            return 0;
+        } else {
+            return setLevel(parentEntity.getParent()) + 1;
+        }
     }
 
     public List<ProductImageResponseDTO> getProductImageResponseDTOs(Product product) {
