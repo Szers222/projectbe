@@ -137,7 +137,7 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
     public List<CategoryResponseDTO> getCategories(int role, Pageable pageable) {
 
         if (role == this.USER_ROLE_USER) {
-            List<Category> categoryList = new ArrayList<>();
+            List<Category> categoryList;
             categoryList = categoryRepository.findAllRootCategoriesWithChildren();
             if (categoryList.isEmpty()) {
                 throw new EntityNotFoundException("Không có dữ liệu !");
@@ -203,7 +203,13 @@ public class CategoryServiceImpl extends AbService<Category, UUID> implements Ca
         return categoryStatusRepository.findByCategoryStatusId((statusId)) != null ? categoryStatusRepository.findByCategoryStatusId((statusId)) : null;
     }
 
-
+    public int setLevel(Category parentEntity) {
+        if (parentEntity.getParent() == null) {
+            return 0;
+        } else {
+            return setLevel(parentEntity.getParent()) + 1;
+        }
+    }
 
 
 

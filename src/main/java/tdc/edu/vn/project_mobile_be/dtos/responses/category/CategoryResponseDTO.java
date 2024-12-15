@@ -33,8 +33,10 @@ public class CategoryResponseDTO implements IDto<Category> {
 
     @JsonProperty("categoryParent")
     private UUID parentId = null;
+
     @JsonProperty("categoryLevel")
-    private int level;
+    private int categoryLevel;
+
     @JsonProperty("categoryStatus")
     private CategoryStatusResponseDTO categoryStatus;
 
@@ -73,7 +75,7 @@ public class CategoryResponseDTO implements IDto<Category> {
                 })
                 .collect(Collectors.toList());
         this.parentId = entity.getParent() != null ? entity.getParent().getCategoryId() : null;
-        this.level = setLevel(entity);
+        this.categoryLevel = setLevel(entity);
 
     }
 
@@ -86,7 +88,7 @@ public class CategoryResponseDTO implements IDto<Category> {
         }
 
         this.parentId = entity.getParent() != null ? entity.getParent().getCategoryId() : null;
-        this.level = setLevel(entity);
+        this.categoryLevel = setLevel(entity);
     }
 
     public int setLevel(Category parentEntity) {
