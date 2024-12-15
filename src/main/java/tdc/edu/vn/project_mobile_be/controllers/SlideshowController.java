@@ -83,14 +83,14 @@ public class SlideshowController {
     }
 
     @DeleteMapping("/slideshow/{id}")
-    public ResponseEntity<ResponseData<?>> deleteShipment(@PathVariable UUID id) {
+    public ResponseEntity<ResponseData<?>> deleteShipment(@PathVariable("id") UUID id) {
         slideshowImageService.deleteSlideshowImage(id);
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Xóa banner thành công", null);
         return ResponseEntity.ok(responseData);
     }
 
     @GetMapping("/slideshows")
-    public ResponseEntity<ResponseData<?>> getSlideshows(@RequestParam   String content) {
+    public ResponseEntity<ResponseData<?>> getSlideshows(@RequestParam String content) {
         List<SlideshowResponseDTO> slideshowImages = slideshowImageService.getSlideshowImage(content);
         ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK, "Lấy danh sách banner thành công", slideshowImages);
         return ResponseEntity.ok(responseData);

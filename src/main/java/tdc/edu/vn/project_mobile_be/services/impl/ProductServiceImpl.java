@@ -429,8 +429,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
             throw new EntityNotFoundException("Product không tồn tại !");
         }
         Product product = productOptional.get();
-//        List<CategoryResponseDTO> categoryResponseDTOs = getCategoryResponseDTOs(product);
-        List<CategoryResponseDTO> categoryResponseDTOs = new ArrayList<>();
+        List<CategoryResponseDTO> categoryResponseDTOs = getCategoryResponseDTOs(product);
+//        List<CategoryResponseDTO> categoryResponseDTOs = new ArrayList<>();
         List<ProductImageResponseDTO> productImageResponseDTOS = getProductImageResponseDTOs(product);
         List<ProductSizeResponseDTO> productSizeResponseDTOS = getProductSizeResponseDTOs(product);
         ProductSupplierResponseDTO productSupplierResponseDTO = getProductSupplierResponseDTO(product);
@@ -590,6 +590,8 @@ public class ProductServiceImpl extends AbService<Product, UUID> implements Prod
         return convertToDTOList(product.getCategories() != null ? new ArrayList<>(product.getCategories()) : Collections.emptyList(), category -> {
             CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO();
             categoryResponseDTO.toDto(category);
+            int level = setLevel(category);
+            categoryResponseDTO.setCategoryLevel(level);
             return categoryResponseDTO;
         });
     }

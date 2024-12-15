@@ -102,13 +102,23 @@ public class CollectionServiceImpl extends AbService<Collection, UUID> implement
     public List<CollectionResponseDTO> getAllCollection() {
         List<Collection> collections = collectionRepository.findAll();
         List<CollectionResponseDTO> collectionResponseDTOS = new ArrayList<>();
+
+
         collections.forEach(collection -> {
+            Set<Product> listProduct = collection.getProducts();
+            List<ProductResponseDTO> productResponseDTOS = new ArrayList<>();
+            listProduct.forEach(product -> {
+                ProductResponseDTO productResponseDTO = productService.getProductById(product.getProductId());
+                productResponseDTOS.add(productResponseDTO);
+            });
+
             CollectionResponseDTO collectionResponseDTO = new CollectionResponseDTO();
             collectionResponseDTO.toDto(collection);
             collectionResponseDTO.setCollectionId(collection.getCollectionId());
             collectionResponseDTO.setImageAlt(collection.getCollectionAlt());
             collectionResponseDTO.setImageUrl(collection.getCollectionUrl());
             collectionResponseDTO.setImageIndex(collection.getCollectionIndex());
+            collectionResponseDTO.setProducts(productResponseDTOS);
             collectionResponseDTOS.add(collectionResponseDTO);
         });
         return collectionResponseDTOS;

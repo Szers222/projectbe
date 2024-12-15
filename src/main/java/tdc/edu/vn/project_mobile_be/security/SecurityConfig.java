@@ -49,7 +49,8 @@ public class SecurityConfig {
             "/swagger-ui/oauth2-re",
             "/v3/api-docs/swagger-config"
             , "v3/api-docs"
-            ,"/redis/ping"
+            ,"/redis/ping",
+            "/api/v1//newsale"
 
     };
 

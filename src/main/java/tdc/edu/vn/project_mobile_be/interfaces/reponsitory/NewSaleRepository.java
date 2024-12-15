@@ -11,5 +11,5 @@ import java.util.UUID;
 @Repository
 public interface NewSaleRepository extends JpaRepository<NewSale, UUID> {
     @Query("SELECT n FROM NewSale n WHERE n.newSaleStatus = ?1")
-    NewSale findByStatus(int status);
+    NewSale findByStatus(Integer status);
 }

@@ -53,7 +53,7 @@ public class NewSaleServiceImpl extends AbService<NewSale, UUID> implements NewS
     }
 
     @Override
-    public NewSaleResponseDTO getNewSale(int status) {
+    public NewSaleResponseDTO getNewSale(Integer status) {
         NewSale newSale = newSaleRepository.findByStatus(status);
         if (newSale == null) {
             return null;
