@@ -13,6 +13,8 @@ COPY ${JAR_FILE} app.jar
 
 COPY service-account.json /app/service-account.json
 
+RUN apt-get update && apt-get install -y iputils-ping
+
 # Mở cổng 8080
 EXPOSE 8080
 

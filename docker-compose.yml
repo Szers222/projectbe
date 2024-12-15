@@ -1,21 +1,36 @@
-version: '3.8'
+
 services:
-  web:  # Tên service (tự đặt)
-    build: . # Build image từ Dockerfile trong thư mục hiện tại (.)
+  redis:
+    image: redis:latest
+    container_name: redis
     ports:
-      - "8080:8080"  # Ánh xạ cổng 8080 của container với cổng 8080 của host
-    depends_on:
-      - redis  # Service "web" phụ thuộc vào service "redis"
-    environment:
-      - REDIS_HOST=redis # Biến môi trường REDIS_HOST có giá trị là "redis"
-
-  redis:  # Tên service (tự đặt)
-    image: redis:latest  # Sử dụng image Redis mới nhất từ Docker Hub
-    ports:
-      - "6379:6379"
+      - "6379:6379" # Expose cổng Redis
     volumes:
-      - redis-data:/data
-
-volumes:
-  redis-data:
-    - name: redis-data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - devops
+  redisinsight:
+    container_name: redisinsight
+    image: redislabs/redisinsight:latest
+    ports:
+      - '5540:5540'
+    volumes:
+      - ./redisinsight:/db
+    depends_on:
+      - redis
+    networks:
+      - devops
+  backend:
+    build:
+      context: .
+    container_name: backend
+    ports:
+      - "8080:8080" # Expose cổng Spring Boot
+    depends_on:
+      - redis
+    networks:
+      - devops
+networks:
+  devops:
+    driver: bridge
